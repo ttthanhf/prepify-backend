@@ -1,0 +1,36 @@
+{
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"plugins": ["@typescript-eslint", "prettier"],
+	"extends": [
+		"standard",
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended",
+		"eslint-config-prettier",
+		"prettier",
+		"plugin:prettier/recommended"
+	],
+	"ignorePatterns": ["dist", "build"],
+	"rules": {
+		"newline-per-chained-call": ["off", { "ignoreChainWithDepth": 2 }],
+		"@typescript-eslint/no-explicit-any": "off",
+		"@typescript-eslint/no-unused-vars": "off",
+		"@typescript-eslint/ban-types": "error",
+		"prettier/prettier": [
+			"error",
+			{
+				"printWidth": 80,
+				"tabWidth": 2,
+				"useTabs": true,
+				"semi": true,
+				"singleQuote": true,
+				"quoteProps": "as-needed",
+				"trailingComma": "none",
+				"bracketSpacing": true,
+				"arrowParens": "always",
+				"endOfLine": "auto",
+				"embeddedLanguageFormatting": "auto"
+			}
+		]
+	}
+}

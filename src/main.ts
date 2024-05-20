@@ -1,15 +1,30 @@
 import fastify from 'fastify';
+import fastifyConfig from './configs/fastify.config';
+import AutoLoad from '@fastify/autoload';
+import path = require('path');
+import swaggerConfig from './configs/swagger.config';
+import mikroUtil from './utils/mikro.util';
+require('dotenv').config();
 
-const server = fastify();
+const app = fastify(fastifyConfig.fastifyInitConfig);
+swaggerConfig(app);
+mikroUtil.initORM();
 
-server.get('/ping', async (request, reply) => {
-    return 'pong\n';
-})
+const pathRegisters = ['routes', 'plugins'];
+pathRegisters.forEach((pathRegister: string) => {
+	app.register(AutoLoad, {
+		dir: path.join(__dirname, pathRegister)
+	});
+});
 
-server.listen({ port: 8080 }, (err, address) => {
-    if (err) {
-        console.error(err);
-        process.exit(1);
-    }
-    console.log(`Server listening at ${address}`);
-})
+app.ready(() => {
+	app.swagger();
+});
+
+app.listen(fastifyConfig.fastifyListenConfig, (err, address) => {
+	if (err) {
+		console.error(err);
+		process.exit(1);
+	}
+	console.log(`Server listening at ${address}`);
+});

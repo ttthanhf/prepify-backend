@@ -1,9 +1,43 @@
 {
-    "include": [
-        "src"
-    ],
-    "compilerOptions": {
-        "module": "commonjs",
-        "outDir": "./build"
-    }
+	"swc": true,
+	"include": ["src"],
+	"compilerOptions": {
+		"module": "CommonJS",
+		"outDir": "build",
+		"esModuleInterop": true,
+		"declaration": false, //remove type ts when build
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"target": "ES2022",
+		"emitDeclarationOnly": false,
+		"noEmit": false,
+		"sourceMap": false,
+		"noEmitOnError": true,
+		"skipLibCheck": true,
+
+		// Linting
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		"alwaysStrict": true,
+		"exactOptionalPropertyTypes": false, //must be false or mikro-orm will break down
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noPropertyAccessFromIndexSignature": false,
+		"noUncheckedIndexedAccess": false, //note
+		"noUnusedLocals": true,
+		"noUnusedParameters": false,
+		"strict": true,
+		"strictBindCallApply": true,
+		"strictFunctionTypes": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true
+	},
+	"ts-node": {
+		"compilerOptions": {
+			"module": "CommonJS"
+		},
+		"swc": true
+	}
 }
