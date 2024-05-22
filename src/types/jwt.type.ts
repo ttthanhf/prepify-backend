@@ -2,6 +2,7 @@ import { Algorithm } from 'fast-jwt';
 
 export interface EnvConfig {
 	SERVER_PORT: number;
+	SERVER_DOMAIN: string;
 	MARIADB_HOST: string;
 	MARIADB_USER: string;
 	MARIADB_PASSWORD: string;
@@ -11,4 +12,6 @@ export interface EnvConfig {
 	JWT_KEY: string;
 	JWT_EXPIRE: string;
 	JWT_ALGORITHM: Algorithm;
+	OAUTH2_GOOGLE_ID: string;
+	OAUTH2_GOOGLE_SECRET: string;
 }

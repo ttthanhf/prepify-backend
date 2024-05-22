@@ -7,6 +7,8 @@ export default async function authRoute(
 	options: unknown,
 	next: unknown
 ) {
+	app.get('/login/google', authController.loginWithGoogle);
+	app.get('/login/google/callback', authController.loginWithGoogleCallback);
 	app.post('/login', { schema: schemas.loginSchemas }, authController.login);
 	app.post(
 		'/register',

@@ -3,11 +3,9 @@ import { FastifyRequest, FastifyResponse } from '../types/fastify.type';
 import cookieUtil from '../utils/cookie.util';
 import jwtUtil from '../utils/jwt.util';
 import { HTTP_STATUS_CODE } from '../constants/httpstatuscode.constant';
+import userRepository from '../repositories/user.repository';
 
-export default async function authMiddleware(
-	req: FastifyRequest,
-	res: FastifyResponse
-) {
+async function requireToken(req: FastifyRequest, res: FastifyResponse) {
 	const cookies = cookieUtil.extract(req.headers);
 	const token = cookies.access_token;
 
@@ -26,3 +24,21 @@ export default async function authMiddleware(
 		reponse.send();
 	}
 }
+
+async function requirePhone(req: FastifyRequest, res: FastifyResponse) {
+	const cookies = cookieUtil.extract(req.headers);
+	const token = jwtUtil.verify(cookies.access_token);
+
+	const user = await userRepository.findOneUser({
+		id: token.user_id
+	});
+
+	if (!user?.phone) {
+		const reponse = new ResponseModel(res);
+		reponse.statusCode = HTTP_STATUS_CODE.FORBIDDEN;
+		reponse.message = 'Phone require';
+		reponse.send();
+	}
+}
+
+export default { requireToken, requirePhone };
