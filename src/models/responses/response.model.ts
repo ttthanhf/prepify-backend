@@ -1,3 +1,6 @@
+import { HTTP_STATUS_CODE } from '../../constants/httpstatuscode.constant';
+import { FastifyResponse } from '../../types/fastify.type';
+
 interface ResponseModel {
 	statusCode: number;
 	message: string;
@@ -8,15 +11,28 @@ class ResponseModel {
 	statusCode: number;
 	message: string;
 	data: any;
+	private response: FastifyResponse;
 
-	constructor(
-		statusCode: number = 200,
-		message: string = '',
-		data: any = null
-	) {
-		this.statusCode = statusCode;
-		this.message = message;
-		this.data = data;
+	constructor(response: FastifyResponse) {
+		if (!response) {
+			throw Error('Response Model must inject response app');
+		}
+
+		this.statusCode = HTTP_STATUS_CODE.OK;
+		this.message = 'Success';
+		this.data = null;
+		this.response = response;
+	}
+
+	send() {
+		this.response.code(this.statusCode);
+		this.response.send({
+			statusCode: this.statusCode,
+			message: this.message,
+			data: this.data
+		});
+
+		return this;
 	}
 }
 

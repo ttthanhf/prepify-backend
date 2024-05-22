@@ -3,14 +3,12 @@ import fastifyConfig from './configs/fastify.config';
 import AutoLoad from '@fastify/autoload';
 import path = require('path');
 import swaggerConfig from './configs/swagger.config';
-import mikroUtil from './utils/mikro.util';
 require('dotenv').config();
 
 const app = fastify(fastifyConfig.fastifyInitConfig);
 swaggerConfig(app);
-mikroUtil.initORM();
 
-const pathRegisters = ['routes', 'plugins'];
+const pathRegisters = ['plugins', 'routes'];
 pathRegisters.forEach((pathRegister: string) => {
 	app.register(AutoLoad, {
 		dir: path.join(__dirname, pathRegister)

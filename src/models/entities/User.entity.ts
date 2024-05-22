@@ -7,7 +7,7 @@ export class User {
 	@Property({ autoincrement: true, primary: true })
 	id!: number;
 
-	@Property()
+	@Property({ hidden: true })
 	password!: string;
 
 	@Property()
