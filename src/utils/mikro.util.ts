@@ -1,23 +1,28 @@
-import { MikroORM } from '@mikro-orm/mariadb';
+import { EntityManager, MikroORM } from '@mikro-orm/mariadb';
 import MikroORM_CONFIG from '../configs/mikro.config';
 
-let orm: MikroORM;
+class Mikro {
+	private static instance: Mikro;
+	private orm!: MikroORM;
+	public em!: EntityManager;
 
-const initORM = async () => {
-	if (!orm) {
-		orm = await MikroORM.init(MikroORM_CONFIG);
+	private constructor() {
+		this.init();
 	}
-	return orm;
-};
 
-const getORM = () => {
-	if (!orm) {
-		throw new Error('ORM is not initialized. Call initORM first.');
+	public static getInstance(): Mikro {
+		if (!Mikro.instance) {
+			Mikro.instance = new Mikro();
+		}
+		return Mikro.instance;
 	}
-	return orm;
-};
 
-export default {
-	initORM,
-	getORM
-};
+	private async init() {
+		if (!this.orm) {
+			this.orm = await MikroORM.init(MikroORM_CONFIG);
+			this.em = this.orm.em.fork();
+		}
+	}
+}
+
+export default Mikro.getInstance();

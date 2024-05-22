@@ -9,38 +9,44 @@ import ResponseModel from '../models/responses/response.model';
 import jwtUtil from '../utils/jwt.util';
 import userRepository from '../repositories/user.repository';
 import { Role } from '../constants/role.constant';
+import { HTTP_STATUS_CODE } from '../constants/httpstatuscode.constant';
 
 class AuthService {
 	async loginHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { phone, password }: LoginRequest = req.body as LoginRequest;
 
-		const user = await userRepository.findOneUserWithPhone(phone);
-		if (user && (await bcryptUtil.compare(password, user.password))) {
-			const respose = new ResponseModel();
-			respose.statusCode = 200;
-			respose.message = 'Login successful';
-			respose.data = {
-				access_token: await jwtUtil.sign({
-					user_id: user.id
-				})
-			};
-			return respose;
+		const user = await userRepository.findOneUser({
+			phone
+		});
+
+		if (!(user && (await bcryptUtil.compare(password, user.password)))) {
+			const respose = new ResponseModel(res);
+			respose.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			respose.message = 'Account not exist';
+			respose.send();
 		}
-		const respose = new ResponseModel();
-		respose.statusCode = 400;
-		respose.message = 'Account not exist';
-		respose.data = null;
-		return respose;
+		const respose = new ResponseModel(res);
+		respose.message = 'Login success';
+		respose.data = {
+			access_token: jwtUtil.sign({
+				user_id: user?.id
+			})
+		};
+		return respose.send();
 	}
 	async registerHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { phone, password }: RegisterRequest = req.body as RegisterRequest;
-		const user = await userRepository.findOneUserWithPhone(phone);
-		if (user) {
-			const respose = new ResponseModel();
-			respose.statusCode = 400;
+
+		const user = await userRepository.findOneUser({
+			phone
+		});
+
+		const respose = new ResponseModel(res);
+
+		if (!user) {
+			respose.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			respose.message = 'Phone exist';
-			respose.data = null;
-			return respose;
+			respose.send();
 		}
 
 		const newUser = new User();
@@ -49,11 +55,8 @@ class AuthService {
 		newUser.role = Role.CUSTOMER;
 		await userRepository.createNewUser(newUser);
 
-		const respose = new ResponseModel();
-		respose.statusCode = 200;
 		respose.message = 'Created new user';
-		respose.data = null;
-		return respose;
+		return respose.send();
 	}
 }
 
