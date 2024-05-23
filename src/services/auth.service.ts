@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyResponse } from '../types/fastify.type';
-import { User } from '../models/entities/User.entity';
+import { User } from '../models/entities/user.entity';
 import {
 	LoginRequest,
 	RegisterRequest

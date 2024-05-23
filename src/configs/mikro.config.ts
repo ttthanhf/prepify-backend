@@ -1,5 +1,5 @@
 import { MariaDbDriver, defineConfig } from '@mikro-orm/mariadb';
-import { User } from '../models/entities/User.entity';
+import { User } from '../models/entities/user.entity';
 import envConfig from './env.config';
 
 export default defineConfig({
