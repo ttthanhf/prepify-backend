@@ -8,12 +8,12 @@ import {
 import { Batch } from './batch.entity';
 import { Order } from './order.entity';
 import { User } from './user.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity({ tableName: 'area' })
 export class Area {
-	@PrimaryKey()
-	@Property({ autoincrement: true, primary: true })
-	id!: number;
+	@PrimaryKey({ type: 'uuid' })
+	id: string = uuidv4();
 
 	@Property()
 	name!: string;

@@ -12,12 +12,12 @@ import { Role } from '../../constants/role.constant';
 import { Customer } from './customer.entity';
 import { Batch } from './batch.entity';
 import { Area } from './area.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity({ tableName: 'user' })
 export class User {
-	@PrimaryKey()
-	@Property({ autoincrement: true, primary: true })
-	id!: number;
+	@PrimaryKey({ type: 'uuid' })
+	id: string = uuidv4();
 
 	@Property({ hidden: true })
 	password!: string;

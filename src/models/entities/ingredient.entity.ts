@@ -6,12 +6,13 @@ import {
 	Property
 } from '@mikro-orm/core';
 import { RecipeIngredient } from './recipe-ingredient.entity';
+import { v4 as uuidv4 } from 'uuid';
+import { CustomerIngredient } from './customer-ingredient.entity';
 
 @Entity({ tableName: 'ingredient' })
 export class Ingredient {
-	@PrimaryKey()
-	@Property({ autoincrement: true, primary: true })
-	id!: number;
+	@PrimaryKey({ type: 'uuid' })
+	id: string = uuidv4();
 
 	@Property()
 	name!: string;
@@ -51,4 +52,7 @@ export class Ingredient {
 
 	@OneToMany({ mappedBy: 'ingredient' })
 	recipeIngredients = new Collection<RecipeIngredient>(this);
+
+	@OneToMany({ mappedBy: 'ingredient' })
+	customerIngredients = new Collection<CustomerIngredient>(this);
 }

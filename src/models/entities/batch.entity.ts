@@ -9,12 +9,12 @@ import {
 import { User } from './user.entity';
 import { Area } from './area.entity';
 import { OrderBatch } from './order-batch.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity({ tableName: 'batch' })
 export class Batch {
-	@PrimaryKey()
-	@Property({ autoincrement: true, primary: true })
-	id!: number;
+	@PrimaryKey({ type: 'uuid' })
+	id: string = uuidv4();
 
 	@Property()
 	datetime!: Date;

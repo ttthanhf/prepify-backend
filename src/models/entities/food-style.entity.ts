@@ -6,12 +6,12 @@ import {
 	Property
 } from '@mikro-orm/core';
 import { Recipe } from './recipe.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity({ tableName: 'food_style' })
 export class FoodStyle {
-	@PrimaryKey()
-	@Property({ autoincrement: true, primary: true })
-	id!: number;
+	@PrimaryKey({ type: 'uuid' })
+	id: string = uuidv4();
 
 	@Property()
 	name!: string;

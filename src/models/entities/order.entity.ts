@@ -13,12 +13,12 @@ import { OrderBatch } from './order-batch.entity';
 import { Payment } from './payment.entity';
 import { OrderStatus } from '../../constants/orderstatus.constant';
 import { Area } from './area.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity({ tableName: 'order' })
 export class Order {
-	@PrimaryKey()
-	@Property({ autoincrement: true, primary: true })
-	id!: number;
+	@PrimaryKey({ type: 'uuid' })
+	id: string = uuidv4();
 
 	@Property()
 	address!: string;

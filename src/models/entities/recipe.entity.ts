@@ -11,12 +11,12 @@ import { Category } from './category.entity';
 import { FoodStyle } from './food-style.entity';
 import { MealKit } from './meal-kit.entity';
 import { RecipeIngredient } from './recipe-ingredient.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity({ tableName: 'recipe' })
 export class Recipe {
-	@PrimaryKey()
-	@Property({ autoincrement: true, primary: true })
-	id!: number;
+	@PrimaryKey({ type: 'uuid' })
+	id: string = uuidv4();
 
 	@Property()
 	name!: string;

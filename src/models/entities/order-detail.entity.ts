@@ -7,12 +7,12 @@ import {
 } from '@mikro-orm/core';
 import { Order } from './order.entity';
 import { MealKit } from './meal-kit.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity({ tableName: 'order_detail' })
 export class OrderDetail {
-	@PrimaryKey()
-	@Property({ autoincrement: true, primary: true })
-	id!: number;
+	@PrimaryKey({ type: 'uuid' })
+	id: string = uuidv4();
 
 	@Property()
 	quantity!: number;
