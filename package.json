@@ -8,7 +8,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "nodemon",
 		"start": "node ./build/main.js",
-		"build": "tsc & node minify.mjs",
+		"build": "tsc & tsc-alias & node minify.mjs",
 		"clean": "rimraf build & rimraf dist",
 		"clean-build": "npm run clean & npm run build"
 	},
@@ -50,6 +50,7 @@
 		"rimraf": "^5.0.7",
 		"terser": "^5.31.0",
 		"ts-node": "^10.9.2",
+		"tsc-alias": "^1.8.10",
 		"typescript": "^5.4.5"
 	},
 	"mikro-orm": {

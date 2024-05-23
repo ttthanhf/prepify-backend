@@ -1,6 +1,6 @@
 {
 	"swc": true,
-	"include": ["src"],
+	"include": ["src/**/*.ts", "src"],
 	"compilerOptions": {
 		"module": "CommonJS",
 		"outDir": "build",
@@ -32,12 +32,34 @@
 		"strictBindCallApply": true,
 		"strictFunctionTypes": true,
 		"strictNullChecks": true,
-		"strictPropertyInitialization": true
+		"strictPropertyInitialization": true,
+
+		// alias
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"],
+			"@configs/*": ["./src/configs/*"],
+			"@constants/*": ["./src/constants/*"],
+			"@controllers/*": ["./src/controllers/*"],
+			"@exceptions/*": ["./src/exceptions/*"],
+			"@middlewares/*": ["./src/middlewares/*"],
+			"@models/*": ["./src/models/*"],
+			"@plugins/*": ["./src/plugins/*"],
+			"@repositories/*": ["./src/repositories/*"],
+			"@routes/*": ["./src/routes/*"],
+			"@services/*": ["./src/services/*"],
+			"@types/*": ["./src/types/*"],
+			"@utils/*": ["./src/utils/*"]
+		}
 	},
 	"ts-node": {
 		"compilerOptions": {
 			"module": "CommonJS"
 		},
 		"swc": true
+	},
+	"tsc-alias": {
+		"verbose": false,
+		"resolveFullPaths": true
 	}
 }
