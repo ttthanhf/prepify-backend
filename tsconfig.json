@@ -38,18 +38,19 @@
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
-			"@configs/*": ["./src/configs/*"],
-			"@constants/*": ["./src/constants/*"],
-			"@controllers/*": ["./src/controllers/*"],
-			"@exceptions/*": ["./src/exceptions/*"],
-			"@middlewares/*": ["./src/middlewares/*"],
-			"@models/*": ["./src/models/*"],
-			"@plugins/*": ["./src/plugins/*"],
-			"@repositories/*": ["./src/repositories/*"],
-			"@routes/*": ["./src/routes/*"],
-			"@services/*": ["./src/services/*"],
-			"@types/*": ["./src/types/*"],
-			"@utils/*": ["./src/utils/*"]
+			"~configs/*": ["./src/configs/*"],
+			"~constants/*": ["./src/constants/*"],
+			"~controllers/*": ["./src/controllers/*"],
+			"~exceptions/*": ["./src/exceptions/*"],
+			"~middlewares/*": ["./src/middlewares/*"],
+			"~models/*": ["./src/models/*"],
+			"~entities/*": ["./src/models/entities/*"],
+			"~plugins/*": ["./src/plugins/*"],
+			"~repositories/*": ["./src/repositories/*"],
+			"~routes/*": ["./src/routes/*"],
+			"~services/*": ["./src/services/*"],
+			"~types/*": ["./src/types/*"],
+			"~utils/*": ["./src/utils/*"]
 		}
 	},
 	"ts-node": {

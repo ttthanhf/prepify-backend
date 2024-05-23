@@ -1,5 +1,5 @@
 export enum OrderStatus {
-	PICKED_UP = 'picked_up',
-	DELIVERING = 'delivering',
-	DELIVERED = 'delivered'
+	PICKED_UP = 'PICKED_UP',
+	DELIVERING = 'DELIVERING',
+	DELIVERED = 'DELIVERED'
 }

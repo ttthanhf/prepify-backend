@@ -1,5 +1,5 @@
-import { User } from '../models/entities/user.entity';
-import mikroUtil from '../utils/mikro.util';
+import { User } from '~entities/user.entity';
+import mikroUtil from '~utils/mikro.util';
 import { FilterQuery } from '@mikro-orm/mariadb';
 
 class UserRepository {

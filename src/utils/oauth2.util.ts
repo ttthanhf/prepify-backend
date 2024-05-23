@@ -3,11 +3,11 @@ import {
 	AuthorizationCode,
 	AuthorizationTokenConfig
 } from 'simple-oauth2';
-import googleOauth2Config from '../configs/google.oauth2.config';
+import googleOauth2Config from '~configs/google.oauth2.config';
 import { FastifyRequest } from 'fastify';
 import stringUtil from './string.util';
-import envConfig from '../configs/env.config';
-import { google_user } from '../types/oauth2.type';
+import envConfig from '~configs/env.config';
+import { google_user } from '~types/oauth2.type';
 
 const client = new AuthorizationCode(
 	googleOauth2Config.GOOGLE_OAUTH2_CODE_CONFIG

@@ -1,4 +1,4 @@
-import { FastifyListenConfig } from '../types/fastify.type';
+import { FastifyListenConfig } from '~types/fastify.type';
 import envConfig from './env.config';
 
 const fastifyInitConfig: any = {

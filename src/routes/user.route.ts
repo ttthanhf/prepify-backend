@@ -1,7 +1,7 @@
-import userController from '../controllers/user.controller';
-import authMiddleware from '../middlewares/auth.middleware';
+import userController from '~controllers/user.controller';
+import authMiddleware from '~middlewares/auth.middleware';
 
-import { Fastify } from '../types/fastify.type';
+import { Fastify } from '~types/fastify.type';
 
 export default async function authRoute(
 	app: Fastify,

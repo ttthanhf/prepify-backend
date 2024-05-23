@@ -8,7 +8,7 @@ import {
 	PrimaryKey,
 	Property
 } from '@mikro-orm/core';
-import { Role } from '../../constants/role.constant';
+import { Role } from '~constants/role.constant';
 import { Customer } from './customer.entity';
 import { Batch } from './batch.entity';
 import { Area } from './area.entity';

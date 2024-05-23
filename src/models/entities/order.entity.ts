@@ -11,7 +11,7 @@ import { Customer } from './customer.entity';
 import { OrderDetail } from './order-detail.entity';
 import { OrderBatch } from './order-batch.entity';
 import { Payment } from './payment.entity';
-import { OrderStatus } from '@constants/orderstatus.constant';
+import { OrderStatus } from '~constants/orderstatus.constant';
 import { Area } from './area.entity';
 import { v4 as uuidv4 } from 'uuid';
 

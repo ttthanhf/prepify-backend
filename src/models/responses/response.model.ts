@@ -1,5 +1,5 @@
-import { HTTP_STATUS_CODE } from '../../constants/httpstatuscode.constant';
-import { FastifyResponse } from '../../types/fastify.type';
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { FastifyResponse } from '~types/fastify.type';
 
 interface ResponseModel {
 	statusCode: number;

@@ -1,8 +1,8 @@
 import fastify from 'fastify';
-import fastifyConfig from './configs/fastify.config';
+import fastifyConfig from '~configs/fastify.config';
 import AutoLoad from '@fastify/autoload';
 import path = require('path');
-import swaggerConfig from './configs/swagger.config';
+import swaggerConfig from '~configs/swagger.config';
 require('dotenv').config();
 
 const app = fastify(fastifyConfig.fastifyInitConfig);
