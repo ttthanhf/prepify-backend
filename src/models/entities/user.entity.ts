@@ -27,13 +27,16 @@ export class User {
 	email!: string;
 
 	@Property()
+	dateOfBirth?: Date;
+
+	@Property()
 	phone!: string;
 
 	@Property()
 	fullname!: string;
 
 	@Property()
-	address!: string;
+	address?: string;
 
 	@Enum(() => Role)
 	role!: Role;
@@ -48,5 +51,5 @@ export class User {
 	batches = new Collection<Batch>(this);
 
 	@ManyToOne({ entity: () => Area })
-	area!: Rel<Area>;
+	area?: Rel<Area>;
 }

@@ -26,5 +26,5 @@ export class OrderBatch {
 	status!: OrderStatus;
 
 	@Property()
-	datetime!: Date;
+	datetime?: Date;
 }
