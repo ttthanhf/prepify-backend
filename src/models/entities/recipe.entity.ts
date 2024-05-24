@@ -5,7 +5,8 @@ import {
 	ManyToOne,
 	OneToMany,
 	PrimaryKey,
-	Property
+	Property,
+	Rel
 } from '@mikro-orm/core';
 import { Category } from './category.entity';
 import { FoodStyle } from './food-style.entity';
@@ -24,15 +25,15 @@ export class Recipe {
 	@Property()
 	steps!: string;
 
-	@ManyToOne()
-	category!: Category;
+	@ManyToOne({ entity: () => Category })
+	category!: Rel<Category>;
 
-	@ManyToMany()
+	@ManyToMany({ entity: () => FoodStyle, inversedBy: 'recipes' })
 	foodStyles = new Collection<FoodStyle>(this);
 
-	@OneToMany({ mappedBy: 'recipe' })
+	@OneToMany({ mappedBy: 'recipe', entity: () => MealKit })
 	mealKits = new Collection<MealKit>(this);
 
-	@OneToMany({ mappedBy: 'recipe' })
+	@OneToMany({ mappedBy: 'recipe', entity: () => RecipeIngredient })
 	recipeIngredients = new Collection<RecipeIngredient>(this);
 }

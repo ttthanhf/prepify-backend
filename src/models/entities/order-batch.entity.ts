@@ -1,4 +1,11 @@
-import { Entity, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+	Entity,
+	Enum,
+	ManyToOne,
+	PrimaryKey,
+	Property,
+	Rel
+} from '@mikro-orm/core';
 import { Order } from './order.entity';
 import { Batch } from './batch.entity';
 import { OrderStatus } from '~constants/orderstatus.constant';
@@ -9,11 +16,11 @@ export class OrderBatch {
 	@PrimaryKey({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@ManyToOne()
-	order!: Order;
+	@ManyToOne({ entity: () => Order })
+	order!: Rel<Order>;
 
-	@ManyToOne()
-	batch!: Batch;
+	@ManyToOne({ entity: () => Batch })
+	batch!: Rel<Batch>;
 
 	@Enum(() => OrderStatus)
 	status!: OrderStatus;

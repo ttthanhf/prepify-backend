@@ -1,6 +1,7 @@
 import { MariaDbDriver, defineConfig } from '@mikro-orm/mariadb';
 import { User } from '~models/entities/user.entity';
 import envConfig from './env.config';
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 
 export default defineConfig({
 	driver: MariaDbDriver,
@@ -12,6 +13,7 @@ export default defineConfig({
 	dbName: envConfig.MARIADB_DATABASE,
 	port: envConfig.MARIADB_PORT,
 	clientUrl: envConfig.MARIADB_CLIENTURL,
+	metadataProvider: TsMorphMetadataProvider,
 	validate: true,
 	strict: true,
 	validateRequired: false,

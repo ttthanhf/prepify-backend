@@ -3,6 +3,7 @@ import {
 	ManyToOne,
 	PrimaryKey,
 	Property,
+	Rel,
 	TinyIntType
 } from '@mikro-orm/core';
 import { Order } from './order.entity';
@@ -23,9 +24,9 @@ export class OrderDetail {
 	@Property()
 	price!: number;
 
-	@ManyToOne()
-	order!: Order;
+	@ManyToOne({ entity: () => Order })
+	order!: Rel<Order>;
 
-	@ManyToOne()
-	mealKit!: MealKit;
+	@ManyToOne({ entity: () => MealKit })
+	mealKit!: Rel<MealKit>;
 }

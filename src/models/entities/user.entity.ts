@@ -13,6 +13,7 @@ import { Customer } from './customer.entity';
 import { Batch } from './batch.entity';
 import { Area } from './area.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { Rel } from '@mikro-orm/core';
 
 @Entity({ tableName: 'user' })
 export class User {
@@ -40,12 +41,12 @@ export class User {
 	@Property()
 	avatar?: string;
 
-	@OneToOne({ mappedBy: 'user' })
-	customer?: Customer;
+	@OneToOne({ entity: () => Customer })
+	customer?: Rel<Customer>;
 
-	@OneToMany({ mappedBy: 'user' })
+	@OneToMany({ mappedBy: 'user', entity: () => Batch })
 	batches = new Collection<Batch>(this);
 
-	@ManyToOne()
-	area!: Area;
+	@ManyToOne({ entity: () => Area })
+	area!: Rel<Area>;
 }

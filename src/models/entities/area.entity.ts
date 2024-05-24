@@ -21,12 +21,12 @@ export class Area {
 	@Property()
 	price!: number;
 
-	@OneToMany({ mappedBy: 'area' })
+	@OneToMany({ mappedBy: 'area', entity: () => Batch })
 	batches = new Collection<Batch>(this);
 
-	@OneToMany({ mappedBy: 'area' })
+	@OneToMany({ mappedBy: 'area', entity: () => Order })
 	orders = new Collection<Order>(this);
 
-	@OneToMany({ mappedBy: 'area' })
+	@OneToMany({ mappedBy: 'area', entity: () => User })
 	users = new Collection<User>(this);
 }

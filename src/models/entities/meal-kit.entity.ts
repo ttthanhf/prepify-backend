@@ -5,6 +5,7 @@ import {
 	OneToMany,
 	PrimaryKey,
 	Property,
+	Rel,
 	TinyIntType
 } from '@mikro-orm/core';
 import { Recipe } from './recipe.entity';
@@ -25,9 +26,9 @@ export class MealKit {
 	@Property({ type: TinyIntType, columnType: 'tinyint(1)' })
 	status!: boolean;
 
-	@ManyToOne()
-	recipe!: Recipe;
+	@ManyToOne({ entity: () => Recipe })
+	recipe!: Rel<Recipe>;
 
-	@OneToMany({ mappedBy: 'mealKit' })
+	@OneToMany({ mappedBy: 'mealKit', entity: () => OrderDetail })
 	orderDetails = new Collection<OrderDetail>(this);
 }

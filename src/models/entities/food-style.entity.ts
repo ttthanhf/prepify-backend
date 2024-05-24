@@ -19,6 +19,6 @@ export class FoodStyle {
 	@Property()
 	type!: string;
 
-	@ManyToMany({ mappedBy: 'foodStyles' })
+	@ManyToMany({ mappedBy: 'foodStyles', entity: () => Recipe })
 	recipes = new Collection<Recipe>(this);
 }
