@@ -29,6 +29,6 @@ export class MealKit {
 	@ManyToOne({ entity: () => Recipe })
 	recipe!: Rel<Recipe>;
 
-	@OneToMany({ mappedBy: 'mealKit', entity: () => OrderDetail })
+	@OneToMany('OrderDetail', 'mealKit')
 	orderDetails = new Collection<OrderDetail>(this);
 }

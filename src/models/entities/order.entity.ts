@@ -48,10 +48,10 @@ export class Order {
 	@ManyToOne({ entity: () => Customer })
 	customer!: Rel<Customer>;
 
-	@OneToMany({ mappedBy: 'order', entity: () => OrderDetail })
+	@OneToMany('OrderDetail', 'order')
 	orderDetails = new Collection<OrderDetail>(this);
 
-	@OneToMany({ mappedBy: 'order', entity: () => OrderBatch })
+	@OneToMany('OrderBatch', 'order')
 	orderBatches = new Collection<OrderBatch>(this);
 
 	@ManyToOne({ entity: () => Payment })

@@ -26,6 +26,6 @@ export class Batch {
 	@ManyToOne({ entity: () => Area })
 	area!: Rel<Area>;
 
-	@OneToMany({ mappedBy: 'batch' })
+	@OneToMany('OrderBatch', 'batch')
 	orderBatches = new Collection<OrderBatch>(this);
 }

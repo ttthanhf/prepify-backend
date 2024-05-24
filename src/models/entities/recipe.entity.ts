@@ -31,9 +31,9 @@ export class Recipe {
 	@ManyToMany({ entity: () => FoodStyle, inversedBy: 'recipes' })
 	foodStyles = new Collection<FoodStyle>(this);
 
-	@OneToMany({ mappedBy: 'recipe', entity: () => MealKit })
+	@OneToMany('MealKit', 'recipe')
 	mealKits = new Collection<MealKit>(this);
 
-	@OneToMany({ mappedBy: 'recipe', entity: () => RecipeIngredient })
+	@OneToMany('RecipeIngredient', 'recipe')
 	recipeIngredients = new Collection<RecipeIngredient>(this);
 }

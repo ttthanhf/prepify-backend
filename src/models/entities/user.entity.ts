@@ -47,7 +47,7 @@ export class User {
 	@OneToOne({ entity: () => Customer })
 	customer?: Rel<Customer>;
 
-	@OneToMany({ mappedBy: 'user', entity: () => Batch })
+	@OneToMany('Batch', 'user')
 	batches = new Collection<Batch>(this);
 
 	@ManyToOne({ entity: () => Area })

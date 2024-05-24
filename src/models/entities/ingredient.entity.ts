@@ -44,9 +44,9 @@ export class Ingredient {
 	@Property()
 	description?: string;
 
-	@OneToMany({ mappedBy: 'ingredient', entity: () => RecipeIngredient })
+	@OneToMany('RecipeIngredient', 'ingredient')
 	recipeIngredients = new Collection<RecipeIngredient>(this);
 
-	@OneToMany({ mappedBy: 'ingredient', entity: () => CustomerIngredient })
+	@OneToMany('CustomerIngredient', 'ingredient')
 	customerIngredients = new Collection<CustomerIngredient>(this);
 }

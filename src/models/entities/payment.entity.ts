@@ -16,6 +16,6 @@ export class Payment {
 	@Property()
 	name!: string;
 
-	@OneToMany({ mappedBy: 'payment', entity: () => Order })
+	@OneToMany('Order', 'payment')
 	orderPayments = new Collection<Order>(this);
 }

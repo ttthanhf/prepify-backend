@@ -19,9 +19,9 @@ export class Customer {
 	@OneToOne({ entity: () => User })
 	user!: Rel<User>;
 
-	@OneToMany({ mappedBy: 'customer', entity: () => CustomerIngredient })
+	@OneToMany('CustomerIngredient', 'customer')
 	customerIngredients = new Collection<CustomerIngredient>(this);
 
-	@OneToMany({ mappedBy: 'customer' })
+	@OneToMany('Order', 'customer')
 	orders = new Collection<Order>(this);
 }
