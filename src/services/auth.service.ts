@@ -1,17 +1,17 @@
-import { FastifyRequest, FastifyResponse } from '../types/fastify.type';
-import { User } from '../models/entities/User.entity';
+import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import { User } from '~models/entities/user.entity';
 import {
 	LoginRequest,
 	RegisterRequest
-} from '../models/requests/auth.request.model';
-import bcryptUtil from '../utils/bcrypt.util';
-import ResponseModel from '../models/responses/response.model';
-import jwtUtil from '../utils/jwt.util';
-import userRepository from '../repositories/user.repository';
-import { Role } from '../constants/role.constant';
-import { HTTP_STATUS_CODE } from '../constants/httpstatuscode.constant';
+} from '~models/requests/auth.request.model';
+import bcryptUtil from '~utils/bcrypt.util';
+import ResponseModel from '~models/responses/response.model';
+import jwtUtil from '~utils/jwt.util';
+import userRepository from '~repositories/user.repository';
+import { Role } from '~constants/role.constant';
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { AuthorizationTokenConfig } from 'simple-oauth2';
-import oauth2Util from '../utils/oauth2.util';
+import oauth2Util from '~utils/oauth2.util';
 
 class AuthService {
 	private getAccessToken(user: User) {

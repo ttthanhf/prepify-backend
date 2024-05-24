@@ -1,9 +1,9 @@
-import ResponseModel from '../models/responses/response.model';
-import { FastifyRequest, FastifyResponse } from '../types/fastify.type';
-import cookieUtil from '../utils/cookie.util';
-import jwtUtil from '../utils/jwt.util';
-import { HTTP_STATUS_CODE } from '../constants/httpstatuscode.constant';
-import userRepository from '../repositories/user.repository';
+import ResponseModel from '~models/responses/response.model';
+import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import cookieUtil from '~utils/cookie.util';
+import jwtUtil from '~utils/jwt.util';
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import userRepository from '~repositories/user.repository';
 
 async function requireToken(req: FastifyRequest, res: FastifyResponse) {
 	const cookies = cookieUtil.extract(req.headers);

@@ -1,4 +1,4 @@
-import { Fastify } from '../types/fastify.type';
+import { Fastify } from '~types/fastify.type';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 

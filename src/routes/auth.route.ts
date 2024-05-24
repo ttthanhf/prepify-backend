@@ -1,6 +1,6 @@
-import authController from '../controllers/auth.controller';
-import { Fastify } from '../types/fastify.type';
-import schemas from '../models/schemas/auth.schemas.model';
+import authController from '~controllers/auth.controller';
+import { Fastify } from '~types/fastify.type';
+import schemas from '~models/schemas/auth.schemas.model';
 
 export default async function authRoute(
 	app: Fastify,

@@ -1,4 +1,4 @@
-import stringUtil from '../utils/string.util';
+import stringUtil from '~utils/string.util';
 import envConfig from './env.config';
 import crypto from 'crypto';
 

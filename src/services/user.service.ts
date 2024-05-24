@@ -1,8 +1,8 @@
-import { FastifyRequest, FastifyResponse } from '../types/fastify.type';
-import cookieUtil from '../utils/cookie.util';
-import ResponseModel from '../models/responses/response.model';
-import jwtUtil from '../utils/jwt.util';
-import userRepository from '../repositories/user.repository';
+import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import cookieUtil from '~utils/cookie.util';
+import ResponseModel from '~models/responses/response.model';
+import jwtUtil from '~utils/jwt.util';
+import userRepository from '~repositories/user.repository';
 
 class AuthService {
 	async getCurrentUser(req: FastifyRequest, res: FastifyResponse) {

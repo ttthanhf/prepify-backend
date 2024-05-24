@@ -1,5 +1,5 @@
-import userService from '../services/user.service';
-import { FastifyRequest, FastifyResponse } from '../types/fastify.type';
+import userService from '~services/user.service';
+import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 
 class UserController {
 	async getMe(req: FastifyRequest, res: FastifyResponse) {

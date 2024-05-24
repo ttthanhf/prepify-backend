@@ -1,5 +1,5 @@
 import { EntityManager, MikroORM } from '@mikro-orm/mariadb';
-import MikroORM_CONFIG from '../configs/mikro.config';
+import MikroORM_CONFIG from '~configs/mikro.config';
 
 class Mikro {
 	private static instance: Mikro;

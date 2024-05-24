@@ -1,5 +1,5 @@
 import { createSigner, createDecoder, createVerifier } from 'fast-jwt';
-import JWT_CONFIG from '../configs/jwt.config';
+import JWT_CONFIG from '~configs/jwt.config';
 
 function sign(payload: object) {
 	const signSync = createSigner(JWT_CONFIG);

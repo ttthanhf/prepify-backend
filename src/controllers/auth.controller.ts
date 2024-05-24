@@ -1,6 +1,6 @@
 import { AuthorizationTokenConfig } from 'simple-oauth2';
-import authService from '../services/auth.service';
-import { FastifyRequest, FastifyResponse } from '../types/fastify.type';
+import authService from '~services/auth.service';
+import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 
 class AuthController {
 	async login(req: FastifyRequest, res: FastifyResponse) {
