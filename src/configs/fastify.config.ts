@@ -3,6 +3,7 @@ import envConfig from './env.config';
 
 const fastifyInitConfig: any = {
 	logger: {
+		level: envConfig.LOG_LEVEL || 'debug',
 		transport: {
 			target: '@fastify/one-line-logger'
 		}
