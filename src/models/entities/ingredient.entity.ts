@@ -39,20 +39,14 @@ export class Ingredient {
 	fat!: number;
 
 	@Property()
-	sodium!: number;
-
-	@Property()
-	sugar!: number;
-
-	@Property()
 	price!: number;
 
 	@Property()
-	description!: string;
+	description?: string;
 
-	@OneToMany({ mappedBy: 'ingredient' })
+	@OneToMany('RecipeIngredient', 'ingredient')
 	recipeIngredients = new Collection<RecipeIngredient>(this);
 
-	@OneToMany({ mappedBy: 'ingredient' })
+	@OneToMany('CustomerIngredient', 'ingredient')
 	customerIngredients = new Collection<CustomerIngredient>(this);
 }

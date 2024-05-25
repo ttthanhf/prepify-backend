@@ -6,7 +6,7 @@
 	"type": "commonjs",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev": "nodemon",
+		"dev": "nodemon src/main.ts",
 		"start": "node ./build/main.js",
 		"build": "tsc & tsc-alias & node minify.mjs",
 		"clean": "rimraf build & rimraf dist",
@@ -51,6 +51,7 @@
 		"terser": "^5.31.0",
 		"ts-node": "^10.9.2",
 		"tsc-alias": "^1.8.10",
+		"tsconfig-paths": "^4.2.0",
 		"typescript": "^5.4.5"
 	},
 	"mikro-orm": {

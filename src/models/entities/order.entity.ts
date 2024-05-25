@@ -5,7 +5,8 @@ import {
 	ManyToOne,
 	OneToMany,
 	PrimaryKey,
-	Property
+	Property,
+	Rel
 } from '@mikro-orm/core';
 import { Customer } from './customer.entity';
 import { OrderDetail } from './order-detail.entity';
@@ -44,18 +45,18 @@ export class Order {
 	@Enum(() => OrderStatus)
 	status!: OrderStatus;
 
-	@ManyToOne()
-	customer!: Customer;
+	@ManyToOne({ entity: () => Customer })
+	customer!: Rel<Customer>;
 
-	@OneToMany({ mappedBy: 'order' })
+	@OneToMany('OrderDetail', 'order')
 	orderDetails = new Collection<OrderDetail>(this);
 
-	@OneToMany({ mappedBy: 'order' })
+	@OneToMany('OrderBatch', 'order')
 	orderBatches = new Collection<OrderBatch>(this);
 
-	@ManyToOne()
-	payment!: Payment;
+	@ManyToOne({ entity: () => Payment })
+	payment!: Rel<Payment>;
 
-	@ManyToOne()
-	area!: Area;
+	@ManyToOne({ entity: () => Area })
+	area!: Rel<Area>;
 }

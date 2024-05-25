@@ -16,6 +16,6 @@ export class Category {
 	@Property()
 	name!: string;
 
-	@OneToMany({ mappedBy: 'category' })
+	@OneToMany('Recipe', 'category')
 	recipes = new Collection<Recipe>(this);
 }

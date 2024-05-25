@@ -9,18 +9,19 @@ import { User } from './user.entity';
 import { CustomerIngredient } from './customer-ingredient.entity';
 import { Order } from './order.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { Rel } from '@mikro-orm/core';
 
 @Entity({ tableName: 'customer' })
 export class Customer {
 	@PrimaryKey({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@OneToOne()
-	user!: User;
+	@OneToOne({ entity: () => User })
+	user!: Rel<User>;
 
-	@OneToMany({ mappedBy: 'customer' })
+	@OneToMany('CustomerIngredient', 'customer')
 	customerIngredients = new Collection<CustomerIngredient>(this);
 
-	@OneToMany({ mappedBy: 'order' })
+	@OneToMany('Order', 'customer')
 	orders = new Collection<Order>(this);
 }

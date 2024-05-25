@@ -10,6 +10,7 @@ import { User } from './user.entity';
 import { Area } from './area.entity';
 import { OrderBatch } from './order-batch.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { Rel } from '@mikro-orm/core';
 
 @Entity({ tableName: 'batch' })
 export class Batch {
@@ -19,12 +20,12 @@ export class Batch {
 	@Property()
 	datetime!: Date;
 
-	@ManyToOne()
-	user!: User;
+	@ManyToOne({ entity: () => User })
+	user!: Rel<User>;
 
-	@ManyToOne()
-	area!: Area;
+	@ManyToOne({ entity: () => Area })
+	area!: Rel<Area>;
 
-	@OneToMany({ mappedBy: 'batch' })
+	@OneToMany('OrderBatch', 'batch')
 	orderBatches = new Collection<OrderBatch>(this);
 }
