@@ -2,6 +2,7 @@ import userController from '~controllers/user.controller';
 import authMiddleware from '~middlewares/auth.middleware';
 
 import { Fastify } from '~types/fastify.type';
+import { Role } from '~constants/role.constant';
 
 export default async function authRoute(
 	app: Fastify,
@@ -11,7 +12,11 @@ export default async function authRoute(
 	app.get(
 		'/me',
 		{
-			preHandler: [authMiddleware.requireToken]
+			onRequest: [authMiddleware.requireToken],
+			config: {
+				allowedRoles: [Role.CUSTOMER]
+			},
+			preHandler: app.auth([app.authorize])
 		},
 		userController.getMe
 	);
