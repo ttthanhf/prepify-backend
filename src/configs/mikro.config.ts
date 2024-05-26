@@ -1,7 +1,6 @@
 import { MariaDbDriver, defineConfig } from '@mikro-orm/mariadb';
 import { User } from '~entities/user.entity';
 import envConfig from './env.config';
-import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { Area } from '~entities/area.entity';
 import { OrderBatch } from '~entities/order-batch.entity';
 import { Order } from '~entities/order.entity';
@@ -59,7 +58,6 @@ export default defineConfig({
 	dbName: envConfig.MARIADB_DATABASE,
 	port: envConfig.MARIADB_PORT,
 	clientUrl: envConfig.MARIADB_CLIENTURL,
-	metadataProvider: TsMorphMetadataProvider,
 	validate: true,
 	strict: true,
 	validateRequired: false,

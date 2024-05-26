@@ -8,12 +8,13 @@
 		"declaration": false, //remove type ts when build
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
-		"target": "ES2022",
+		"target": "ESNext",
 		"emitDeclarationOnly": false,
 		"noEmit": false,
 		"sourceMap": false,
 		"noEmitOnError": true,
 		"skipLibCheck": true,
+		"allowJs": true,
 
 		// Linting
 		"allowUnreachableCode": false,
@@ -35,22 +36,22 @@
 		"strictPropertyInitialization": true,
 
 		// alias
-		"baseUrl": ".",
+		"baseUrl": "src",
 		"paths": {
-			"@/*": ["./src/*"],
-			"~configs/*": ["./src/configs/*"],
-			"~constants/*": ["./src/constants/*"],
-			"~controllers/*": ["./src/controllers/*"],
-			"~exceptions/*": ["./src/exceptions/*"],
-			"~middlewares/*": ["./src/middlewares/*"],
-			"~models/*": ["./src/models/*"],
-			"~entities/*": ["./src/models/entities/*"],
-			"~plugins/*": ["./src/plugins/*"],
-			"~repositories/*": ["./src/repositories/*"],
-			"~routes/*": ["./src/routes/*"],
-			"~services/*": ["./src/services/*"],
-			"~types/*": ["./src/types/*"],
-			"~utils/*": ["./src/utils/*"]
+			"@/*": ["./*"],
+			"~configs/*": ["./configs/*"],
+			"~constants/*": ["./constants/*"],
+			"~controllers/*": ["./controllers/*"],
+			"~exceptions/*": ["./exceptions/*"],
+			"~middlewares/*": ["./middlewares/*"],
+			"~models/*": ["./models/*"],
+			"~entities/*": ["./models/entities/*"],
+			"~plugins/*": ["./plugins/*"],
+			"~repositories/*": ["./repositories/*"],
+			"~routes/*": ["./routes/*"],
+			"~services/*": ["./services/*"],
+			"~types/*": ["./types/*"],
+			"~utils/*": ["./utils/*"]
 		}
 	},
 	"ts-node": {
