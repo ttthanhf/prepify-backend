@@ -3,9 +3,11 @@ import fastifyConfig from '~configs/fastify.config';
 import AutoLoad from '@fastify/autoload';
 import path from 'path';
 import swaggerConfig from '~configs/swagger.config';
+import exceptionsHandle from './exceptions/exceptions';
 require('dotenv').config();
 
 const app = fastify(fastifyConfig.fastifyInitConfig);
+exceptionsHandle(app);
 swaggerConfig(app);
 
 const pathRegisters = ['plugins', 'routes'];

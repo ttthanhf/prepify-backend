@@ -1,5 +1,6 @@
 import swagger from '@fastify/swagger';
 import swagger_ui from '@fastify/swagger-ui';
+import envConfig from './env.config';
 
 const SWAGGER_CONFIG = {
 	openapi: {
@@ -11,7 +12,7 @@ const SWAGGER_CONFIG = {
 		},
 		servers: [
 			{
-				url: 'http://localhost:8080',
+				url: `http://localhost:${envConfig.SERVER_PORT}`,
 				description: 'Localhost'
 			},
 			{
@@ -21,13 +22,18 @@ const SWAGGER_CONFIG = {
 		],
 		components: {
 			securitySchemes: {
-				apiKey: {
+				access_token: {
 					type: 'apiKey',
-					name: 'apiKey',
-					in: 'header'
+					in: 'cookie',
+					name: 'access_token'
 				}
 			}
 		},
+		security: [
+			{
+				access_token: []
+			}
+		],
 		externalDocs: {
 			url: 'https://editor.swagger.io/',
 			description: 'Editor in swagger.io'
