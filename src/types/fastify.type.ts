@@ -1,12 +1,57 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import {
+	FastifyInstance,
+	FastifyRequest,
+	FastifyReply,
+	FastifyBaseLogger,
+	FastifyTypeProviderDefault,
+	RouteGenericInterface,
+	FastifySchema,
+	RouteHandlerMethod
+} from 'fastify';
+import {
+	Http2SecureServer,
+	Http2ServerRequest,
+	Http2ServerResponse
+} from 'http2';
 
 interface FastifyInitConfig {
 	logger: boolean;
 }
 
-export {
-	FastifyInitConfig,
-	FastifyInstance as Fastify,
-	FastifyRequest,
-	FastifyReply as FastifyResponse
-};
+export type Fastify =
+	| FastifyInstance<
+			Http2SecureServer,
+			Http2ServerRequest,
+			Http2ServerResponse,
+			FastifyBaseLogger,
+			FastifyTypeProviderDefault
+	  >
+	| FastifyRequest
+	| any;
+
+export type FastifyResponse =
+	| FastifyReply<
+			Http2SecureServer,
+			Http2ServerRequest,
+			Http2ServerResponse,
+			RouteGenericInterface,
+			unknown,
+			FastifySchema,
+			FastifyTypeProviderDefault,
+			unknown
+	  >
+	| FastifyReply
+	| any;
+
+export type FastifyRoute = RouteHandlerMethod<
+	Http2SecureServer,
+	Http2ServerRequest,
+	Http2ServerResponse,
+	RouteGenericInterface,
+	unknown,
+	FastifySchema,
+	FastifyTypeProviderDefault,
+	FastifyBaseLogger
+>;
+
+export type { FastifyInitConfig, FastifyRequest };
