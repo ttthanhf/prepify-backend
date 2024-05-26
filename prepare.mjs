@@ -5,11 +5,8 @@ import { minify } from 'terser';
 const buildDir = 'build';
 const distDir = 'dist';
 const opts = {
-	mangle: {
-		toplevel: true
-	},
-	compress: {
-		toplevel: true
+	output: {
+		comments: false
 	}
 };
 

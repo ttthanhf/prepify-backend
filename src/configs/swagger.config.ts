@@ -12,7 +12,11 @@ const SWAGGER_CONFIG = {
 		servers: [
 			{
 				url: 'http://localhost:8080',
-				description: 'Development server'
+				description: 'Localhost'
+			},
+			{
+				url: 'https://prepifyb.thanhf.dev/',
+				description: 'BE server'
 			}
 		],
 		components: {
@@ -47,7 +51,11 @@ const SWAGGER_UI_CONFIG = {
 	},
 	staticCSP: true,
 	transformStaticCSP: (header: unknown) => header,
-	transformSpecification: (swaggerObject: unknown, request: unknown, reply: unknown) => {
+	transformSpecification: (
+		swaggerObject: unknown,
+		request: unknown,
+		reply: unknown
+	) => {
 		return swaggerObject;
 	},
 	transformSpecificationClone: true

@@ -9,7 +9,7 @@
 		"dev": "nodemon",
 		"clean": "rimraf build & rimraf dist",
 		"start:dev": "node ./build/src/main.js",
-		"start:deloy": "npm install && node ./src/main.js",
+		"start:deloy": "npm install --only=production && node ./src/main.js",
 		"build": "npm run clean & tsc-alias & npm run build:swc",
 		"build:swc": "tsc-alias & swc src -d build",
 		"build:dev": "npm run clean & npm run build:swc",
