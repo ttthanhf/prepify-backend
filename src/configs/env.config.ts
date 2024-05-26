@@ -1,9 +1,9 @@
+import envSchemas from '~models/schemas/env.schemas.model';
 import envSchema from 'env-schema';
-import jwtSchemas from '~models/schemas/jwt.schemas.model';
-import { EnvConfig } from '~types/jwt.type';
+import { EnvConfig } from '~types/env.type';
 
 const envConfig = envSchema<EnvConfig>({
-	schema: jwtSchemas,
+	schema: envSchemas,
 	dotenv: true,
 	expandEnv: true
 });

@@ -1,15 +1,12 @@
 import { Fastify } from '~types/fastify.type';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
-import auth from '@fastify/auth';
+import fp from 'fastify-plugin';
 
-export default async function plugins(
-	app: Fastify,
-	options: unknown,
-	next: CallableFunction
-) {
-	app.register(helmet);
+function fastifyPlugin(app: Fastify, opts: Object, next: CallableFunction) {
 	app.register(cors);
-	app.register(auth);
-	return next();
+	app.register(helmet);
+	next();
 }
+
+module.exports = fp(fastifyPlugin);

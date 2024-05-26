@@ -23,10 +23,10 @@ class AuthService {
 	}
 
 	async loginHandle(req: FastifyRequest, res: FastifyResponse) {
-		const { phone, password }: LoginRequest = req.body as LoginRequest;
+		const { email, password }: LoginRequest = req.body as LoginRequest;
 
 		const user = await userRepository.findOneUser({
-			phone
+			email
 		});
 
 		const respose = new ResponseModel(res);
@@ -42,27 +42,31 @@ class AuthService {
 		return respose.send();
 	}
 	async registerHandle(req: FastifyRequest, res: FastifyResponse) {
-		const { phone, password }: RegisterRequest = req.body as RegisterRequest;
+		const { phone, password, email, fullname }: RegisterRequest =
+			req.body as RegisterRequest;
 
 		const user = await userRepository.findOneUser({
-			phone
+			email
 		});
 
 		const respose = new ResponseModel(res);
 
-		if (!user) {
+		if (user) {
 			respose.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
-			respose.message = 'Phone exist';
-			respose.send();
+			respose.message = 'Email exist';
+			return respose.send();
 		}
 
 		const newUser = new User();
 		newUser.phone = phone;
+		newUser.email = email;
+		newUser.fullname = fullname;
 		newUser.password = await bcryptUtil.hash(password);
 		newUser.role = Role.CUSTOMER;
 		await userRepository.createNewUser(newUser);
 
 		respose.message = 'Created new user';
+		respose.data = this.getAccessToken(newUser);
 		return respose.send();
 	}
 

@@ -1,5 +1,6 @@
 import swagger from '@fastify/swagger';
 import swagger_ui from '@fastify/swagger-ui';
+import envConfig from './env.config';
 
 const SWAGGER_CONFIG = {
 	openapi: {
@@ -11,19 +12,28 @@ const SWAGGER_CONFIG = {
 		},
 		servers: [
 			{
-				url: 'http://localhost:8080',
-				description: 'Development server'
+				url: `http://localhost:${envConfig.SERVER_PORT}`,
+				description: 'Localhost'
+			},
+			{
+				url: 'https://prepifyb.thanhf.dev/',
+				description: 'BE server'
 			}
 		],
 		components: {
 			securitySchemes: {
-				apiKey: {
+				access_token: {
 					type: 'apiKey',
-					name: 'apiKey',
-					in: 'header'
+					in: 'cookie',
+					name: 'access_token'
 				}
 			}
 		},
+		security: [
+			{
+				access_token: []
+			}
+		],
 		externalDocs: {
 			url: 'https://editor.swagger.io/',
 			description: 'Editor in swagger.io'
@@ -47,7 +57,11 @@ const SWAGGER_UI_CONFIG = {
 	},
 	staticCSP: true,
 	transformStaticCSP: (header: unknown) => header,
-	transformSpecification: (swaggerObject: unknown, request: unknown, reply: unknown) => {
+	transformSpecification: (
+		swaggerObject: unknown,
+		request: unknown,
+		reply: unknown
+	) => {
 		return swaggerObject;
 	},
 	transformSpecificationClone: true

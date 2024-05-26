@@ -10,7 +10,8 @@ export default fastifyPlugin<FastifyAuthPluginOptions>(async (app: Fastify) => {
 
 	app.decorate(
 		'authorize',
-		async (req, res) => await authorizeDecorator(req, res)
+		async (req: FastifyRequest, res: FastifyResponse) =>
+			await authorizeDecorator(req, res)
 	);
 });
 
