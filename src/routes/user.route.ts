@@ -14,7 +14,7 @@ export default async function authRoute(
 		{
 			onRequest: [authMiddleware.requireToken],
 			config: {
-				allowedRoles: [Role.CUSTOMER]
+				allowedRoles: [Role.CUSTOMER, Role.ADMIN]
 			},
 			preHandler: app.auth([app.authorize])
 		},

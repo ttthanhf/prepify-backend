@@ -8,8 +8,10 @@ import userRepository from '~repositories/user.repository';
 async function requireToken(req: FastifyRequest, res: FastifyResponse) {
 	const cookies = cookieUtil.extract(req.headers);
 	const token = cookies.access_token;
+	console.log(token);
 
 	const isValid = jwtUtil.verify(token);
+	console.log(isValid);
 
 	const reponse = new ResponseModel(res);
 
@@ -41,4 +43,30 @@ async function requirePhone(req: FastifyRequest, res: FastifyResponse) {
 	}
 }
 
-export default { requireToken, requirePhone };
+async function verifyRole(
+	req: FastifyRequest,
+	res: FastifyResponse
+): Promise<void> {
+	const allowedRoles = req.routeOptions.config.allowedRoles;
+	const cookies = cookieUtil.extract(req.headers);
+	const token = jwtUtil.verify(cookies.access_token);
+	console.log(token);
+
+	const response = new ResponseModel(res);
+
+	if (allowedRoles && token) {
+		const user = await userRepository.findOneUser({
+			id: token.user_id
+		});
+		console.log(user);
+		const userRole = user!.role;
+
+		if (!allowedRoles.includes(userRole)) {
+			response.statusCode = HTTP_STATUS_CODE.FORBIDDEN;
+			response.message = 'Role not allowed';
+			response.send();
+		}
+	}
+}
+
+export default { verifyRole, requireToken, requirePhone };
