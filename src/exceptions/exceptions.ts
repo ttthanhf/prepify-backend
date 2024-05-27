@@ -1,6 +1,6 @@
-import ResponseModel from '@/models/responses/response.model';
-import { Fastify, FastifyResponse } from '@/types/fastify.type';
 import { FastifyError, FastifyRequest } from 'fastify';
+import ResponseModel from '~models/responses/response.model';
+import { Fastify, FastifyResponse } from '~types/fastify.type';
 
 export default async function exceptionsHandle(app: Fastify) {
 	app.setErrorHandler(

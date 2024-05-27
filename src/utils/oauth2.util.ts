@@ -7,7 +7,7 @@ import googleOauth2Config from '~configs/google.oauth2.config';
 import { FastifyRequest } from 'fastify';
 import envConfig from '~configs/env.config';
 import { google_user } from '~types/oauth2.type';
-import { GoogleOauth2Request } from '@/models/requests/auth.request.model';
+import { GoogleOauth2Request } from '~models/requests/auth.request.model';
 
 const client = new AuthorizationCode(
 	googleOauth2Config.GOOGLE_OAUTH2_CODE_CONFIG

@@ -3,7 +3,7 @@ import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 import jwtUtil from '~utils/jwt.util';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import userRepository from '~repositories/user.repository';
-import headerUtil from '@/utils/header.util';
+import headerUtil from '~utils/header.util';
 
 async function requireToken(req: FastifyRequest, res: FastifyResponse) {
 	const token = headerUtil.extractAuthorization(req.headers);
@@ -25,7 +25,7 @@ async function requirePhone(req: FastifyRequest, res: FastifyResponse) {
 	const token = headerUtil.extractAuthorization(req.headers);
 	const info = jwtUtil.verify(token);
 	const user = await userRepository.findOneUser({
-		id: info.user_id
+		id: info.userId
 	});
 	if (!user?.phone) {
 		const reponse = new ResponseModel(res);
@@ -47,7 +47,7 @@ async function verifyRole(
 
 	if (allowedRoles && token) {
 		const user = await userRepository.findOneUser({
-			id: info.user_id
+			id: info.userId
 		});
 		const userRole = user!.role;
 
