@@ -70,18 +70,18 @@ class AuthService {
 		return respose.send();
 	}
 
-	async loginWithGoogleHandle(req: FastifyRequest, res: FastifyResponse) {
+	async getUrlGoole(req: FastifyRequest, res: FastifyResponse) {
 		const respose = new ResponseModel(res);
 		respose.data = {
 			url: oauth2Util.getUrlGoogleLogin()
 		};
 		return respose.send();
 	}
-	async loginWithGoogleCallbackHandle(
+	async loginWithGoogleHandle(
 		req: FastifyRequest<{ Querystring: AuthorizationTokenConfig }>,
 		res: FastifyResponse
 	) {
-		const { email, name } = await oauth2Util.getUserInfo(req);
+		const { email, name, picture } = await oauth2Util.getUserInfo(req);
 
 		const respose = new ResponseModel(res);
 
@@ -99,8 +99,10 @@ class AuthService {
 		newUser.fullname = name;
 		newUser.role = Role.CUSTOMER;
 		newUser.email = email;
+		newUser.avatar = picture;
 		await userRepository.createNewUser(newUser);
 
+		respose.message = 'Created new user';
 		respose.data = this.getAccessToken(newUser);
 		return respose.send();
 	}

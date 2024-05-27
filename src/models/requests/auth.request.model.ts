@@ -9,3 +9,7 @@ export interface RegisterRequest {
 	email: string;
 	fullname: string;
 }
+
+export interface GoogleOauth2Request {
+	code: string;
+}
