@@ -1,3 +1,4 @@
+import { Role } from '~constants/role.constant';
 import {
 	FastifyInstance,
 	FastifyRequest,
@@ -13,6 +14,12 @@ import {
 	Http2ServerRequest,
 	Http2ServerResponse
 } from 'http2';
+
+declare module 'fastify' {
+	interface FastifyContextConfig {
+		allowedRoles?: Role[];
+	}
+}
 
 interface FastifyInitConfig {
 	logger: boolean;
