@@ -1,3 +1,4 @@
+import { Role } from '~constants/role.constant';
 import {
 	FastifyInstance,
 	FastifyRequest,
@@ -16,7 +17,7 @@ import {
 
 declare module 'fastify' {
 	interface FastifyContextConfig {
-		allowedRoles?: string[];
+		allowedRoles?: Role[];
 	}
 }
 
