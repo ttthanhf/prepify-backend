@@ -12,11 +12,10 @@ export default async function authRoute(
 	app.get(
 		'/me',
 		{
-			onRequest: [authMiddleware.requireToken],
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.CUSTOMER, Role.ADMIN]
-			},
-			preHandler: app.auth([app.authorize])
+			}
 		},
 		userController.getMe
 	);

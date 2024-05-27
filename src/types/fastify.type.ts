@@ -18,16 +18,6 @@ declare module 'fastify' {
 	interface FastifyContextConfig {
 		allowedRoles?: string[];
 	}
-
-	type Authorize = (
-		request: FastifyRequest,
-		reply: FastifyReply
-	) => Promise<void>;
-
-	/** Apply the extension */
-	interface FastifyInstance {
-		authorize: Authorize;
-	}
 }
 
 interface FastifyInitConfig {
