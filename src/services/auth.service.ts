@@ -17,7 +17,7 @@ class AuthService {
 	private getAccessToken(user: User) {
 		return {
 			access_token: jwtUtil.sign({
-				user_id: user.id
+				userId: user.id
 			})
 		};
 	}
@@ -70,39 +70,41 @@ class AuthService {
 		return respose.send();
 	}
 
-	async loginWithGoogleHandle(req: FastifyRequest, res: FastifyResponse) {
+	async getUrlGoogle(req: FastifyRequest, res: FastifyResponse) {
 		const respose = new ResponseModel(res);
 		respose.data = {
 			url: oauth2Util.getUrlGoogleLogin()
 		};
 		return respose.send();
 	}
-	async loginWithGoogleCallbackHandle(
+	async loginWithGoogleHandle(
 		req: FastifyRequest<{ Querystring: AuthorizationTokenConfig }>,
 		res: FastifyResponse
 	) {
-		const { email, name } = await oauth2Util.getUserInfo(req);
+		const { email, name, picture } = await oauth2Util.getUserInfo(req);
 
-		const respose = new ResponseModel(res);
+		const response = new ResponseModel(res);
 
 		const user = await userRepository.findOneUser({
 			email
 		});
 
 		if (user) {
-			respose.message = 'Login success';
-			respose.data = this.getAccessToken(user);
-			return respose.send();
+			response.message = 'Login success';
+			response.data = this.getAccessToken(user);
+			return response.send();
 		}
 
 		const newUser = new User();
 		newUser.fullname = name;
 		newUser.role = Role.CUSTOMER;
 		newUser.email = email;
+		newUser.avatar = picture;
 		await userRepository.createNewUser(newUser);
 
-		respose.data = this.getAccessToken(newUser);
-		return respose.send();
+		response.message = 'Created new user';
+		response.data = this.getAccessToken(newUser);
+		return response.send();
 	}
 }
 

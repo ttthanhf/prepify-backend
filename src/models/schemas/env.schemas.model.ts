@@ -14,6 +14,7 @@ const envSchemas = S.object()
 	.prop('JWT_ALGORITHM', S.string().required())
 	.prop('OAUTH2_GOOGLE_ID', S.string().required())
 	.prop('OAUTH2_GOOGLE_SECRET', S.string().required())
+	.prop('OAUTH2_GOOGLE_REDIRECT', S.string().required())
 	.prop('LOG_LEVEL', S.string().required())
 	.valueOf();
 

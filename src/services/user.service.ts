@@ -1,24 +1,23 @@
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
-import cookieUtil from '~utils/cookie.util';
 import ResponseModel from '~models/responses/response.model';
 import jwtUtil from '~utils/jwt.util';
 import userRepository from '~repositories/user.repository';
+import headerUtil from '~utils/header.util';
 
 class AuthService {
 	async getCurrentUser(req: FastifyRequest, res: FastifyResponse) {
-		const cookies = cookieUtil.extract(req.headers);
-		const access_token = cookies.access_token;
+		const token = headerUtil.extractAuthorization(req.headers);
 
-		const user_id = jwtUtil.verify(access_token).user_id;
+		const userId = jwtUtil.verify(token).userId;
 		const user = await userRepository.findOneUser({
-			id: user_id
+			id: userId
 		});
 
-		const reponse = new ResponseModel(res);
-		reponse.data = {
+		const response = new ResponseModel(res);
+		response.data = {
 			user
 		};
-		reponse.send();
+		return response.send();
 	}
 }
 

@@ -1,4 +1,3 @@
-import stringUtil from '~utils/string.util';
 import envConfig from './env.config';
 import crypto from 'crypto';
 
@@ -16,10 +15,8 @@ const GOOGLE_OAUTH2_CODE_CONFIG = {
 };
 
 const GOOGLE_OAUTH2_URL_CONFIG = {
-	redirect_uri:
-		stringUtil.ensureTrailingSlash(envConfig.SERVER_DOMAIN) +
-		'login/google/callback',
-	scope: 'email profile',
+	redirect_uri: envConfig.OAUTH2_GOOGLE_REDIRECT,
+	scope: 'email profile openid',
 	state: crypto.randomBytes(16).toString('hex')
 };
 

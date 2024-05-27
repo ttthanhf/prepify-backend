@@ -9,14 +9,14 @@ class AuthController {
 	async register(req: FastifyRequest, res: FastifyResponse) {
 		return authService.registerHandle(req, res);
 	}
-	async loginWithGoogle(req: FastifyRequest, res: FastifyResponse) {
-		return authService.loginWithGoogleHandle(req, res);
+	async getUrlGoogle(req: FastifyRequest, res: FastifyResponse) {
+		return authService.getUrlGoogle(req, res);
 	}
-	async loginWithGoogleCallback(
+	async loginWithGoogle(
 		req: FastifyRequest<{ Querystring: AuthorizationTokenConfig }>,
 		res: FastifyResponse
 	) {
-		return authService.loginWithGoogleCallbackHandle(req, res);
+		return authService.loginWithGoogleHandle(req, res);
 	}
 }
 

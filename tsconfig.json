@@ -38,7 +38,6 @@
 		// alias
 		"baseUrl": "src",
 		"paths": {
-			"@/*": ["./*"],
 			"~configs/*": ["./configs/*"],
 			"~constants/*": ["./constants/*"],
 			"~controllers/*": ["./controllers/*"],

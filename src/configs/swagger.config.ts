@@ -24,8 +24,8 @@ const SWAGGER_CONFIG = {
 			securitySchemes: {
 				access_token: {
 					type: 'apiKey',
-					in: 'cookie',
-					name: 'access_token'
+					in: 'header',
+					name: 'Authorization'
 				}
 			}
 		},

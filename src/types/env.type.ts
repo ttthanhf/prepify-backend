@@ -14,5 +14,6 @@ export interface EnvConfig {
 	JWT_ALGORITHM: Algorithm;
 	OAUTH2_GOOGLE_ID: string;
 	OAUTH2_GOOGLE_SECRET: string;
+	OAUTH2_GOOGLE_REDIRECT: string;
 	LOG_LEVEL: string;
 }
