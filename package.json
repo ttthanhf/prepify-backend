@@ -31,6 +31,8 @@
 		"fastify": "^4.27.0",
 		"fastify-plugin": "^4.5.1",
 		"fluent-json-schema": "^4.2.1",
+		"ioredis": "^5.4.1",
+		"nodemailer": "^6.9.13",
 		"simple-oauth2": "^5.0.0",
 		"uuid": "^9.0.1"
 	},
@@ -39,6 +41,7 @@
 		"@swc/core": "^1.5.6",
 		"@types/bcrypt": "^5.0.2",
 		"@types/node": "^20.12.10",
+		"@types/nodemailer": "^6.4.15",
 		"@types/simple-oauth2": "^5.0.7",
 		"@types/uuid": "^9.0.8",
 		"@typescript-eslint/eslint-plugin": "^7.9.0",

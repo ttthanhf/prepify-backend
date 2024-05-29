@@ -1,8 +1,15 @@
 import { createSigner, createDecoder, createVerifier } from 'fast-jwt';
+import envConfig from '~configs/env.config';
 import JWT_CONFIG from '~configs/jwt.config';
 
-function sign(payload: object) {
-	const signSync = createSigner(JWT_CONFIG);
+function sign(
+	payload: object,
+	expiresIn: number | string = envConfig.JWT_EXPIRE
+) {
+	const signSync = createSigner({
+		...JWT_CONFIG,
+		expiresIn: expiresIn
+	});
 	return signSync(payload);
 }
 

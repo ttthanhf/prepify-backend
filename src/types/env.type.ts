@@ -15,5 +15,9 @@ export interface EnvConfig {
 	OAUTH2_GOOGLE_ID: string;
 	OAUTH2_GOOGLE_SECRET: string;
 	OAUTH2_GOOGLE_REDIRECT: string;
+	MAIL_USER: string;
+	MAIL_PASSWORD: string;
+	MAIL_EXPIRE: string;
+	MAIL_REDIRECT: string;
 	LOG_LEVEL: string;
 }

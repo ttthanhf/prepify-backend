@@ -19,4 +19,25 @@ export default async function authRoute(
 		{ schema: schemas.registerSchemas },
 		authController.register
 	);
+	app.post(
+		'/forgot-password',
+		{
+			schema: schemas.forgotPasswordSchemas
+		},
+		authController.forgotPassword
+	);
+	app.post(
+		'/verify-token-forgot-password',
+		{
+			schema: schemas.verifyForgotPasswordSchemas
+		},
+		authController.verifyForgotPassword
+	);
+	app.post(
+		'/reset-password',
+		{
+			schema: schemas.resetPasswordSchemas
+		},
+		authController.resetPassword
+	);
 }
