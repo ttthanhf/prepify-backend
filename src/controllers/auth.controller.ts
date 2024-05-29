@@ -18,6 +18,15 @@ class AuthController {
 	) {
 		return authService.loginWithGoogleHandle(req, res);
 	}
+	async forgotPassword(req: FastifyRequest, res: FastifyResponse) {
+		return authService.forgotPasswordHandle(req, res);
+	}
+	async verifyForgotPassword(req: FastifyRequest, res: FastifyResponse) {
+		return authService.verifyForgotPasswordHandle(req, res);
+	}
+	async resetPassword(req: FastifyRequest, res: FastifyResponse) {
+		return authService.resetPasswordHandle(req, res);
+	}
 }
 
 export default new AuthController();

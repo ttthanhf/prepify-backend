@@ -16,6 +16,10 @@ const envSchemas = S.object()
 	.prop('OAUTH2_GOOGLE_SECRET', S.string().required())
 	.prop('OAUTH2_GOOGLE_REDIRECT', S.string().required())
 	.prop('LOG_LEVEL', S.string().required())
+	.prop('MAIL_USER', S.string().required())
+	.prop('MAIL_PASSWORD', S.string().required())
+	.prop('MAIL_EXPIRE', S.string().required())
+	.prop('MAIL_REDIRECT', S.string().required())
 	.valueOf();
 
 export default envSchemas;

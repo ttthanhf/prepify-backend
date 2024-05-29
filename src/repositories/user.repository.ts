@@ -10,6 +10,10 @@ class UserRepository {
 	async createNewUser(user: User) {
 		return await mikroUtil.em.persistAndFlush(user);
 	}
+
+	async updateUser(user: User) {
+		return await this.createNewUser(user);
+	}
 }
 
 export default new UserRepository();
