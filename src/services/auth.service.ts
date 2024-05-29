@@ -18,6 +18,7 @@ import oauth2Util from '~utils/oauth2.util';
 import mailUtil from '~utils/mail.util';
 import envConfig from '~configs/env.config';
 import redisUtil from '~utils/redis.util';
+import { Token } from '~constants/token.constant';
 
 class AuthService {
 	private getAccessToken(user: User) {
@@ -136,7 +137,7 @@ class AuthService {
 		const access_token = jwtUtil.sign(
 			{
 				userId: user.id,
-				type: 'ForgotPassword'
+				type: Token.FORGOTPASSWORD
 			},
 			envConfig.MAIL_EXPIRE
 		);
@@ -158,7 +159,7 @@ class AuthService {
 
 		if (
 			(await redisUtil.getTokenRecoveryPasswordWhiteList(token)) === null ||
-			info?.type !== 'ForgotPassword'
+			info?.type !== Token.FORGOTPASSWORD
 		) {
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			response.message = 'Token invaild';
@@ -184,7 +185,7 @@ class AuthService {
 
 		const info = jwtUtil.verify(token);
 
-		if (info?.type != 'ForgotPassword') {
+		if (info?.type != Token.FORGOTPASSWORD) {
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			response.message = 'Token invalid';
 			return response.send();
