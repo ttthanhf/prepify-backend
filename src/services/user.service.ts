@@ -7,7 +7,6 @@ import headerUtil from '~utils/header.util';
 class AuthService {
 	async getCurrentUser(req: FastifyRequest, res: FastifyResponse) {
 		const token = headerUtil.extractAuthorization(req.headers);
-
 		const userId = jwtUtil.verify(token).userId;
 		const user = await userRepository.findOneUser({
 			id: userId

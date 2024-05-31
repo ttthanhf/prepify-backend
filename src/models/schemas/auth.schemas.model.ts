@@ -4,20 +4,17 @@ import { Pattern } from '~constants/pattern.constant';
 
 const loginObj = S.object()
 	.additionalProperties(false)
-	.prop(
-		'email',
-		S.string()
-			.required()
-			.pattern(Pattern.EMAIL_REGEX)
-			.default('qwe123@gmail.com')
-	)
+	.prop('email', S.string().pattern(Pattern.EMAIL_REGEX))
+	.prop('phone', S.string().pattern(Pattern.PHONE_REGEX))
 	.prop(
 		'password',
-		S.string()
-			.required()
-			.pattern(Pattern.PASSWORD_REGEX)
-			.default('Password123!')
-	);
+		S.string().pattern(Pattern.PASSWORD_REGEX).default('Password123!')
+	)
+	.anyOf([
+		S.required(['email', 'password']),
+		S.required(['phone', 'password']),
+		S.required(['email', 'phone', 'password'])
+	]);
 
 const loginSchemas: FastifySchema = {
 	body: loginObj.valueOf()
@@ -25,10 +22,6 @@ const loginSchemas: FastifySchema = {
 
 const registerObj = S.object()
 	.prop('fullname', S.string().required().default('Nguyen Van A'))
-	.prop(
-		'phone',
-		S.string().required().pattern(Pattern.PHONE_REGEX).default('0909990099')
-	)
 	.extend(loginObj);
 
 const registerSchemas: FastifySchema = {
