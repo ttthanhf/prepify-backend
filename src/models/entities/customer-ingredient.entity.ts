@@ -1,17 +1,13 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Rel } from '@mikro-orm/core';
+import { Entity, ManyToOne, Property, Rel } from '@mikro-orm/core';
 import { Customer } from './customer.entity';
 import { Ingredient } from './ingredient.entity';
-import { v4 as uuidv4 } from 'uuid';
 
 @Entity({ tableName: 'customer_ingredient' })
 export class CustomerIngredient {
-	@PrimaryKey({ type: 'uuid' })
-	id: string = uuidv4();
-
-	@ManyToOne({ entity: () => Customer })
+	@ManyToOne({ entity: () => Customer, primary: true })
 	customer!: Rel<Customer>;
 
-	@ManyToOne({ entity: () => Ingredient })
+	@ManyToOne({ entity: () => Ingredient, primary: true })
 	ingredient!: Rel<Ingredient>;
 
 	@Property()

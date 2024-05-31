@@ -15,42 +15,54 @@ import { RecipeIngredient } from '~entities/recipe-ingredient.entity';
 import { OrderDetail } from '~entities/order-detail.entity';
 import { Payment } from '~entities/payment.entity';
 import { MealKit } from '~entities/meal-kit.entity';
+import { OrderPayment } from '~models/entities/order-payment.entity';
+import { Nutrition } from '~models/entities/nutrition.entity';
+import { RecipeNutrition } from '~models/entities/recipe-nutrition.entity';
+import { Unit } from '~models/entities/unit.entity';
 
 export default defineConfig({
 	driver: MariaDbDriver,
 	entities: [
-		User,
 		Area,
 		Batch,
+		Category,
 		Customer,
 		CustomerIngredient,
-		Order,
-		OrderBatch,
-		Category,
 		FoodStyle,
 		Ingredient,
+		MealKit,
+		Nutrition,
+		Order,
+		OrderBatch,
+		OrderDetail,
+		OrderPayment,
+		Payment,
 		Recipe,
 		RecipeIngredient,
-		OrderDetail,
-		Payment,
-		MealKit
+		RecipeNutrition,
+		Unit,
+		User
 	],
 	entitiesTs: [
-		User,
 		Area,
 		Batch,
+		Category,
 		Customer,
 		CustomerIngredient,
-		Order,
-		OrderBatch,
-		Category,
 		FoodStyle,
 		Ingredient,
+		MealKit,
+		Nutrition,
+		Order,
+		OrderBatch,
+		OrderDetail,
+		OrderPayment,
+		Payment,
 		Recipe,
 		RecipeIngredient,
-		OrderDetail,
-		Payment,
-		MealKit
+		RecipeNutrition,
+		Unit,
+		User
 	],
 	host: envConfig.MARIADB_HOST,
 	user: envConfig.MARIADB_USER,

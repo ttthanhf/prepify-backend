@@ -1,13 +1,16 @@
 import {
 	Collection,
 	Entity,
+	ManyToOne,
 	OneToMany,
 	PrimaryKey,
-	Property
+	Property,
+	Rel
 } from '@mikro-orm/core';
 import { RecipeIngredient } from './recipe-ingredient.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { CustomerIngredient } from './customer-ingredient.entity';
+import { Unit } from './unit.entity';
 
 @Entity({ tableName: 'ingredient' })
 export class Ingredient {
@@ -49,4 +52,7 @@ export class Ingredient {
 
 	@OneToMany('CustomerIngredient', 'ingredient')
 	customerIngredients = new Collection<CustomerIngredient>(this);
+
+	@ManyToOne({ entity: () => Unit })
+	unit!: Rel<Unit>;
 }

@@ -5,8 +5,8 @@ import {
 	PrimaryKey,
 	Property
 } from '@mikro-orm/core';
-import { Order } from './order.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { OrderPayment } from './order-payment.entity';
 
 @Entity({ tableName: 'payment' })
 export class Payment {
@@ -16,6 +16,6 @@ export class Payment {
 	@Property()
 	name!: string;
 
-	@OneToMany('Order', 'payment')
-	orderPayments = new Collection<Order>(this);
+	@OneToMany('OrderPayment', 'payment')
+	orderPayments = new Collection<OrderPayment>(this);
 }
