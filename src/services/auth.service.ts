@@ -30,11 +30,10 @@ class AuthService {
 	}
 
 	async loginHandle(req: FastifyRequest, res: FastifyResponse) {
-		const { email, password }: LoginRequest = req.body as LoginRequest;
-
-		const user = await userRepository.findOneUser({
-			email
-		});
+		const { email, phone, password }: LoginRequest = req.body as LoginRequest;
+		const user = await userRepository.findOneUser(
+			email ? { email } : { phone }
+		);
 
 		const respose = new ResponseModel(res);
 
@@ -53,14 +52,14 @@ class AuthService {
 			req.body as RegisterRequest;
 
 		const user = await userRepository.findOneUser({
-			email
+			$or: [{ email: email || undefined }, { phone: phone || undefined }]
 		});
 
 		const respose = new ResponseModel(res);
 
 		if (user) {
 			respose.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
-			respose.message = 'Email exist';
+			respose.message = 'Email or phone exist';
 			return respose.send();
 		}
 
