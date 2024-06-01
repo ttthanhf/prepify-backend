@@ -20,6 +20,11 @@ const envSchemas = S.object()
 	.prop('MAIL_PASSWORD', S.string().required())
 	.prop('MAIL_EXPIRE', S.string().required())
 	.prop('MAIL_REDIRECT', S.string().required())
+	.prop('S3_BUCKET', S.string().required())
+	.prop('S3_ID', S.string().required())
+	.prop('S3_KEY', S.string().required())
+	.prop('S3_REGION', S.string().required())
+	.prop('S3_END_POINT', S.string().required())
 	.valueOf();
 
 export default envSchemas;
