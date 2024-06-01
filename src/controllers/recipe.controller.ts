@@ -8,6 +8,9 @@ class RecipeController {
 	async updateRecipe(req: FastifyRequest, res: FastifyResponse) {
 		return recipeService.updateRecipeHandle(req, res);
 	}
+	async getRecipe(req: FastifyRequest, res: FastifyResponse) {
+		return recipeService.getRecipeHandle(req, res);
+	}
 }
 
 export default new RecipeController();

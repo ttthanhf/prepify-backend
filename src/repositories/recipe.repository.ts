@@ -14,6 +14,14 @@ class RecipeRepository {
 	async findOneRecipe(field: FilterQuery<Recipe>) {
 		return await mikroUtil.em.findOne(Recipe, field);
 	}
+
+	async findRecipe(field: FilterQuery<Recipe>) {
+		return await mikroUtil.em.find(Recipe, field);
+	}
+
+	async findAllRecipe() {
+		return await mikroUtil.em.findAll(Recipe);
+	}
 }
 
 export default new RecipeRepository();

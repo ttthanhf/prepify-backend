@@ -9,6 +9,7 @@ export default async function recipeRoute(
 	options: unknown,
 	next: unknown
 ) {
+	app.get('/recipes', recipeController.getRecipe);
 	app.post(
 		'/recipes',
 		{
