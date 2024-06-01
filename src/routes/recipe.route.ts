@@ -22,4 +22,17 @@ export default async function recipeRoute(
 		},
 		recipeController.createRecipe
 	);
+	app.put(
+		'/recipes/:recipe_id',
+		{
+			schema: {
+				consumes: ['multipart/form-data']
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR, Role.ADMIN]
+			}
+		},
+		recipeController.updateRecipe
+	);
 }

@@ -38,13 +38,14 @@ class RecipeService {
 		}
 
 		const newRecipe = new Recipe();
-		objectUtil.mapObjToEntity(newRecipe, recipeObj);
 
 		validateUtil.validate(
 			res,
 			recipeSchemasModel.recipeCreateObj.valueOf(),
 			recipeObj
 		);
+
+		objectUtil.mapObjToEntity(newRecipe, recipeObj);
 
 		await recipeRepository.createNewRecipe(newRecipe);
 		for (const file of files) {
@@ -60,6 +61,44 @@ class RecipeService {
 					'.-'
 			});
 		}
+
+		return response.send();
+	}
+
+	async updateRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { recipe_id }: any = req.params as Object;
+		const recipeObj = {} as Recipe;
+
+		const recipe = await recipeRepository.findOneRecipe({
+			id: recipe_id
+		});
+
+		const response = new ResponseModel(res);
+		if (!recipe) {
+			response.message = 'Recipe not found';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
+		for await (const part of req.parts()) {
+			if (part.type == 'field') {
+				objectUtil.setProperty(
+					recipeObj,
+					part.fieldname as keyof Recipe,
+					stringUtil.tryParseStringToJSON(String(part.value))
+				);
+			}
+		}
+
+		validateUtil.validate(
+			res,
+			recipeSchemasModel.recipeUpdateObj.valueOf(),
+			recipeObj
+		);
+
+		objectUtil.mapObjToEntity(recipe, recipeObj);
+
+		await recipeRepository.updateRecipe(recipe);
 
 		return response.send();
 	}

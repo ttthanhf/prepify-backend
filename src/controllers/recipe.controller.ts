@@ -5,6 +5,9 @@ class RecipeController {
 	async createRecipe(req: FastifyRequest, res: FastifyResponse) {
 		return recipeService.createRecipeHandle(req, res);
 	}
+	async updateRecipe(req: FastifyRequest, res: FastifyResponse) {
+		return recipeService.updateRecipeHandle(req, res);
+	}
 }
 
 export default new RecipeController();
