@@ -1,4 +1,5 @@
 import { MultipartFile } from '@fastify/multipart';
+import { FilterQuery } from '@mikro-orm/core';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { Recipe } from '~models/entities/recipe.entity';
 import ResponseModel from '~models/responses/response.model';
@@ -100,6 +101,27 @@ class RecipeService {
 
 		await recipeRepository.updateRecipe(recipe);
 
+		return response.send();
+	}
+
+	async getRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+		const query = req.query as FilterQuery<Recipe>;
+
+		let recipe: any;
+		if (query) {
+			try {
+				recipe = await recipeRepository.findRecipe(
+					JSON.parse(JSON.stringify(query))
+				);
+			} catch (error) {
+				recipe = await recipeRepository.findAllRecipe();
+			}
+		} else {
+			recipe = await recipeRepository.findAllRecipe();
+		}
+
+		const response = new ResponseModel(res);
+		response.data = recipe;
 		return response.send();
 	}
 }
