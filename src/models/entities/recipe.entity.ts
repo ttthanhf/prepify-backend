@@ -36,4 +36,10 @@ export class Recipe {
 
 	@OneToMany('RecipeIngredient', 'recipe')
 	recipeIngredients = new Collection<RecipeIngredient>(this);
+
+	@Property()
+	time!: number;
+
+	@Property()
+	level!: string;
 }
