@@ -37,7 +37,41 @@ const recipeCreateSchema: FastifySchema = {
 	body: recipeCreateObj.valueOf()
 };
 
+const recipeUpdateObj = S.anyOf([
+	S.object().prop('name', S.string().required()),
+	S.object().prop(
+		'ingredients',
+		S.array()
+			.items(
+				S.object()
+					.prop('ingredient_id', S.number())
+					.prop('amount', S.number())
+					.prop('unit_id', S.number())
+			)
+			.required()
+	),
+	S.object().prop('category', S.number().required()),
+	S.object().prop('foodStyle', S.array().items(S.number()).required()),
+	S.object().prop('steps', S.string().required()),
+	S.object().prop(
+		'nutrition',
+		S.array()
+			.items(
+				S.object()
+					.prop('nutrition_id', S.number())
+					.prop('amount', S.number())
+					.prop('unit_id', S.number())
+			)
+			.required()
+	),
+	S.object().prop('images', S.array().items(S.string()).required()),
+	S.object().prop('time', S.number().required().description('Time cook')),
+	S.object().prop('video', S.string().required().description('URL youtube')),
+	S.object().prop('level', S.string().required())
+]);
+
 export default {
 	recipeCreateSchema,
-	recipeCreateObj
+	recipeCreateObj,
+	recipeUpdateObj
 };
