@@ -14,7 +14,7 @@ export default async function authRoute(
 		{
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
-				allowedRoles: [Role.CUSTOMER, Role.ADMIN]
+				allowedRoles: [Role.CUSTOMER, Role.ADMIN, Role.SHIPPER]
 			}
 		},
 		userController.getMe

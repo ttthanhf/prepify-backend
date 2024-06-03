@@ -8,13 +8,13 @@ import {
 	Property,
 	Rel
 } from '@mikro-orm/core';
-import { Customer } from './customer.entity';
-import { OrderDetail } from './order-detail.entity';
-import { OrderBatch } from './order-batch.entity';
-import { Payment } from './payment.entity';
+import { v4 as uuidv4 } from 'uuid';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { Area } from './area.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { Customer } from './customer.entity';
+import { OrderBatch } from './order-batch.entity';
+import { OrderDetail } from './order-detail.entity';
+import { OrderPayment } from './order-payment.entity';
 
 @Entity({ tableName: 'order' })
 export class Order {
@@ -39,9 +39,6 @@ export class Order {
 	@Property()
 	phone!: string;
 
-	@Property()
-	transactionId!: string; // optional in the future
-
 	@Enum(() => OrderStatus)
 	status!: OrderStatus;
 
@@ -54,8 +51,8 @@ export class Order {
 	@OneToMany('OrderBatch', 'order')
 	orderBatches = new Collection<OrderBatch>(this);
 
-	@ManyToOne({ entity: () => Payment })
-	payment!: Rel<Payment>;
+	@OneToMany('OrderPayment', 'order')
+	orderPayments = new Collection<OrderPayment>(this);
 
 	@ManyToOne({ entity: () => Area })
 	area!: Rel<Area>;

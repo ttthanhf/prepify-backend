@@ -6,7 +6,8 @@ import {
 	OneToMany,
 	OneToOne,
 	PrimaryKey,
-	Property
+	Property,
+	TinyIntType
 } from '@mikro-orm/core';
 import { Role } from '~constants/role.constant';
 import { Customer } from './customer.entity';
@@ -30,7 +31,7 @@ export class User {
 	dateOfBirth?: Date;
 
 	@Property()
-	phone!: string;
+	phone?: string;
 
 	@Property()
 	fullname!: string;
@@ -52,4 +53,7 @@ export class User {
 
 	@ManyToOne({ entity: () => Area })
 	area?: Rel<Area>;
+
+	@Property({ type: TinyIntType, columnType: 'tinyint(1)' })
+	gender?: boolean;
 }
