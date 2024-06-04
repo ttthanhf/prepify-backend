@@ -9,7 +9,7 @@ export class Customer {
 	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@OneToOne(() => User)
+	@OneToOne(() => User, (user) => user.customer)
 	user!: Relation<User>;
 
 	@OneToMany(

@@ -1,6 +1,7 @@
 import {
 	Column,
 	Entity,
+	JoinColumn,
 	ManyToMany,
 	ManyToOne,
 	OneToMany,
@@ -25,7 +26,7 @@ export class Recipe {
 	@Column()
 	steps!: string;
 
-	@ManyToOne(() => Category, (category) => category.id, { eager: true })
+	@ManyToOne(() => Category, (category) => category.id)
 	category!: Relation<Category>;
 
 	@ManyToMany(() => FoodStyle, (foodStyle) => foodStyle.recipes)
@@ -38,9 +39,11 @@ export class Recipe {
 		() => RecipeIngredient,
 		(recipeIngredient) => recipeIngredient.recipe
 	)
+	@JoinColumn()
 	recipeIngredients!: RecipeIngredient[];
 
 	@OneToMany(() => RecipeNutrition, (recipeNutrition) => recipeNutrition.recipe)
+	@JoinColumn()
 	recipeNutritions!: RecipeNutrition[];
 
 	@Column()

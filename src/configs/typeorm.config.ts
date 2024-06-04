@@ -16,6 +16,10 @@ import { Batch } from '~models/entities/batch.entity';
 import { OrderBatch } from '~models/entities/order-batch.entity';
 import { Payment } from '~models/entities/payment.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { OrderPayment } from '~models/entities/order-payment.entity';
+import { RecipeNutrition } from '~models/entities/recipe-nutrition.entity';
+import { Nutrition } from '~models/entities/nutrition.entity';
+import { Unit } from '~models/entities/unit.entity';
 
 const TYPEORM_CONFIG: DataSourceOptions = {
 	type: 'mariadb',
@@ -39,7 +43,11 @@ const TYPEORM_CONFIG: DataSourceOptions = {
 		RecipeIngredient,
 		OrderDetail,
 		Payment,
-		MealKit
+		MealKit,
+		OrderPayment,
+		RecipeNutrition,
+		Nutrition,
+		Unit
 	],
 	synchronize: false, //warning its will - with db - if y delete entity - db will delete it
 	logging: true,
