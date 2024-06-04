@@ -1,55 +1,58 @@
-import {
-	Collection,
-	Entity,
-	Enum,
-	ManyToOne,
-	OneToMany,
-	OneToOne,
-	PrimaryKey,
-	Property
-} from '@mikro-orm/core';
 import { Role } from '~constants/role.constant';
 import { Customer } from './customer.entity';
 import { Batch } from './batch.entity';
 import { Area } from './area.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { Rel } from '@mikro-orm/core';
+import {
+	Column,
+	Entity,
+	ManyToOne,
+	OneToMany,
+	OneToOne,
+	PrimaryColumn,
+	Relation
+} from 'typeorm';
 
-@Entity({ tableName: 'user' })
+@Entity({ name: 'user' })
 export class User {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@Property({ hidden: true })
+	@Column()
 	password!: string;
 
-	@Property()
+	@Column()
 	email!: string;
 
-	@Property()
+	@Column({
+		type: 'date'
+	})
 	dateOfBirth?: Date;
 
-	@Property()
+	@Column()
 	phone!: string;
 
-	@Property()
+	@Column()
 	fullname!: string;
 
-	@Property()
+	@Column()
 	address?: string;
 
-	@Enum(() => Role)
+	@Column({
+		type: 'enum',
+		enum: Role
+	})
 	role!: Role;
 
-	@Property()
-	avatar?: string;
+	@Column()
+	avatar!: string;
 
-	@OneToOne({ entity: () => Customer })
-	customer?: Rel<Customer>;
+	@OneToOne(() => Customer)
+	customer?: Relation<Customer>;
 
-	@OneToMany('Batch', 'user')
-	batches = new Collection<Batch>(this);
+	@OneToMany(() => Batch, (batch) => batch.user)
+	batches!: Batch[];
 
-	@ManyToOne({ entity: () => Area })
-	area?: Rel<Area>;
+	@ManyToOne(() => Area, (area) => area.users)
+	area?: Relation<Area>;
 }

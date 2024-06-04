@@ -1,19 +1,19 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Rel } from '@mikro-orm/core';
+import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 import { Customer } from './customer.entity';
 import { Ingredient } from './ingredient.entity';
 import { v4 as uuidv4 } from 'uuid';
 
-@Entity({ tableName: 'customer_ingredient' })
+@Entity({ name: 'customer_ingredient' })
 export class CustomerIngredient {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@ManyToOne({ entity: () => Customer })
-	customer!: Rel<Customer>;
+	@ManyToOne(() => Customer, (customer) => customer.customerIngredients)
+	customer!: Relation<Customer>;
 
-	@ManyToOne({ entity: () => Ingredient })
-	ingredient!: Rel<Ingredient>;
+	@ManyToOne(() => Ingredient, (ingredient) => ingredient.customerIngredients)
+	ingredient!: Relation<Ingredient>;
 
-	@Property()
+	@Column()
 	note?: string; // optional field
 }

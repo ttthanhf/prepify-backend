@@ -1,52 +1,52 @@
-import {
-	Collection,
-	Entity,
-	OneToMany,
-	PrimaryKey,
-	Property
-} from '@mikro-orm/core';
 import { RecipeIngredient } from './recipe-ingredient.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { CustomerIngredient } from './customer-ingredient.entity';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 
-@Entity({ tableName: 'ingredient' })
+@Entity({ name: 'ingredient' })
 export class Ingredient {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@Property()
+	@Column()
 	name!: string;
 
-	@Property()
+	@Column()
 	category!: string;
 
-	@Property()
+	@Column()
 	portionSize!: number;
 
-	@Property()
+	@Column()
 	calories!: number;
 
-	@Property()
+	@Column()
 	carbohydrate!: number;
 
-	@Property()
+	@Column()
 	dietaryFiber!: number;
 
-	@Property()
+	@Column()
 	protein!: number;
 
-	@Property()
+	@Column()
 	fat!: number;
 
-	@Property()
+	@Column()
 	price!: number;
 
-	@Property()
+	@Column()
 	description?: string;
 
-	@OneToMany('RecipeIngredient', 'ingredient')
-	recipeIngredients = new Collection<RecipeIngredient>(this);
+	@OneToMany(
+		() => RecipeIngredient,
+		(recipeIngredient) => recipeIngredient.ingredient
+	)
+	recipeIngredients!: RecipeIngredient[];
 
-	@OneToMany('CustomerIngredient', 'ingredient')
-	customerIngredients = new Collection<CustomerIngredient>(this);
+	@OneToMany(
+		() => CustomerIngredient,
+		(customerIngredient) => customerIngredient.ingredient
+	)
+	customerIngredients!: CustomerIngredient[];
 }

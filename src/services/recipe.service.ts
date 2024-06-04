@@ -1,5 +1,4 @@
 import { MultipartFile } from '@fastify/multipart';
-import { FilterQuery } from '@mikro-orm/core';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { Recipe } from '~models/entities/recipe.entity';
 import ResponseModel from '~models/responses/response.model';
@@ -48,7 +47,7 @@ class RecipeService {
 
 		objectUtil.mapObjToEntity(newRecipe, recipeObj);
 
-		await recipeRepository.createNewRecipe(newRecipe);
+		await recipeRepository.create(newRecipe);
 		for (const file of files) {
 			await s3Util.uploadImage({
 				data: await file.toBuffer(),
@@ -70,7 +69,7 @@ class RecipeService {
 		const { recipe_id }: any = req.params as Object;
 		const recipeObj = {} as Recipe;
 
-		const recipe = await recipeRepository.findOneRecipe({
+		const recipe = await recipeRepository.findOneBy({
 			id: recipe_id
 		});
 
@@ -99,25 +98,25 @@ class RecipeService {
 
 		objectUtil.mapObjToEntity(recipe, recipeObj);
 
-		await recipeRepository.updateRecipe(recipe);
+		await recipeRepository.update(recipe);
 
 		return response.send();
 	}
 
 	async getRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
-		const query = req.query as FilterQuery<Recipe>;
+		const query = req.query;
 
-		let recipe: any;
+		let recipe: Recipe[];
 		if (query) {
 			try {
-				recipe = await recipeRepository.findRecipe(
+				recipe = await recipeRepository.findBy(
 					JSON.parse(JSON.stringify(query))
 				);
 			} catch (error) {
-				recipe = await recipeRepository.findAllRecipe();
+				recipe = await recipeRepository.findAll();
 			}
 		} else {
-			recipe = await recipeRepository.findAllRecipe();
+			recipe = await recipeRepository.findAll();
 		}
 
 		const response = new ResponseModel(res);

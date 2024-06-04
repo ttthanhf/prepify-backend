@@ -20,7 +20,7 @@
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"alwaysStrict": true,
-		"exactOptionalPropertyTypes": false, //must be false or mikro-orm will break down
+		"exactOptionalPropertyTypes": false, //note
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
 		"noImplicitReturns": true,

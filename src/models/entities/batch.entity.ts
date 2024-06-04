@@ -1,31 +1,32 @@
-import {
-	Collection,
-	Entity,
-	ManyToOne,
-	OneToMany,
-	PrimaryKey,
-	Property
-} from '@mikro-orm/core';
 import { User } from './user.entity';
 import { Area } from './area.entity';
 import { OrderBatch } from './order-batch.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { Rel } from '@mikro-orm/core';
+import {
+	Column,
+	Entity,
+	ManyToOne,
+	OneToMany,
+	PrimaryColumn,
+	Relation
+} from 'typeorm';
 
-@Entity({ tableName: 'batch' })
+@Entity({ name: 'batch' })
 export class Batch {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@Property()
+	@Column({
+		type: 'date'
+	})
 	datetime!: Date;
 
-	@ManyToOne({ entity: () => User })
-	user!: Rel<User>;
+	@ManyToOne(() => User, (user) => user.batches)
+	user!: Relation<User>;
 
-	@ManyToOne({ entity: () => Area })
-	area!: Rel<Area>;
+	@ManyToOne(() => Area, (area) => area.batches)
+	area!: Relation<Area>;
 
-	@OneToMany('OrderBatch', 'batch')
-	orderBatches = new Collection<OrderBatch>(this);
+	@OneToMany(() => OrderBatch, (orderBatch) => orderBatch.batch)
+	orderBatches!: OrderBatch[];
 }

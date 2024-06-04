@@ -8,6 +8,7 @@ class RedisUtil {
 	constructor() {
 		if (!this.redis) {
 			this.redis = new Redis();
+			console.log('Redis init successfully !');
 		}
 	}
 

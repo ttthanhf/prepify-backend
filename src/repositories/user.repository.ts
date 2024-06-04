@@ -1,18 +1,9 @@
 import { User } from '~entities/user.entity';
-import mikroUtil from '~utils/mikro.util';
-import { FilterQuery } from '@mikro-orm/mariadb';
+import { BaseRepository } from './base.repository';
 
-class UserRepository {
-	async findOneUser(field: FilterQuery<User>) {
-		return await mikroUtil.em.findOne(User, field);
-	}
-
-	async createNewUser(user: User) {
-		return await mikroUtil.em.persistAndFlush(user);
-	}
-
-	async updateUser(user: User) {
-		return await this.createNewUser(user);
+class UserRepository extends BaseRepository<User> {
+	constructor() {
+		super(User);
 	}
 }
 

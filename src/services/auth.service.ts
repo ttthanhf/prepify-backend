@@ -31,9 +31,7 @@ class AuthService {
 
 	async loginHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { email, phone, password }: LoginRequest = req.body as LoginRequest;
-		const user = await userRepository.findOneUser(
-			email ? { email } : { phone }
-		);
+		const user = await userRepository.findOneBy(email ? { email } : { phone });
 
 		const respose = new ResponseModel(res);
 
@@ -51,8 +49,8 @@ class AuthService {
 		const { phone, password, email, fullname }: RegisterRequest =
 			req.body as RegisterRequest;
 
-		const user = await userRepository.findOneUser({
-			$or: [{ email: email || undefined }, { phone: phone || undefined }]
+		const user = await userRepository.find({
+			where: [{ email: email || undefined }, { phone: phone || undefined }]
 		});
 
 		const respose = new ResponseModel(res);
@@ -69,7 +67,7 @@ class AuthService {
 		newUser.fullname = fullname;
 		newUser.password = await bcryptUtil.hash(password);
 		newUser.role = Role.CUSTOMER;
-		await userRepository.createNewUser(newUser);
+		await userRepository.create(newUser);
 
 		respose.message = 'Created new user';
 		respose.data = this.getAccessToken(newUser);
@@ -91,7 +89,7 @@ class AuthService {
 
 		const response = new ResponseModel(res);
 
-		const user = await userRepository.findOneUser({
+		const user = await userRepository.findOneBy({
 			email
 		});
 
@@ -106,7 +104,7 @@ class AuthService {
 		newUser.role = Role.CUSTOMER;
 		newUser.email = email;
 		newUser.avatar = picture;
-		await userRepository.createNewUser(newUser);
+		await userRepository.create(newUser);
 
 		response.message = 'Created new user';
 		response.data = this.getAccessToken(newUser);
@@ -123,7 +121,7 @@ class AuthService {
 			return response.send();
 		}
 
-		const user = await userRepository.findOneUser({
+		const user = await userRepository.findOneBy({
 			email
 		});
 
@@ -190,7 +188,7 @@ class AuthService {
 			return response.send();
 		}
 
-		const user = await userRepository.findOneUser({
+		const user = await userRepository.findOneBy({
 			id: info.userId
 		});
 
@@ -202,7 +200,7 @@ class AuthService {
 
 		user.password = await bcryptUtil.hash(password);
 		response.message = 'Reset password successfully';
-		userRepository.updateUser(user);
+		userRepository.update(user);
 		redisUtil.removeTokenRecoveryPasswordWhiteList(token);
 		return response.send();
 	}

@@ -1,19 +1,19 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Rel } from '@mikro-orm/core';
 import { Recipe } from './recipe.entity';
 import { Ingredient } from './ingredient.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
-@Entity({ tableName: 'recipe_ingredient' })
+@Entity({ name: 'recipe_ingredient' })
 export class RecipeIngredient {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@ManyToOne({ entity: () => Recipe })
-	recipe!: Rel<Recipe>;
+	@ManyToOne(() => Recipe, (recipe) => recipe.recipeIngredients)
+	recipe!: Relation<Recipe>;
 
-	@ManyToOne({ entity: () => Ingredient })
-	ingredient!: Rel<Ingredient>;
+	@ManyToOne(() => Ingredient, (ingredient) => ingredient.recipeIngredients)
+	ingredient!: Relation<Ingredient>;
 
-	@Property()
+	@Column()
 	amount!: number;
 }

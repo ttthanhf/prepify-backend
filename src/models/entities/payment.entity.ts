@@ -1,21 +1,15 @@
-import {
-	Collection,
-	Entity,
-	OneToMany,
-	PrimaryKey,
-	Property
-} from '@mikro-orm/core';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Order } from './order.entity';
 import { v4 as uuidv4 } from 'uuid';
 
-@Entity({ tableName: 'payment' })
+@Entity({ name: 'payment' })
 export class Payment {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@Property()
+	@Column()
 	name!: string;
 
-	@OneToMany('Order', 'payment')
-	orderPayments = new Collection<Order>(this);
+	@OneToMany(() => Order, (order) => order.payment)
+	orderPayments!: Order[];
 }

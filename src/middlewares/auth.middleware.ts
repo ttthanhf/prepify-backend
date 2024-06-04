@@ -24,7 +24,7 @@ async function requireToken(req: FastifyRequest, res: FastifyResponse) {
 async function requirePhone(req: FastifyRequest, res: FastifyResponse) {
 	const token = headerUtil.extractAuthorization(req.headers);
 	const info = jwtUtil.verify(token);
-	const user = await userRepository.findOneUser({
+	const user = await userRepository.findOneBy({
 		id: info.userId
 	});
 	if (!user?.phone) {
@@ -46,7 +46,7 @@ async function verifyRole(
 	const response = new ResponseModel(res);
 
 	if (allowedRoles && token) {
-		const user = await userRepository.findOneUser({
+		const user = await userRepository.findOneBy({
 			id: info.userId
 		});
 		const userRole = user!.role;
