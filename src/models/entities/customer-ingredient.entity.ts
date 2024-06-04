@@ -1,15 +1,30 @@
-import { Entity, ManyToOne, Property, Rel } from '@mikro-orm/core';
+import {
+	Column,
+	Entity,
+	JoinColumn,
+	ManyToOne,
+	PrimaryColumn,
+	Relation
+} from 'typeorm';
 import { Customer } from './customer.entity';
 import { Ingredient } from './ingredient.entity';
 
-@Entity({ tableName: 'customer_ingredient' })
+@Entity({ name: 'customer_ingredient' })
 export class CustomerIngredient {
-	@ManyToOne({ entity: () => Customer, primary: true })
-	customer!: Rel<Customer>;
+	@PrimaryColumn()
+	customer_id!: string;
 
-	@ManyToOne({ entity: () => Ingredient, primary: true })
-	ingredient!: Rel<Ingredient>;
+	@PrimaryColumn()
+	ingredient_id!: string;
 
-	@Property()
+	@ManyToOne(() => Customer, (customer) => customer.customerIngredients)
+	@JoinColumn({ name: 'customer_id' })
+	customer!: Relation<Customer>;
+
+	@ManyToOne(() => Ingredient, (ingredient) => ingredient.customerIngredients)
+	@JoinColumn({ name: 'ingredient_id' })
+	ingredient!: Relation<Ingredient>;
+
+	@Column()
 	note?: string; // optional field
 }

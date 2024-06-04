@@ -1,19 +1,28 @@
-import { Entity, Enum, ManyToOne, Property, Rel } from '@mikro-orm/core';
-import { OrderStatus } from '~constants/orderstatus.constant';
-import { Batch } from './batch.entity';
 import { Order } from './order.entity';
+import { Batch } from './batch.entity';
+import { OrderStatus } from '~constants/orderstatus.constant';
+import { v4 as uuidv4 } from 'uuid';
+import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
-@Entity({ tableName: 'order_batch' })
+@Entity({ name: 'order_batch' })
 export class OrderBatch {
-	@ManyToOne({ entity: () => Order, primary: true })
-	order!: Rel<Order>;
+	@PrimaryColumn({ type: 'uuid' })
+	id: string = uuidv4();
 
-	@ManyToOne({ entity: () => Batch, primary: true })
-	batch!: Rel<Batch>;
+	@ManyToOne(() => Order, (order) => order.orderBatches)
+	order!: Relation<Order>;
 
-	@Enum(() => OrderStatus)
+	@ManyToOne(() => Batch, (batch) => batch.orderBatches)
+	batch!: Relation<Batch>;
+
+	@Column({
+		type: 'enum',
+		enum: OrderStatus
+	})
 	status!: OrderStatus;
 
-	@Property()
+	@Column({
+		type: 'date'
+	})
 	datetime?: Date;
 }

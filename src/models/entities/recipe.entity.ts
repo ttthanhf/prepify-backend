@@ -1,45 +1,56 @@
 import {
-	Collection,
+	Column,
 	Entity,
+	JoinColumn,
 	ManyToMany,
 	ManyToOne,
 	OneToMany,
-	PrimaryKey,
-	Property,
-	Rel
-} from '@mikro-orm/core';
+	PrimaryColumn,
+	Relation
+} from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { Category } from './category.entity';
 import { FoodStyle } from './food-style.entity';
 import { MealKit } from './meal-kit.entity';
 import { RecipeIngredient } from './recipe-ingredient.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { RecipeNutrition } from './recipe-nutrition.entity';
 
-@Entity({ tableName: 'recipe' })
+@Entity({ name: 'recipe' })
 export class Recipe {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn()
 	id: string = uuidv4();
 
-	@Property()
+	@Column()
 	name!: string;
 
-	@Property()
+	@Column()
 	steps!: string;
 
-	@ManyToOne({ entity: () => Category })
-	category!: Rel<Category>;
+	@ManyToOne(() => Category, (category) => category.id)
+	category!: Relation<Category>;
 
-	@ManyToMany({ entity: () => FoodStyle, inversedBy: 'recipes' })
-	foodStyles = new Collection<FoodStyle>(this);
+	@ManyToMany(() => FoodStyle, (foodStyle) => foodStyle.recipes)
+	foodStyles!: FoodStyle[];
 
-	@OneToMany('MealKit', 'recipe')
-	mealKits = new Collection<MealKit>(this);
+	@OneToMany(() => MealKit, (mealKit) => mealKit.recipe)
+	mealKits!: MealKit[];
 
-	@OneToMany('RecipeIngredient', 'recipe')
-	recipeIngredients = new Collection<RecipeIngredient>(this);
+	@OneToMany(
+		() => RecipeIngredient,
+		(recipeIngredient) => recipeIngredient.recipe
+	)
+	@JoinColumn()
+	recipeIngredients!: RecipeIngredient[];
 
-	@Property()
+	@OneToMany(() => RecipeNutrition, (recipeNutrition) => recipeNutrition.recipe)
+	@JoinColumn()
+	recipeNutritions!: RecipeNutrition[];
+
+	@Column()
 	time!: number;
 
-	@Property()
+	@Column()
 	level!: string;
+
+	images: Array<string> = [];
 }

@@ -1,32 +1,26 @@
-import {
-	Collection,
-	Entity,
-	OneToMany,
-	PrimaryKey,
-	Property
-} from '@mikro-orm/core';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Batch } from './batch.entity';
 import { Order } from './order.entity';
 import { User } from './user.entity';
 import { v4 as uuidv4 } from 'uuid';
 
-@Entity({ tableName: 'area' })
+@Entity({ name: 'area' })
 export class Area {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@Property()
+	@Column()
 	name!: string;
 
-	@Property()
+	@Column()
 	price!: number;
 
-	@OneToMany('Batch', 'area')
-	batches = new Collection<Batch>(this);
+	@OneToMany(() => Batch, (batch) => batch.area)
+	batches!: Batch[];
 
-	@OneToMany('Order', 'area')
-	orders = new Collection<Order>(this);
+	@OneToMany(() => Order, (order) => order.area)
+	orders!: Order[];
 
-	@OneToMany('User', 'area')
-	users = new Collection<User>(this);
+	@OneToMany(() => User, (user) => user.area)
+	users!: User[];
 }

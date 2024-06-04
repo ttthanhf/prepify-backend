@@ -1,24 +1,22 @@
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 import ResponseModel from '~models/responses/response.model';
-import { FilterQuery } from '@mikro-orm/core';
 import ingredientRepository from '~repositories/ingredient.repository';
-import { Ingredient } from '~models/entities/ingredient.entity';
 
 class IngredientService {
 	async getIngredientHandle(req: FastifyRequest, res: FastifyResponse) {
-		const query = req.query as FilterQuery<Ingredient>;
+		const query = req.query;
 
 		let ingredient: any;
 		if (query) {
 			try {
-				ingredient = await ingredientRepository.findIngredient(
+				ingredient = await ingredientRepository.findBy(
 					JSON.parse(JSON.stringify(query))
 				);
 			} catch (error) {
-				ingredient = await ingredientRepository.findAllIngredient();
+				ingredient = await ingredientRepository.findAll();
 			}
 		} else {
-			ingredient = await ingredientRepository.findAllIngredient();
+			ingredient = await ingredientRepository.findAll();
 		}
 
 		const response = new ResponseModel(res);

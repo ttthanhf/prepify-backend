@@ -1,19 +1,34 @@
-import { Entity, ManyToOne, Property, Rel } from '@mikro-orm/core';
+import {
+	Column,
+	Entity,
+	JoinColumn,
+	ManyToOne,
+	PrimaryColumn,
+	Relation
+} from 'typeorm';
 import { Nutrition } from './nutrition.entity';
 import { Recipe } from './recipe.entity';
 import { Unit } from './unit.entity';
 
-@Entity({ tableName: 'recipe_nutrition' })
+@Entity({ name: 'recipe_nutrition' })
 export class RecipeNutrition {
-	@ManyToOne({ entity: () => Recipe, primary: true })
-	recipe!: Rel<Recipe>;
+	@PrimaryColumn()
+	recipe_id!: string;
 
-	@ManyToOne({ entity: () => Nutrition, primary: true })
-	nutrition!: Rel<Nutrition>;
+	@PrimaryColumn()
+	nutrition_id!: string;
 
-	@Property()
+	@ManyToOne(() => Recipe, (recipe) => recipe.recipeNutritions)
+	@JoinColumn({ name: 'recipe_id' })
+	recipe!: Relation<Recipe>;
+
+	@ManyToOne(() => Nutrition, (nutrition) => nutrition.recipeNutritions)
+	@JoinColumn({ name: 'nutrition_id' })
+	nutrition!: Nutrition;
+
+	@Column()
 	amount!: number;
 
-	@ManyToOne({ entity: () => Unit })
-	unit!: Rel<Unit>;
+	@ManyToOne(() => Unit, (unit) => unit.recipeNutritions)
+	unit!: Relation<Unit>;
 }

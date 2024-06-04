@@ -1,34 +1,34 @@
-import {
-	Collection,
-	Entity,
-	ManyToOne,
-	OneToMany,
-	PrimaryKey,
-	Property,
-	Rel,
-	TinyIntType
-} from '@mikro-orm/core';
 import { Recipe } from './recipe.entity';
 import { OrderDetail } from './order-detail.entity';
 import { v4 as uuidv4 } from 'uuid';
+import {
+	Column,
+	Entity,
+	ManyToOne,
+	OneToMany,
+	PrimaryColumn,
+	Relation
+} from 'typeorm';
 
-@Entity({ tableName: 'meal_kit' })
+@Entity({ name: 'meal_kit' })
 export class MealKit {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@Property()
+	@Column()
 	serving!: number;
 
-	@Property()
+	@Column()
 	price!: number;
 
-	@Property({ type: TinyIntType, columnType: 'tinyint(1)' })
+	@Column({
+		type: 'boolean'
+	})
 	status!: boolean;
 
-	@ManyToOne({ entity: () => Recipe })
-	recipe!: Rel<Recipe>;
+	@ManyToOne(() => Recipe, (recipe) => recipe.mealKits)
+	recipe!: Relation<Recipe>;
 
-	@OneToMany('OrderDetail', 'mealKit')
-	orderDetails = new Collection<OrderDetail>(this);
+	@OneToMany(() => OrderDetail, (orderDetail) => orderDetail.mealKit)
+	orderDetails!: OrderDetail[];
 }

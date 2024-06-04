@@ -1,21 +1,15 @@
-import {
-	Collection,
-	Entity,
-	OneToMany,
-	PrimaryKey,
-	Property
-} from '@mikro-orm/core';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Recipe } from './recipe.entity';
 import { v4 as uuidv4 } from 'uuid';
 
-@Entity({ tableName: 'category' })
+@Entity({ name: 'category' })
 export class Category {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@Property()
+	@Column()
 	name!: string;
 
-	@OneToMany('Recipe', 'category')
-	recipes = new Collection<Recipe>(this);
+	@OneToMany(() => Recipe, (recipe) => recipe.category)
+	recipes!: Recipe[];
 }

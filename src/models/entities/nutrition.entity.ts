@@ -1,21 +1,18 @@
-import {
-	Collection,
-	Entity,
-	OneToMany,
-	PrimaryKey,
-	Property
-} from '@mikro-orm/core';
 import { v4 as uuidv4 } from 'uuid';
 import { RecipeNutrition } from './recipe-nutrition.entity';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 
-@Entity({ tableName: 'nutrition' })
+@Entity({ name: 'nutrition' })
 export class Nutrition {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@Property()
+	@Column()
 	name!: string;
 
-	@OneToMany('RecipeNutrition', 'nutrition')
-	recipeNutritions = new Collection<RecipeNutrition>(this);
+	@OneToMany(
+		() => RecipeNutrition,
+		(recipeNutrition) => recipeNutrition.nutrition
+	)
+	recipeNutritions!: RecipeNutrition[];
 }

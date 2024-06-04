@@ -1,59 +1,69 @@
-import {
-	Collection,
-	Entity,
-	Enum,
-	ManyToOne,
-	OneToMany,
-	PrimaryKey,
-	Property,
-	Rel
-} from '@mikro-orm/core';
-import { v4 as uuidv4 } from 'uuid';
+import { Customer } from './customer.entity';
+import { OrderDetail } from './order-detail.entity';
+import { OrderBatch } from './order-batch.entity';
+import { Payment } from './payment.entity';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { Area } from './area.entity';
-import { Customer } from './customer.entity';
-import { OrderBatch } from './order-batch.entity';
-import { OrderDetail } from './order-detail.entity';
+import { v4 as uuidv4 } from 'uuid';
+import {
+	Column,
+	Entity,
+	ManyToOne,
+	OneToMany,
+	PrimaryColumn,
+	Relation
+} from 'typeorm';
 import { OrderPayment } from './order-payment.entity';
 
-@Entity({ tableName: 'order' })
+@Entity({ name: 'order' })
 export class Order {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@Property()
+	@Column()
 	address!: string;
 
-	@Property()
+	@Column({
+		type: 'date'
+	})
 	datetime!: Date;
 
-	@Property()
+	@Column()
 	totalPrice!: number;
 
-	@Property()
+	@Column()
 	feedback?: string;
 
-	@Property()
+	@Column()
 	rate?: number;
 
-	@Property()
+	@Column()
 	phone!: string;
 
-	@Enum(() => OrderStatus)
+	@Column()
+	transactionId!: string; // optional in the future
+
+	@Column({
+		type: 'enum',
+		enum: OrderStatus
+	})
 	status!: OrderStatus;
 
-	@ManyToOne({ entity: () => Customer })
-	customer!: Rel<Customer>;
+	@ManyToOne(() => Customer, (customer) => customer.orders)
+	customer!: Relation<Customer>;
 
-	@OneToMany('OrderDetail', 'order')
-	orderDetails = new Collection<OrderDetail>(this);
+	@OneToMany(() => OrderDetail, (orderDetail) => orderDetail.order)
+	orderDetails!: OrderDetail[];
 
-	@OneToMany('OrderBatch', 'order')
-	orderBatches = new Collection<OrderBatch>(this);
+	@OneToMany(() => OrderBatch, (orderBatch) => orderBatch.order)
+	orderBatches!: OrderBatch[];
 
-	@OneToMany('OrderPayment', 'order')
-	orderPayments = new Collection<OrderPayment>(this);
+	@ManyToOne(() => Payment, (payment) => payment.orderPayments)
+	payment!: Relation<Payment>;
 
-	@ManyToOne({ entity: () => Area })
-	area!: Rel<Area>;
+	@OneToMany(() => OrderPayment, (orderPayment) => orderPayment.order)
+	orderPayments!: OrderPayment[];
+
+	@ManyToOne(() => Area, (area) => area.orders)
+	area!: Relation<Area>;
 }

@@ -1,22 +1,22 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Rel } from '@mikro-orm/core';
 import { Order } from './order.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { Payment } from './payment.entity';
+import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
-@Entity({ tableName: 'order_payment' })
+@Entity({ name: 'order_payment' })
 export class OrderPayment {
-	@PrimaryKey({ type: 'uuid' })
+	@PrimaryColumn({ type: 'uuid' })
 	id: string = uuidv4();
 
-	@ManyToOne({ entity: () => Order })
-	order!: Rel<Order>;
+	@ManyToOne(() => Order, (order) => order.orderPayments)
+	order!: Relation<Order>;
 
-	@ManyToOne({ entity: () => Payment })
-	payment!: Rel<Payment>;
+	@ManyToOne(() => Payment, (payment) => payment.orderPayments)
+	payment!: Relation<Payment>;
 
-	@Property()
+	@Column()
 	totalPrice!: number;
 
-	@Property()
+	@Column()
 	transactionId?: string;
 }
