@@ -13,6 +13,7 @@ import {
 	PrimaryColumn,
 	Relation
 } from 'typeorm';
+import { OrderPayment } from './order-payment.entity';
 
 @Entity({ name: 'order' })
 export class Order {
@@ -59,6 +60,9 @@ export class Order {
 
 	@ManyToOne(() => Payment, (payment) => payment.orderPayments)
 	payment!: Relation<Payment>;
+
+	@OneToMany(() => OrderPayment, (orderPayment) => orderPayment.order)
+	orderPayments!: OrderPayment[];
 
 	@ManyToOne(() => Area, (area) => area.orders)
 	area!: Relation<Area>;

@@ -12,6 +12,7 @@ import { Category } from './category.entity';
 import { FoodStyle } from './food-style.entity';
 import { MealKit } from './meal-kit.entity';
 import { RecipeIngredient } from './recipe-ingredient.entity';
+import { RecipeNutrition } from './recipe-nutrition.entity';
 
 @Entity({ name: 'recipe' })
 export class Recipe {
@@ -38,6 +39,9 @@ export class Recipe {
 		(recipeIngredient) => recipeIngredient.recipe
 	)
 	recipeIngredients!: RecipeIngredient[];
+
+	@OneToMany(() => RecipeNutrition, (recipeNutrition) => recipeNutrition.recipe)
+	recipeNutritions!: RecipeNutrition[];
 
 	@Column()
 	time!: number;

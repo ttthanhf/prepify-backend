@@ -1,7 +1,15 @@
 import { RecipeIngredient } from './recipe-ingredient.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { CustomerIngredient } from './customer-ingredient.entity';
-import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+	Column,
+	Entity,
+	ManyToOne,
+	OneToMany,
+	PrimaryColumn,
+	Relation
+} from 'typeorm';
+import { Unit } from './unit.entity';
 
 @Entity({ name: 'ingredient' })
 export class Ingredient {
@@ -49,4 +57,7 @@ export class Ingredient {
 		(customerIngredient) => customerIngredient.ingredient
 	)
 	customerIngredients!: CustomerIngredient[];
+
+	@ManyToOne(() => Unit, (unit) => unit.recipeIngredients)
+	unit!: Relation<Unit>;
 }

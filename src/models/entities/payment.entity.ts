@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
-import { Order } from './order.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { OrderPayment } from './order-payment.entity';
 
 @Entity({ name: 'payment' })
 export class Payment {
@@ -10,6 +10,6 @@ export class Payment {
 	@Column()
 	name!: string;
 
-	@OneToMany(() => Order, (order) => order.payment)
-	orderPayments!: Order[];
+	@OneToMany(() => OrderPayment, (orderPayment) => orderPayment.payment)
+	orderPayments!: OrderPayment[];
 }
