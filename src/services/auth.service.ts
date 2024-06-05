@@ -111,7 +111,8 @@ class AuthService {
 		return response.send();
 	}
 	async forgotPasswordHandle(req: FastifyRequest, res: FastifyResponse) {
-		const { email }: ForgotPasswordRequest = req.body as ForgotPasswordRequest;
+		const { email, redirect_url }: ForgotPasswordRequest =
+			req.body as ForgotPasswordRequest;
 
 		const response = new ResponseModel(res);
 
@@ -139,7 +140,7 @@ class AuthService {
 			envConfig.MAIL_EXPIRE
 		);
 
-		mailUtil.sendMailRecoveryPassword(user.email, access_token);
+		mailUtil.sendMailRecoveryPassword(user.email, redirect_url, access_token);
 		await redisUtil.setEmailRecoveryWhiteList(user.email);
 		await redisUtil.setTokenRecoveryPasswordWhiteList(access_token);
 		response.message = 'Sent email';

@@ -17,6 +17,7 @@ export interface GoogleOauth2Request {
 
 export interface ForgotPasswordRequest {
 	email: string;
+	redirect_url: string;
 }
 
 export interface ResetPasswordRequest {

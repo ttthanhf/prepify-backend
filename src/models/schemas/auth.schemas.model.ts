@@ -34,10 +34,21 @@ const googleOauth2Schemas: FastifySchema = {
 	body: googleOauth2Obj.valueOf()
 };
 
-const forgotPasswordObj = S.object().prop(
-	'email',
-	S.string().required().pattern(Pattern.EMAIL_REGEX).default('qwe123@gmail.com')
-);
+const forgotPasswordObj = S.object()
+	.prop(
+		'email',
+		S.string()
+			.required()
+			.pattern(Pattern.EMAIL_REGEX)
+			.default('qwe123@gmail.com')
+	)
+	.prop(
+		'redirect_url',
+		S.string()
+			.required()
+			.pattern(Pattern.URL_REGEX)
+			.default('http://localhost:3000/reset-password')
+	);
 
 const forgotPasswordSchemas: FastifySchema = {
 	body: forgotPasswordObj.valueOf()
