@@ -1,7 +1,6 @@
 import nodemailer, { Transporter } from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import envConfig from '~configs/env.config';
 import mailConfig from '~configs/mail.config';
 
 class EmailUtil {
@@ -16,7 +15,7 @@ class EmailUtil {
 	sendMail(opts: Mail.Options) {
 		this.transporter.sendMail(opts);
 	}
-	sendMailRecoveryPassword(targetMail: string, accessToken: string) {
+	sendMailRecoveryPassword(targetMail: string, redirectUrl: string) {
 		this.sendMail({
 			to: targetMail,
 			subject: 'Khôi phục mật khẩu Prepify',
@@ -42,7 +41,7 @@ class EmailUtil {
 					Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình. Vui lòng nhấp vào nút bên dưới để đặt lại mật khẩu:
 					</p>
 					<a
-					href="${envConfig.MAIL_REDIRECT + accessToken}"
+					href="${redirectUrl}"
 					style="
 						display: block;
 						width: 200px;

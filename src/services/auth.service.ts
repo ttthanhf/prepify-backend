@@ -111,6 +111,7 @@ class AuthService {
 		return response.send();
 	}
 	async forgotPasswordHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { 'user-agent': userAgent } = req.headers;
 		const { email }: ForgotPasswordRequest = req.body as ForgotPasswordRequest;
 
 		const response = new ResponseModel(res);
@@ -131,6 +132,10 @@ class AuthService {
 			return response.send();
 		}
 
+		const redirectBaseUrl = userAgent!.includes('Android')
+			? envConfig.MAIL_REDIRECT_MOBILE
+			: envConfig.MAIL_REDIRECT;
+
 		const access_token = jwtUtil.sign(
 			{
 				userId: user.id,
@@ -139,7 +144,10 @@ class AuthService {
 			envConfig.MAIL_EXPIRE
 		);
 
-		mailUtil.sendMailRecoveryPassword(user.email, access_token);
+		mailUtil.sendMailRecoveryPassword(
+			user.email,
+			redirectBaseUrl + access_token
+		);
 		await redisUtil.setEmailRecoveryWhiteList(user.email);
 		await redisUtil.setTokenRecoveryPasswordWhiteList(access_token);
 		response.message = 'Sent email';
