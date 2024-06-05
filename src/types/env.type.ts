@@ -19,6 +19,7 @@ export interface EnvConfig {
 	MAIL_PASSWORD: string;
 	MAIL_EXPIRE: string;
 	MAIL_REDIRECT: string;
+	MAIL_REDIRECT_MOBILE: string;
 	S3_BUCKET: string;
 	S3_ID: string;
 	S3_KEY: string;
