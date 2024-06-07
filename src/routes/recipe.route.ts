@@ -3,13 +3,20 @@ import authMiddleware from '~middlewares/auth.middleware';
 import { Fastify } from '~types/fastify.type';
 import { Role } from '~constants/role.constant';
 import recipeController from '~controllers/recipe.controller';
+import { recipeQueryGetRequestSchema } from '~models/schemas/recipe.schemas.model';
 
 export default async function recipeRoute(
 	app: Fastify,
 	options: unknown,
 	next: unknown
 ) {
-	app.get('/recipes', recipeController.getRecipe);
+	app.get(
+		'/recipes',
+		{
+			schema: recipeQueryGetRequestSchema
+		},
+		recipeController.getRecipe
+	);
 	app.post(
 		'/recipes',
 		{

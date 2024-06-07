@@ -2,6 +2,7 @@ import {
 	Column,
 	Entity,
 	JoinColumn,
+	JoinTable,
 	ManyToMany,
 	ManyToOne,
 	OneToMany,
@@ -26,10 +27,19 @@ export class Recipe {
 	@Column()
 	steps!: string;
 
+	@Column({
+		type: 'datetime',
+		default: new Date()
+	})
+	createdAt: Date = new Date();
+
 	@ManyToOne(() => Category, (category) => category.id)
 	category!: Relation<Category>;
 
 	@ManyToMany(() => FoodStyle, (foodStyle) => foodStyle.recipes)
+	@JoinTable({
+		name: 'recipe_style'
+	})
 	foodStyles!: FoodStyle[];
 
 	@OneToMany(() => MealKit, (mealKit) => mealKit.recipe)

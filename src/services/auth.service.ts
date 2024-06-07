@@ -55,7 +55,7 @@ class AuthService {
 
 		const respose = new ResponseModel(res);
 
-		if (user) {
+		if (user.length != 0) {
 			respose.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			respose.message = 'Email or phone exist';
 			return respose.send();

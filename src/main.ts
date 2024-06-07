@@ -4,9 +4,12 @@ import AutoLoad from '@fastify/autoload';
 import path from 'path';
 import swaggerConfig from '~configs/swagger.config';
 import exceptionsHandle from './exceptions/exceptions';
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 require('dotenv').config();
 
-const app = fastify(fastifyConfig.fastifyInitConfig);
+const app = fastify(
+	fastifyConfig.fastifyInitConfig
+).withTypeProvider<TypeBoxTypeProvider>();
 exceptionsHandle(app);
 swaggerConfig(app);
 

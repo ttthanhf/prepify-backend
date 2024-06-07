@@ -46,4 +46,8 @@ export class BaseRepository<T extends ObjectLiteral> {
 	): Promise<T | null> {
 		return await this.db.findOneBy(opts);
 	}
+
+	getRepository() {
+		return this.db;
+	}
 }

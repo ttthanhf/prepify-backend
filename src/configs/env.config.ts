@@ -1,8 +1,7 @@
-import envSchemas from '~models/schemas/env.schemas.model';
+import envSchemas, { EnvSchema } from '~models/schemas/env.schemas.model';
 import envSchema from 'env-schema';
-import { EnvConfig } from '~types/env.type';
 
-const envConfig = envSchema<EnvConfig>({
+const envConfig = envSchema<EnvSchema>({
 	schema: envSchemas,
 	dotenv: true,
 	expandEnv: true
