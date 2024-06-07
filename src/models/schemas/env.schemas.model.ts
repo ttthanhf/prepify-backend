@@ -1,31 +1,34 @@
-import S from 'fluent-json-schema';
+import { Static, Type } from '@sinclair/typebox';
 
-const envSchemas = S.object()
-	.prop('SERVER_PORT', S.number().required())
-	.prop('SERVER_DOMAIN', S.string().required())
-	.prop('MARIADB_HOST', S.string().required())
-	.prop('MARIADB_USER', S.string().required())
-	.prop('MARIADB_PASSWORD', S.string().required())
-	.prop('MARIADB_DATABASE', S.string().required())
-	.prop('MARIADB_CLIENTURL', S.string().required())
-	.prop('MARIADB_PORT', S.number().required())
-	.prop('JWT_KEY', S.string().required())
-	.prop('JWT_EXPIRE', S.string().required())
-	.prop('JWT_ALGORITHM', S.string().required())
-	.prop('OAUTH2_GOOGLE_ID', S.string().required())
-	.prop('OAUTH2_GOOGLE_SECRET', S.string().required())
-	.prop('OAUTH2_GOOGLE_REDIRECT', S.string().required())
-	.prop('LOG_LEVEL', S.string().required())
-	.prop('MAIL_USER', S.string().required())
-	.prop('MAIL_PASSWORD', S.string().required())
-	.prop('MAIL_EXPIRE', S.string().required())
-	.prop('MAIL_REDIRECT', S.string().required())
-	.prop('MAIL_REDIRECT_MOBILE', S.string().required())
-	.prop('S3_BUCKET', S.string().required())
-	.prop('S3_ID', S.string().required())
-	.prop('S3_KEY', S.string().required())
-	.prop('S3_REGION', S.string().required())
-	.prop('S3_END_POINT', S.string().required())
-	.valueOf();
+const envSchema = Type.Object({
+	SERVER_PORT: Type.String(),
+	SERVER_DOMAIN: Type.String(),
+	MARIADB_HOST: Type.String(),
+	MARIADB_USER: Type.String(),
+	MARIADB_PASSWORD: Type.String(),
+	MARIADB_DATABASE: Type.String(),
+	MARIADB_CLIENTURL: Type.String(),
+	MARIADB_PORT: Type.String(),
+	JWT_KEY: Type.String(),
+	JWT_EXPIRE: Type.String(),
+	JWT_ALGORITHM: Type.String(),
+	OAUTH2_GOOGLE_ID: Type.String(),
+	OAUTH2_GOOGLE_SECRET: Type.String(),
+	OAUTH2_GOOGLE_REDIRECT: Type.String(),
+	MAIL_USER: Type.String(),
+	MAIL_PASSWORD: Type.String(),
+	MAIL_EXPIRE: Type.String(),
+	MAIL_REDIRECT: Type.String(),
+	MAIL_REDIRECT_MOBILE: Type.String(),
+	S3_BUCKET: Type.String(),
+	S3_ID: Type.String(),
+	S3_KEY: Type.String(),
+	S3_REGION: Type.String(),
+	S3_END_POINT: Type.String(),
+	S3_HOST: Type.String(),
+	LOG_LEVEL: Type.String()
+});
 
-export default envSchemas;
+export type EnvSchema = Static<typeof envSchema>;
+
+export default envSchema;
