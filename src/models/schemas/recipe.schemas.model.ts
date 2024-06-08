@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 
-const recipeCreateRequestSchema = Type.Object({
+export const recipeCreateRequestSchema = Type.Object({
 	name: Type.String(),
 	ingredients: Type.Array(
 		Type.Object({
@@ -20,7 +20,7 @@ const recipeCreateRequestSchema = Type.Object({
 			unit_id: Type.Number()
 		})
 	),
-	images: Type.Array(Type.String()),
+	images: Type.Optional(Type.Array(Type.String())),
 	time: Type.Number({ description: 'Time cook' }),
 	video: Type.Optional(Type.String({ description: 'URL youtube' })),
 	level: Type.String()

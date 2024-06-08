@@ -4,8 +4,10 @@ import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import { Recipe } from '~models/entities/recipe.entity';
 import ResponseModel from '~models/responses/response.model';
-import recipeSchemasModel, {
-	RecipeGetRequest
+import {
+	RecipeGetRequest,
+	recipeCreateRequestSchema,
+	recipeUpdateRequestSchema
 } from '~models/schemas/recipe.schemas.model';
 import recipeRepository from '~repositories/recipe.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
@@ -43,11 +45,7 @@ class RecipeService {
 
 		const newRecipe = new Recipe();
 
-		validateUtil.validate(
-			res,
-			recipeSchemasModel.recipeCreateObj.valueOf(),
-			recipeObj
-		);
+		validateUtil.validate(res, recipeCreateRequestSchema, recipeObj);
 
 		objectUtil.mapObjToEntity(newRecipe, recipeObj);
 
@@ -89,11 +87,7 @@ class RecipeService {
 			}
 		}
 
-		validateUtil.validate(
-			res,
-			recipeSchemasModel.recipeUpdateObj.valueOf(),
-			recipeObj
-		);
+		validateUtil.validate(res, recipeUpdateRequestSchema, recipeObj);
 
 		objectUtil.mapObjToEntity(recipe, recipeObj);
 
