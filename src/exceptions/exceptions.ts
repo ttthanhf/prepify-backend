@@ -12,6 +12,9 @@ export default async function exceptionsHandle(app: Fastify) {
 			if (validation.length > 0) {
 				if (validation[0].message?.startsWith('must match pattern')) {
 					reponse.message = `${validation[0].instancePath.slice(1)} not correct format`;
+				} else {
+					request.log.error(error);
+					reponse.message = String(error);
 				}
 			} else {
 				request.log.error(error);

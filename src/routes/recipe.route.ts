@@ -13,7 +13,9 @@ export default async function recipeRoute(
 	app.get(
 		'/recipes',
 		{
-			schema: recipeQueryGetRequestSchema
+			schema: {
+				querystring: recipeQueryGetRequestSchema
+			}
 		},
 		recipeController.getRecipe
 	);
