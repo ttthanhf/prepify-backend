@@ -1,24 +1,10 @@
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 import ResponseModel from '~models/responses/response.model';
 import foodStyleRepository from '~repositories/foodStyle.repository';
-import { FoodStyle } from '~models/entities/food-style.entity';
 
 class FoodStyleService {
 	async getFoodStyleHandle(req: FastifyRequest, res: FastifyResponse) {
-		const query = req.query;
-
-		let foodStyles: FoodStyle[];
-		if (query) {
-			try {
-				foodStyles = await foodStyleRepository.findBy(
-					JSON.parse(JSON.stringify(query))
-				);
-			} catch (error) {
-				foodStyles = await foodStyleRepository.findAll();
-			}
-		} else {
-			foodStyles = await foodStyleRepository.findAll();
-		}
+		const foodStyles = await foodStyleRepository.findAll();
 
 		const results = [];
 		for (const item of foodStyles) {
