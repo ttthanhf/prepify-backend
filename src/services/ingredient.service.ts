@@ -1,10 +1,11 @@
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 import ResponseModel from '~models/responses/response.model';
 import ingredientRepository from '~repositories/ingredient.repository';
+import { IngredientGetRequest } from '~models/schemas/ingredient.schemas.model';
 
 class IngredientService {
 	async getIngredientHandle(req: FastifyRequest, res: FastifyResponse) {
-		const query = req.query;
+		const query: IngredientGetRequest = req.query as IngredientGetRequest;
 
 		let ingredient: any;
 		if (query) {

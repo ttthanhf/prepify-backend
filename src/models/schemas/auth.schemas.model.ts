@@ -1,73 +1,57 @@
-import S from 'fluent-json-schema';
-import { FastifySchema } from 'fastify/types/schema';
 import { Pattern } from '~constants/pattern.constant';
+import { Static, Type } from '@sinclair/typebox';
 
-const loginObj = S.object()
-	.additionalProperties(false)
-	.prop('email', S.string().pattern(Pattern.EMAIL_REGEX))
-	.prop('phone', S.string().pattern(Pattern.PHONE_REGEX))
-	.prop(
-		'password',
-		S.string().pattern(Pattern.PASSWORD_REGEX).default('Password123!')
-	)
-	.anyOf([
-		S.required(['email', 'password']),
-		S.required(['phone', 'password']),
-		S.required(['email', 'phone', 'password'])
-	]);
-
-const loginSchemas: FastifySchema = {
-	body: loginObj.valueOf()
+const BaseAuthSchema = {
+	email: Type.String({
+		pattern: Pattern.EMAIL_REGEX.source,
+		default: '-@gmail.com'
+	}),
+	phone: Type.String({
+		pattern: Pattern.PHONE_REGEX.source,
+		default: '0909990099'
+	}),
+	password: Type.String({
+		pattern: Pattern.PASSWORD_REGEX.source,
+		default: 'Password123!'
+	})
 };
 
-const registerObj = S.object()
-	.prop('fullname', S.string().required().default('Nguyen Van A'))
-	.extend(loginObj);
+export const loginRequestSchema = Type.Object({
+	password: BaseAuthSchema.password,
+	email: Type.Optional(BaseAuthSchema.email),
+	phone: Type.Optional(BaseAuthSchema.phone)
+});
 
-const registerSchemas: FastifySchema = {
-	body: registerObj.valueOf()
-};
+export type LoginRequest = Static<typeof loginRequestSchema>;
 
-const googleOauth2Obj = S.object().prop('code', S.string().required());
+export const registerRequestSchema = Type.Object({
+	fullname: Type.String({ default: 'Nguyen Van A' }),
+	...BaseAuthSchema
+});
 
-const googleOauth2Schemas: FastifySchema = {
-	body: googleOauth2Obj.valueOf()
-};
+export type RegisterRequest = Static<typeof registerRequestSchema>;
 
-const forgotPasswordObj = S.object().prop(
-	'email',
-	S.string().required().pattern(Pattern.EMAIL_REGEX).default('qwe123@gmail.com')
-);
+export const googleOauth2Schema = Type.Object({
+	code: Type.String()
+});
 
-const forgotPasswordSchemas: FastifySchema = {
-	body: forgotPasswordObj.valueOf()
-};
+export type GoogleOauth2 = Static<typeof googleOauth2Schema>;
 
-const verifyForgotPasswordObj = S.object().prop('token', S.string().required());
+export const forgotPasswordSchema = Type.Object({
+	email: BaseAuthSchema.email
+});
 
-const verifyForgotPasswordSchemas: FastifySchema = {
-	body: verifyForgotPasswordObj
-};
+export type ForgotPassword = Static<typeof forgotPasswordSchema>;
 
-const resetPasswordObj = S.object()
-	.prop('token', S.string().required())
-	.prop(
-		'password',
-		S.string()
-			.required()
-			.pattern(Pattern.PASSWORD_REGEX)
-			.default('Password123!')
-	);
+export const verifyForgotPasswordSchema = Type.Object({
+	token: Type.String()
+});
 
-const resetPasswordSchemas: FastifySchema = {
-	body: resetPasswordObj.valueOf()
-};
+export type VerifyForgotPassword = Static<typeof verifyForgotPasswordSchema>;
 
-export default {
-	loginSchemas,
-	registerSchemas,
-	googleOauth2Schemas,
-	forgotPasswordSchemas,
-	verifyForgotPasswordSchemas,
-	resetPasswordSchemas
-};
+export const resetPasswordSchema = Type.Object({
+	token: Type.String(),
+	password: BaseAuthSchema.password
+});
+
+export type ResetPassword = Static<typeof resetPasswordSchema>;

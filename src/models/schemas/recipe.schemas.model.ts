@@ -1,76 +1,38 @@
-import S from 'fluent-json-schema';
-import { FastifySchema } from 'fastify/types/schema';
 import { Static, Type } from '@sinclair/typebox';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 
-const recipeCreateObj = S.object()
-	.prop('name', S.string().required())
-	.prop(
-		'ingredients',
-		S.array()
-			.items(
-				S.object()
-					.prop('ingredient_id', S.number().required())
-					.prop('amount', S.number().required())
-					.prop('unit_id', S.number().required())
-			)
-			.required()
-	)
-	.prop('category', S.number().required())
-	.prop('foodStyle', S.array().items(S.number()).required())
-	.prop('steps', S.string().required())
-	.prop(
-		'nutrition',
-		S.array()
-			.items(
-				S.object()
-					.prop('nutrition_id', S.number().required())
-					.prop('amount', S.number().required())
-					.prop('unit_id', S.number().required())
-			)
-			.required()
-	)
-	.prop('images', S.array().items(S.string()))
-	.prop('time', S.number().required().description('Time cook'))
-	.prop('video', S.string().description('URL youtube'))
-	.prop('level', S.string().required());
-
-const recipeCreateSchema: FastifySchema = {
-	body: recipeCreateObj.valueOf()
-};
-
-const recipeUpdateObj = S.anyOf([
-	S.object().prop('name', S.string().required()),
-	S.object().prop(
-		'ingredients',
-		S.array()
-			.items(
-				S.object()
-					.prop('ingredient_id', S.number())
-					.prop('amount', S.number())
-					.prop('unit_id', S.number())
-			)
-			.required()
+const recipeCreateRequestSchema = Type.Object({
+	name: Type.String(),
+	ingredients: Type.Array(
+		Type.Object({
+			ingredient_id: Type.Number(),
+			amount: Type.Number(),
+			unit_id: Type.Number()
+		})
 	),
-	S.object().prop('category', S.number().required()),
-	S.object().prop('foodStyle', S.array().items(S.number()).required()),
-	S.object().prop('steps', S.string().required()),
-	S.object().prop(
-		'nutrition',
-		S.array()
-			.items(
-				S.object()
-					.prop('nutrition_id', S.number())
-					.prop('amount', S.number())
-					.prop('unit_id', S.number())
-			)
-			.required()
+	category: Type.Number(),
+	foodStyle: Type.Array(Type.Number()),
+	steps: Type.String(),
+	nutrition: Type.Array(
+		Type.Object({
+			nutrition_id: Type.Number(),
+			amount: Type.Number(),
+			unit_id: Type.Number()
+		})
 	),
-	S.object().prop('images', S.array().items(S.string()).required()),
-	S.object().prop('time', S.number().required().description('Time cook')),
-	S.object().prop('video', S.string().required().description('URL youtube')),
-	S.object().prop('level', S.string().required())
-]);
+	images: Type.Array(Type.String()),
+	time: Type.Number({ description: 'Time cook' }),
+	video: Type.Optional(Type.String({ description: 'URL youtube' })),
+	level: Type.String()
+});
+
+export type RecipeCreateRequest = Static<typeof recipeCreateRequestSchema>;
+
+export const recipeUpdateRequestSchema = Type.Partial(
+	recipeCreateRequestSchema
+);
+
+export type RecipeUpdateRequest = Static<typeof recipeUpdateRequestSchema>;
 
 export const recipeQueryGetRequestSchema = Type.Object({
 	pageSize: Type.Optional(Type.Number()),
@@ -86,9 +48,3 @@ export const recipeQueryGetRequestSchema = Type.Object({
 });
 
 export type RecipeGetRequest = Static<typeof recipeQueryGetRequestSchema>;
-
-export default {
-	recipeCreateSchema,
-	recipeCreateObj,
-	recipeUpdateObj
-};

@@ -31,9 +31,15 @@ class AuthService {
 
 	async loginHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { email, phone, password }: LoginRequest = req.body as LoginRequest;
-		const user = await userRepository.findOneBy(email ? { email } : { phone });
-
 		const respose = new ResponseModel(res);
+
+		if (!(email || phone)) {
+			respose.message = 'Missing phone or email field';
+			respose.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return respose.send();
+		}
+
+		const user = await userRepository.findOneBy(email ? { email } : { phone });
 
 		if (user && (await bcryptUtil.compare(password, user.password))) {
 			respose.message = 'Login success';

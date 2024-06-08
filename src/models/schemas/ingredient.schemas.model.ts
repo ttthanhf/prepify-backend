@@ -1,11 +1,10 @@
-import S from 'fluent-json-schema';
+import { Static, Type } from '@sinclair/typebox';
 
-const ingredientSchemaObj = S.object()
-	.prop('id', S.string())
-	.prop('name', S.string())
-	.prop('category', S.string())
-	.prop('price', S.string());
+export const ingredientGetRequestSchema = Type.Object({
+	id: Type.Optional(Type.String()),
+	name: Type.Optional(Type.String()),
+	category: Type.Optional(Type.String()),
+	price: Type.Optional(Type.String())
+});
 
-export default {
-	ingredientSchemaObj
-};
+export type IngredientGetRequest = Static<typeof ingredientGetRequestSchema>;

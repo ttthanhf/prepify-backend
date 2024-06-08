@@ -4,20 +4,7 @@ import categoryRepository from '~repositories/category,repository';
 
 class CategoryService {
 	async getCategoryHandle(req: FastifyRequest, res: FastifyResponse) {
-		const query = req.query;
-
-		let category: any;
-		if (query) {
-			try {
-				category = await categoryRepository.findBy(
-					JSON.parse(JSON.stringify(query))
-				);
-			} catch (error) {
-				category = await categoryRepository.findAll();
-			}
-		} else {
-			category = await categoryRepository.findAll();
-		}
+		const category = await categoryRepository.findAll();
 
 		const response = new ResponseModel(res);
 		response.data = category;
