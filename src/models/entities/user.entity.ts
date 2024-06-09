@@ -47,7 +47,7 @@ export class User {
 	@Column()
 	avatar!: string;
 
-	@OneToOne(() => Customer)
+	@OneToOne(() => Customer, (customer) => customer.user)
 	customer?: Relation<Customer>;
 
 	@OneToMany(() => Batch, (batch) => batch.user)
