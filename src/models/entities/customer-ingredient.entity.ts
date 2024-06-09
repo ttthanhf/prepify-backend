@@ -18,7 +18,6 @@ export class CustomerIngredient {
 	ingredient_id!: string;
 
 	@ManyToOne(() => Customer, (customer) => customer.customerIngredients)
-	@JoinColumn({ name: 'customer_id' })
 	customer!: Relation<Customer>;
 
 	@ManyToOne(() => Ingredient, (ingredient) => ingredient.customerIngredients)

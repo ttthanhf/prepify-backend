@@ -19,6 +19,8 @@ import mailUtil from '~utils/mail.util';
 import envConfig from '~configs/env.config';
 import redisUtil from '~utils/redis.util';
 import { Token } from '~constants/token.constant';
+import { Customer } from '~models/entities/customer.entity';
+import customerRepository from '~repositories/customer.repository';
 
 class AuthService {
 	private getAccessToken(user: User) {
@@ -75,6 +77,10 @@ class AuthService {
 		newUser.role = Role.CUSTOMER;
 		await userRepository.create(newUser);
 
+		const newCustomer = new Customer();
+		newCustomer.user = newUser;
+		await customerRepository.create(newCustomer);
+
 		respose.message = 'Created new user';
 		respose.data = this.getAccessToken(newUser);
 		return respose.send();
@@ -111,6 +117,10 @@ class AuthService {
 		newUser.email = email;
 		newUser.avatar = picture;
 		await userRepository.create(newUser);
+
+		const newCustomer = new Customer();
+		newCustomer.user = newUser;
+		await customerRepository.create(newCustomer);
 
 		response.message = 'Created new user';
 		response.data = this.getAccessToken(newUser);
