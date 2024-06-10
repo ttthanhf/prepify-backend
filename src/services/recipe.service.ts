@@ -3,6 +3,7 @@ import envConfig from '~configs/env.config';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import { Recipe } from '~models/entities/recipe.entity';
+import { RecipeShopReponseModel } from '~models/responses/recipe.reponse.model';
 import ResponseModel from '~models/responses/response.model';
 import {
 	RecipeGetRequest,
@@ -108,11 +109,13 @@ class RecipeService {
 			query.pageIndex && query.pageIndex > 0 ? query.pageIndex : 1;
 
 		const orderBy = query.orderBy ? query.orderBy : OrderBy.ASC;
-		const sortBy = query.sortBy ? query.sortBy : SortBy.NEWEST;
+		const sortBy = query.sortBy ? query.sortBy : SortBy.POPULAR;
 
 		const minPrice = query.minPrice && query.minPrice >= 0 ? query.minPrice : 0;
 		const maxPrice =
-			query.maxPrice && query.maxPrice >= 0 ? query.maxPrice : 10000000;
+			query.maxPrice && query.maxPrice >= 0 && query.maxPrice <= 10000000
+				? query.maxPrice
+				: 10000000;
 
 		const minRating =
 			query.minRating && query.minRating >= 0 && query.minRating <= 5
@@ -123,7 +126,6 @@ class RecipeService {
 				? query.maxRating
 				: 5;
 
-		let recipes: Recipe[];
 		let recipeQuery = recipeRepository
 			.getRepository()
 			.createQueryBuilder('recipe')
@@ -135,7 +137,18 @@ class RecipeService {
 			.addGroupBy('orderDetail.id')
 			.addGroupBy('foodStyle.id')
 			.take(pageSize)
-			.skip((pageIndex - 1) * pageSize);
+			.skip((pageIndex - 1) * pageSize)
+			.select([
+				'recipe.id',
+				'recipe.name',
+				'recipe.slug',
+				'recipe.level',
+				'recipe.time',
+				'recipe.createdAt',
+				'mealKit.price',
+				'mealKit.rating',
+				'foodStyle.name'
+			]);
 
 		if (sortBy === SortBy.POPULAR) {
 			recipeQuery = recipeQuery
@@ -147,8 +160,8 @@ class RecipeService {
 			recipeQuery = recipeQuery.orderBy('recipe.createdAt', orderBy);
 		}
 
-		if (query.foodStyle) {
-			const foodStyleSlugs = query.foodStyle.split(',');
+		if (query.foodStyles) {
+			const foodStyleSlugs = query.foodStyles.split(',');
 			for (const foodStyleSlug of foodStyleSlugs) {
 				recipeQuery = recipeQuery.andWhere(
 					`foodStyle.slug LIKE :foodStyleSlug`,
@@ -186,7 +199,7 @@ class RecipeService {
 			);
 		}
 
-		recipes = await recipeQuery.getMany();
+		const recipes: Recipe[] = await recipeQuery.getMany();
 
 		const itemTotal = recipes.length;
 		const pageTotal = Math.ceil(itemTotal / pageSize);
@@ -209,9 +222,39 @@ class RecipeService {
 			}
 		});
 
+		const recipeShopReponseModelList: Array<RecipeShopReponseModel> = [];
+		recipes.forEach((recipe) => {
+			const recipeShopReponseModel = new RecipeShopReponseModel();
+			recipeShopReponseModel.id = recipe.id;
+			recipeShopReponseModel.name = recipe.name;
+			recipeShopReponseModel.slug = recipe.slug;
+			recipeShopReponseModel.foodStyles = recipe?.foodStyles?.[0]?.name;
+			recipeShopReponseModel.mainImage =
+				recipe?.images[0] ||
+				'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+			recipeShopReponseModel.subImage =
+				recipe?.images[1] ||
+				'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+			recipeShopReponseModel.level = recipe.level;
+			recipeShopReponseModel.time = recipe.time;
+
+			if (recipe.mealKits.length != 0) {
+				let lowestPriceMealKit = recipe.mealKits[0];
+				for (let i = 1; i < recipe.mealKits.length; i++) {
+					if (recipe.mealKits[i].price < lowestPriceMealKit.price) {
+						lowestPriceMealKit = recipe.mealKits[i];
+					}
+				}
+				recipeShopReponseModel.price = lowestPriceMealKit.price;
+				recipeShopReponseModel.star = lowestPriceMealKit.rating;
+			}
+
+			recipeShopReponseModelList.push(recipeShopReponseModel);
+		});
+
 		const response = new ResponseModel(res);
 		response.data = {
-			recipes,
+			recipes: recipeShopReponseModelList,
 			itemTotal,
 			pageIndex,
 			pageSize,
