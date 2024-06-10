@@ -10,12 +10,12 @@ async function requireToken(req: FastifyRequest, res: FastifyResponse) {
 	const isValid = jwtUtil.verify(token);
 	const reponse = new ResponseModel(res);
 	if (!token) {
-		reponse.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+		reponse.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 		reponse.message = 'Token not found';
 		reponse.send();
 	}
 	if (!isValid) {
-		reponse.statusCode = HTTP_STATUS_CODE.FORBIDDEN;
+		reponse.statusCode = HTTP_STATUS_CODE.UNAUTHORIZED;
 		reponse.message = 'Token invalid';
 		reponse.send();
 	}
@@ -29,7 +29,7 @@ async function requirePhone(req: FastifyRequest, res: FastifyResponse) {
 	});
 	if (!user?.phone) {
 		const reponse = new ResponseModel(res);
-		reponse.statusCode = HTTP_STATUS_CODE.FORBIDDEN;
+		reponse.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 		reponse.message = 'Phone require';
 		reponse.send();
 	}
