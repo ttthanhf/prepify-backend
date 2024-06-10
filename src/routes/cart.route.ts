@@ -1,6 +1,9 @@
 import cartController from '~controllers/cart.controller';
 import authMiddleware from '~middlewares/auth.middleware';
-import { cartCreateRequestSchema } from '~models/schemas/cart.schemas.model';
+import {
+	cartCreateRequestSchema,
+	cartUpdateRequestSchema
+} from '~models/schemas/cart.schemas.model';
 import { Fastify } from '~types/fastify.type';
 
 export default async function route(
@@ -24,5 +27,15 @@ export default async function route(
 			onRequest: [authMiddleware.requireToken]
 		},
 		cartController.createCart
+	);
+	app.put(
+		'/carts',
+		{
+			schema: {
+				body: cartUpdateRequestSchema
+			},
+			onRequest: [authMiddleware.requireToken]
+		},
+		cartController.updateCart
 	);
 }

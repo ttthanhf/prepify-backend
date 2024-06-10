@@ -6,3 +6,7 @@ export const cartCreateRequestSchema = Type.Object({
 });
 
 export type CartCreateRequest = Static<typeof cartCreateRequestSchema>;
+
+export const cartUpdateRequestSchema = cartCreateRequestSchema;
+
+export type CartUpdateRequest = Static<typeof cartUpdateRequestSchema>;
