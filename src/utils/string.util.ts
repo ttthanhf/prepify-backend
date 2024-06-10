@@ -7,6 +7,13 @@ function tryParseStringToJSON(str: string) {
 	}
 }
 
+function removeVietnameseTones(str: string) {
+	str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+	str = str.replace(/đ/g, 'd').replace(/Đ/g, 'D');
+	return str;
+}
+
 export default {
-	tryParseStringToJSON
+	tryParseStringToJSON,
+	removeVietnameseTones
 };
