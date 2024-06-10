@@ -50,6 +50,14 @@ class RecipeService {
 
 		objectUtil.mapObjToEntity(newRecipe, recipeObj);
 
+		newRecipe.slug =
+			stringUtil
+				.removeVietnameseTones(newRecipe.name)
+				.toLocaleLowerCase('vi')
+				.replaceAll(' ', '-') +
+			'.' +
+			newRecipe.id;
+
 		await recipeRepository.create(newRecipe);
 
 		for (const file of files) {
@@ -228,7 +236,7 @@ class RecipeService {
 			recipeShopReponseModel.id = recipe.id;
 			recipeShopReponseModel.name = recipe.name;
 			recipeShopReponseModel.slug = recipe.slug;
-			recipeShopReponseModel.foodStyles = recipe?.foodStyles?.[0]?.name;
+			recipeShopReponseModel.foodStyle = recipe?.foodStyles?.[0]?.name;
 			recipeShopReponseModel.mainImage =
 				recipe?.images[0] ||
 				'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';

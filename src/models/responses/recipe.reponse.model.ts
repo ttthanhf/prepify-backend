@@ -2,7 +2,7 @@ export class RecipeShopReponseModel {
 	id!: string;
 	name!: string;
 	slug!: string;
-	foodStyles!: string;
+	foodStyle!: string;
 	mainImage!: string;
 	subImage!: string;
 	level!: string;
