@@ -205,7 +205,8 @@ class RecipeService {
 
 		const recipes: Recipe[] = await recipeQuery.getMany();
 
-		const itemTotal = recipes.length;
+		const itemTotal = await recipeRepository.count();
+
 		const pageTotal = Math.ceil(itemTotal / pageSize);
 
 		const datas3 = await s3Util.getImages({

@@ -47,6 +47,10 @@ export class BaseRepository<T extends ObjectLiteral> {
 		return await this.db.findOneBy(opts);
 	}
 
+	async count(opts?: FindManyOptions<T>) {
+		return await this.db.count(opts);
+	}
+
 	getRepository() {
 		return this.db;
 	}
