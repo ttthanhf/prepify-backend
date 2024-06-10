@@ -1,3 +1,4 @@
+import { _Object } from '@aws-sdk/client-s3';
 import { MultipartFile } from '@fastify/multipart';
 import envConfig from '~configs/env.config';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
@@ -13,6 +14,7 @@ import {
 import recipeRepository from '~repositories/recipe.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 import objectUtil from '~utils/object.util';
+import redisUtil from '~utils/redis.util';
 
 import s3Util from '~utils/s3.util';
 import stringUtil from '~utils/string.util';
@@ -67,6 +69,8 @@ class RecipeService {
 				type: 'recipe'
 			});
 		}
+
+		await redisUtil.removeImagesRecipes();
 
 		return response.send();
 	}
@@ -208,16 +212,25 @@ class RecipeService {
 		const itemTotal = recipes.length;
 		const pageTotal = Math.ceil(itemTotal / pageSize);
 
-		const datas3 = await s3Util.getImages({
-			type: 'recipe'
-		});
+		let images = await redisUtil.getImagesRecipes();
+		if (images === null) {
+			const datas3 = await s3Util.getImages({
+				type: 'recipe'
+			});
+			req.log.info('Call s3 get images');
+			images = datas3.Contents;
+			if (images) {
+				await redisUtil.setImagesRecipes(images);
+			} else {
+				images = [];
+			}
+		}
 
-		const images = datas3.Contents || [];
 		recipes.forEach((recipe) => {
 			if (images.length == 0) {
 				return;
 			}
-			const indexImage = images.findIndex((image) => {
+			const indexImage = images.findIndex((image: _Object) => {
 				return image.Key?.includes(recipe.id);
 			});
 			if (indexImage != -1) {

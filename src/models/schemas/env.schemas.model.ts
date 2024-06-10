@@ -8,7 +8,7 @@ const envSchema = Type.Object({
 	MARIADB_PASSWORD: Type.String(),
 	MARIADB_DATABASE: Type.String(),
 	MARIADB_CLIENTURL: Type.String(),
-	MARIADB_PORT: Type.String(),
+	MARIADB_PORT: Type.Number(),
 	JWT_KEY: Type.String(),
 	JWT_EXPIRE: Type.String(),
 	JWT_ALGORITHM: Type.String(),
@@ -26,7 +26,8 @@ const envSchema = Type.Object({
 	S3_REGION: Type.String(),
 	S3_END_POINT: Type.String(),
 	S3_HOST: Type.String(),
-	LOG_LEVEL: Type.String()
+	LOG_LEVEL: Type.String(),
+	ENVIROMENT: Type.String()
 });
 
 export type EnvSchema = Static<typeof envSchema>;
