@@ -203,9 +203,7 @@ class RecipeService {
 			);
 		}
 
-		const recipes: Recipe[] = await recipeQuery.getMany();
-
-		const itemTotal = await recipeRepository.count();
+		const [recipes, itemTotal] = await recipeQuery.getManyAndCount();
 
 		const pageTotal = Math.ceil(itemTotal / pageSize);
 
