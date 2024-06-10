@@ -43,7 +43,7 @@ export default async function route(
 		'/carts/:cartId',
 		{
 			schema: {
-				params: cartDeleteRequestSchema
+				body: cartDeleteRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken]
 		},

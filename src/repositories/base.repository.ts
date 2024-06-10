@@ -48,7 +48,7 @@ export class BaseRepository<T extends ObjectLiteral> {
 		return await this.db.findOneBy(opts);
 	}
 
-	async remove(entities: T, options?: RemoveOptions | undefined): Promise<T> {
+	async remove(entities: T[], options?: RemoveOptions): Promise<T[]> {
 		return await this.db.remove(entities, options);
 	}
 

@@ -10,6 +10,7 @@ import {
 	CartUpdateRequest
 } from '~models/schemas/cart.schemas.model';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { In } from 'typeorm';
 
 class CartService {
 	async getCartHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -118,15 +119,15 @@ class CartService {
 	}
 
 	async deleteCartHandle(req: FastifyRequest, res: FastifyResponse) {
-		const { cartId }: CartDeleteRequest = req.params as CartDeleteRequest;
+		const { cartIds }: CartDeleteRequest = req.body as CartDeleteRequest;
 		const response = new ResponseModel(res);
 
-		const cart = await orderDetailRepository.findOneBy({
-			id: cartId
+		const carts = await orderDetailRepository.findBy({
+			id: In(cartIds)
 		});
 
-		if (cart) {
-			await orderDetailRepository.remove(cart);
+		if (carts.length != 0) {
+			await orderDetailRepository.remove(carts);
 		} else {
 			response.message = 'Cart not found';
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
