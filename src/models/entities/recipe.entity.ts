@@ -27,6 +27,9 @@ export class Recipe {
 	@Column()
 	steps!: string;
 
+	@Column()
+	slug!: string;
+
 	@Column({
 		type: 'datetime',
 		default: new Date()

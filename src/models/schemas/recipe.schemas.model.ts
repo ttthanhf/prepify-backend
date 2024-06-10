@@ -39,7 +39,7 @@ export const recipeQueryGetRequestSchema = Type.Object({
 	pageIndex: Type.Optional(Type.Number()),
 	orderBy: Type.Optional(Type.Enum(OrderBy)),
 	sortBy: Type.Optional(Type.Enum(SortBy)),
-	foodStyle: Type.Optional(Type.String()),
+	foodStyles: Type.Optional(Type.String()),
 	minPrice: Type.Optional(Type.Number()),
 	maxPrice: Type.Optional(Type.Number()),
 	searchRecipe: Type.Optional(Type.String()),
