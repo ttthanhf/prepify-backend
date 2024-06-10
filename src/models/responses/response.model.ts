@@ -26,13 +26,11 @@ class ResponseModel {
 
 	send() {
 		this.response.code(this.statusCode);
-		this.response.send({
+		return this.response.send({
 			statusCode: this.statusCode,
 			message: this.message,
 			data: this.data
 		});
-
-		return this;
 	}
 }
 

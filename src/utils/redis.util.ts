@@ -12,6 +12,22 @@ class RedisUtil {
 		}
 	}
 
+	async setImagesRecipes(images: object) {
+		return await this.redis.set('images-recipes', JSON.stringify(images));
+	}
+
+	async getImagesRecipes() {
+		const images = await this.redis.get('images-recipes');
+		if (images) {
+			return JSON.parse(images);
+		}
+		return null;
+	}
+
+	async removeImagesRecipes() {
+		return await this.redis.del('images-recipes');
+	}
+
 	async setEmailRecoveryWhiteList(email: RedisKey) {
 		return await this.redis.set(
 			email + recoveryPasswordTail,

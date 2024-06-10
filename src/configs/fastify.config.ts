@@ -1,3 +1,4 @@
+import { ENVIROMENT } from '~constants/env.constant';
 import envConfig from './env.config';
 import { FastifyListenOptions } from 'fastify';
 
@@ -7,7 +8,8 @@ const fastifyInitConfig: any = {
 		transport: {
 			target: '@fastify/one-line-logger'
 		}
-	}
+	},
+	disableRequestLogging: envConfig.ENVIROMENT == ENVIROMENT.PRODUCTION
 };
 
 const fastifyListenConfig: FastifyListenOptions = {
