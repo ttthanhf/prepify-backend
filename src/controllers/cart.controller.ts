@@ -13,6 +13,10 @@ class CartController {
 	async updateCart(req: FastifyRequest, res: FastifyResponse) {
 		return cartService.updateCartHandle(req, res);
 	}
+
+	async deleteCart(req: FastifyRequest, res: FastifyResponse) {
+		return cartService.deleteCartHandle(req, res);
+	}
 }
 
 export default new CartController();
