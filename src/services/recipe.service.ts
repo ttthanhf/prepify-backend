@@ -170,14 +170,10 @@ class RecipeService {
 
 		if (query.foodStyles) {
 			const foodStyleSlugs = query.foodStyles.split(',');
-			for (const foodStyleSlug of foodStyleSlugs) {
-				recipeQuery = recipeQuery.andWhere(
-					`foodStyle.slug LIKE :foodStyleSlug`,
-					{
-						foodStyleSlug
-					}
-				);
-			}
+			recipeQuery = recipeQuery.andWhere(
+				'foodStyle.slug IN (:...foodStyleSlugs)',
+				{ foodStyleSlugs }
+			);
 		}
 
 		if (query.minPrice || query.maxPrice) {
