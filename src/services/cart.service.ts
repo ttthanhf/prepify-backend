@@ -6,6 +6,7 @@ import { OrderDetail } from '~models/entities/order-detail.entity';
 import mealKitRepository from '~repositories/mealKit.repository';
 import {
 	CartCreateRequest,
+	CartDeleteRequest,
 	CartUpdateRequest
 } from '~models/schemas/cart.schemas.model';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
@@ -90,7 +91,7 @@ class CartService {
 			return response.send();
 		}
 
-		let cart = await orderDetailRepository.findOne({
+		const cart = await orderDetailRepository.findOne({
 			where: {
 				isCart: true,
 				customer: {
@@ -111,6 +112,24 @@ class CartService {
 		} else {
 			response.message = 'MealKit not in cart !';
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+		}
+
+		return response.send();
+	}
+
+	async deleteCartHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { cartId }: CartDeleteRequest = req.params as CartDeleteRequest;
+		const response = new ResponseModel(res);
+
+		const cart = await orderDetailRepository.findOneBy({
+			id: cartId
+		});
+
+		if (cart) {
+			await orderDetailRepository.remove(cart);
+		} else {
+			response.message = 'Cart not found';
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
 		}
 
 		return response.send();

@@ -4,6 +4,7 @@ import {
 	FindOptionsWhere,
 	ObjectLiteral,
 	ObjectType,
+	RemoveOptions,
 	Repository
 } from 'typeorm';
 import typeormUtil from '~utils/typeorm.util';
@@ -45,6 +46,10 @@ export class BaseRepository<T extends ObjectLiteral> {
 		opts: FindOptionsWhere<T> | FindOptionsWhere<T>[]
 	): Promise<T | null> {
 		return await this.db.findOneBy(opts);
+	}
+
+	async remove(entities: T, options?: RemoveOptions | undefined): Promise<T> {
+		return await this.db.remove(entities, options);
 	}
 
 	async count(opts?: FindManyOptions<T>) {

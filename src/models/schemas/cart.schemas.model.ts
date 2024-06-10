@@ -10,3 +10,9 @@ export type CartCreateRequest = Static<typeof cartCreateRequestSchema>;
 export const cartUpdateRequestSchema = cartCreateRequestSchema;
 
 export type CartUpdateRequest = Static<typeof cartUpdateRequestSchema>;
+
+export const cartDeleteRequestSchema = Type.Object({
+	cartId: Type.String()
+});
+
+export type CartDeleteRequest = Static<typeof cartDeleteRequestSchema>;
