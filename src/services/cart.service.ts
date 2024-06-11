@@ -11,10 +11,19 @@ import {
 } from '~models/schemas/cart.schemas.model';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { In } from 'typeorm';
+import {
+	CartItemResponse,
+	MealKitCartResponse,
+	RecipeCartResponse
+} from '~models/responses/cart.response.model';
+import redisUtil from '~utils/redis.util';
+import envConfig from '~configs/env.config';
+import mapperUtil from '~utils/mapper.util';
 
 class CartService {
 	async getCartHandle(req: FastifyRequest, res: FastifyResponse) {
 		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
+		const response = new ResponseModel(res);
 
 		const carts = await orderDetailRepository.find({
 			where: {
@@ -23,10 +32,88 @@ class CartService {
 					id: customer!.id
 				}
 			},
-			relations: ['customer', 'mealKit']
+			relations: ['mealKit', 'mealKit.recipe'],
+			select: {
+				mealKit: {
+					id: true,
+					price: true,
+					serving: true,
+					recipe: {
+						id: true,
+						name: true,
+						slug: true
+					}
+				}
+			}
 		});
-		const response = new ResponseModel(res);
-		response.data = carts;
+
+		const CartList: Array<CartItemResponse> = [];
+		const images = await redisUtil.getImagesRecipes();
+		const mealKitItemExisted: { [key: string]: any } = {};
+
+		for (const cart of carts) {
+			const recipeCart = mapperUtil.mapEntityToClass(
+				cart.mealKit.recipe,
+				RecipeCartResponse
+			);
+
+			const mealKitCart = mapperUtil.mapEntityToClass(
+				cart.mealKit,
+				MealKitCartResponse
+			);
+
+			const mealKitItemList: Array<MealKitCartResponse> = [];
+			if (!mealKitItemExisted[cart.mealKit.recipe.id]) {
+				const mealKits = await mealKitRepository.find({
+					where: {
+						recipe: {
+							id: cart.mealKit.recipe.id
+						}
+					},
+					select: {
+						id: true,
+						serving: true,
+						price: true
+					}
+				});
+				for (const mealKit of mealKits) {
+					const mealKitCartResponse = mapperUtil.mapEntityToClass(
+						mealKit,
+						MealKitCartResponse
+					);
+					mealKitItemList.push(mealKitCartResponse);
+				}
+				mealKitItemExisted[cart.mealKit.recipe.id] = mealKitItemList;
+			}
+
+			const mealKitItems = mealKitItemExisted[cart.mealKit.recipe.id];
+
+			const cartItem = new CartItemResponse();
+			cartItem.id = cart.id;
+			cartItem.recipe = recipeCart;
+			cartItem.mealKitSelected = mealKitCart;
+			cartItem.quantity = cart.quantity;
+			cartItem.totalPrice = cart.quantity * mealKitCart.price;
+			cartItem.mealKits = mealKitItems;
+
+			if (images) {
+				const indexImage = images.findIndex((image) => {
+					return image.Key?.includes(cart.mealKit.recipe.id);
+				});
+				if (indexImage != -1) {
+					cartItem.image = envConfig.S3_HOST + images[indexImage].Key;
+				} else {
+					cartItem.image =
+						'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+				}
+			} else {
+				cartItem.image =
+					'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+			}
+
+			CartList.push(cartItem);
+		}
+		response.data = CartList;
 		return response.send();
 	}
 

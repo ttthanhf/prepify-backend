@@ -14,5 +14,6 @@
 	"[javascript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
-	"editor.fontWeight": "normal"
+	"editor.fontWeight": "normal",
+	"cSpell.words": ["fastify", "httpstatuscode", "mealkit", "typeorm"]
 }
