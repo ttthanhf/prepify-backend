@@ -13,14 +13,14 @@ export default async function route(
 	next: unknown
 ) {
 	app.get(
-		'/carts',
+		'/cart',
 		{
 			onRequest: [authMiddleware.requireToken]
 		},
 		cartController.getCart
 	);
 	app.post(
-		'/carts',
+		'/cart',
 		{
 			schema: {
 				body: cartCreateRequestSchema
@@ -30,7 +30,7 @@ export default async function route(
 		cartController.createCart
 	);
 	app.put(
-		'/carts',
+		'/cart',
 		{
 			schema: {
 				body: cartUpdateRequestSchema
@@ -40,7 +40,7 @@ export default async function route(
 		cartController.updateCart
 	);
 	app.delete(
-		'/carts/:cartId',
+		'/cart',
 		{
 			schema: {
 				body: cartDeleteRequestSchema
