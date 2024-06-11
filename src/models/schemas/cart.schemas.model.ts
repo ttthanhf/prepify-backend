@@ -7,7 +7,11 @@ export const cartCreateRequestSchema = Type.Object({
 
 export type CartCreateRequest = Static<typeof cartCreateRequestSchema>;
 
-export const cartUpdateRequestSchema = cartCreateRequestSchema;
+export const cartUpdateRequestSchema = Type.Object({
+	cartId: Type.String(),
+	mealkitId: Type.String(),
+	quantity: Type.Number()
+});
 
 export type CartUpdateRequest = Static<typeof cartUpdateRequestSchema>;
 
