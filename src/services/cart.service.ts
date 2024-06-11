@@ -93,7 +93,6 @@ class CartService {
 			cartItem.recipe = recipeCart;
 			cartItem.mealKitSelected = mealKitCart;
 			cartItem.quantity = cart.quantity;
-			cartItem.totalPrice = cart.quantity * mealKitCart.price;
 			cartItem.mealKits = mealKitItems;
 
 			if (images) {
@@ -164,29 +163,17 @@ class CartService {
 
 	async updateCartHandle(req: FastifyRequest, res: FastifyResponse) {
 		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
-		const { quantity, mealkitId }: CartUpdateRequest =
+		const { quantity, mealkitId, cartId }: CartUpdateRequest =
 			req.body as CartUpdateRequest;
 
-		const mealKit = await mealKitRepository.findOneBy({
-			id: mealkitId
-		});
-
 		const response = new ResponseModel(res);
-
-		if (!mealKit) {
-			response.message = 'Meal Kit not found';
-			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			return response.send();
-		}
 
 		const cart = await orderDetailRepository.findOne({
 			where: {
 				isCart: true,
+				id: cartId,
 				customer: {
 					id: customer!.id
-				},
-				mealKit: {
-					id: mealKit.id
 				}
 			},
 			relations: ['mealKit'],
@@ -194,9 +181,18 @@ class CartService {
 		});
 
 		if (cart) {
+			const mealKit = await mealKitRepository.findOneBy({
+				id: mealkitId
+			});
+
+			if (!mealKit) {
+				response.message = 'Meal Kit not found';
+				response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+				return response.send();
+			}
+			cart.mealKit.id = mealKit.id;
 			cart.quantity = quantity;
 			await orderDetailRepository.update(cart);
-			response.data = cart;
 		} else {
 			response.message = 'MealKit not in cart !';
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;

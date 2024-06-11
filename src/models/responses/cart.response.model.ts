@@ -15,7 +15,6 @@ export class CartItemResponse {
 	recipe!: RecipeCartResponse;
 	mealKitSelected!: MealKitCartResponse;
 	quantity!: number;
-	totalPrice!: number; // quantity * mealkit.price
 	image!: string;
 	mealKits!: Array<MealKitCartResponse>; // get all mealkit
 }
