@@ -13,6 +13,7 @@ import {
 } from '~models/schemas/recipe.schemas.model';
 import recipeRepository from '~repositories/recipe.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import mapperUtil from '~utils/mapper.util';
 import objectUtil from '~utils/object.util';
 import redisUtil from '~utils/redis.util';
 
@@ -50,7 +51,7 @@ class RecipeService {
 
 		validateUtil.validate(res, recipeCreateRequestSchema, recipeObj);
 
-		objectUtil.mapObjToEntity(newRecipe, recipeObj);
+		mapperUtil.mapObjToEntity(newRecipe, recipeObj);
 
 		newRecipe.slug =
 			stringUtil
@@ -102,7 +103,7 @@ class RecipeService {
 
 		validateUtil.validate(res, recipeUpdateRequestSchema, recipeObj);
 
-		objectUtil.mapObjToEntity(recipe, recipeObj);
+		mapperUtil.mapObjToEntity(recipe, recipeObj);
 
 		await recipeRepository.update(recipe);
 
@@ -226,7 +227,7 @@ class RecipeService {
 		}
 
 		recipes.forEach((recipe) => {
-			if (images.length == 0) {
+			if (!images) {
 				return;
 			}
 			const indexImage = images.findIndex((image: _Object) => {

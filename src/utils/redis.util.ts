@@ -1,3 +1,4 @@
+import { _Object } from '@aws-sdk/client-s3';
 import { Redis, RedisKey } from 'ioredis';
 
 const recoveryPasswordTail = '-recovery-password';
@@ -16,7 +17,7 @@ class RedisUtil {
 		return await this.redis.set('images-recipes', JSON.stringify(images));
 	}
 
-	async getImagesRecipes() {
+	async getImagesRecipes(): Promise<_Object[] | undefined | null> {
 		const images = await this.redis.get('images-recipes');
 		if (images) {
 			return JSON.parse(images);
