@@ -16,6 +16,7 @@
 	},
 	"editor.fontWeight": "normal",
 	"cSpell.words": [
+		"autoload",
 		"ENVIROMENT",
 		"fastify",
 		"httpstatuscode",
