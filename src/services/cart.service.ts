@@ -34,6 +34,7 @@ class CartService {
 			},
 			relations: ['mealKit', 'mealKit.recipe', 'mealKit.extraSpice'],
 			select: {
+				id: true,
 				has_extra_spice: true,
 				quantity: true,
 				mealKit: {
@@ -173,6 +174,15 @@ class CartService {
 
 		if (cart) {
 			cart.quantity = cart.quantity + quantity;
+			if (
+				cart.quantity > 99 ||
+				cart.quantity < 1 ||
+				quantity < 1 ||
+				quantity > 99
+			) {
+				response.message = 'Quantity not lower 1 or higher 99 item';
+				return response.send();
+			}
 			await orderDetailRepository.update(cart);
 		} else {
 			cart = new OrderDetail();
@@ -194,6 +204,11 @@ class CartService {
 			req.body as CartUpdateRequest;
 
 		const response = new ResponseModel(res);
+
+		if (quantity < 1 || quantity > 99) {
+			response.message = 'Quantity not lower 1 or higher 99 item';
+			return response.send();
+		}
 
 		const cart = await orderDetailRepository.findOne({
 			where: {
