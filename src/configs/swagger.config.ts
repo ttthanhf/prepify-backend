@@ -6,18 +6,29 @@ const SWAGGER_CONFIG = {
 	openapi: {
 		openapi: '3.0.0',
 		info: {
-			title: 'Perpify API',
-			description: 'API ui for Perpify API',
-			version: '0.0.0.1'
+			title: 'Prepify API',
+			description: 'API ui for Prepify API',
+			version: String(
+				'Last Updated: ' +
+					new Date().toLocaleString('vi-VN', {
+						weekday: 'long',
+						day: '2-digit',
+						month: '2-digit',
+						year: 'numeric',
+						hour: '2-digit',
+						minute: '2-digit',
+						second: '2-digit'
+					})
+			)
 		},
 		servers: [
 			{
-				url: `http://localhost:${envConfig.SERVER_PORT}`,
-				description: 'Localhost'
-			},
-			{
 				url: 'https://prepifyb.thanhf.dev/',
 				description: 'BE server'
+			},
+			{
+				url: `http://localhost:${envConfig.SERVER_PORT}`,
+				description: 'Localhost'
 			}
 		],
 		components: {

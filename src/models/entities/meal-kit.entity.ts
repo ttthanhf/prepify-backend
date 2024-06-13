@@ -6,9 +6,11 @@ import {
 	Entity,
 	ManyToOne,
 	OneToMany,
+	OneToOne,
 	PrimaryColumn,
 	Relation
 } from 'typeorm';
+import { ExtraSpice } from './extra-spice.entity';
 
 @Entity({ name: 'meal_kit' })
 export class MealKit {
@@ -37,4 +39,7 @@ export class MealKit {
 
 	@OneToMany(() => OrderDetail, (orderDetail) => orderDetail.mealKit)
 	orderDetails!: OrderDetail[];
+
+	@OneToOne(() => ExtraSpice, (extraSpice) => extraSpice.mealKit)
+	extraSpice!: Relation<ExtraSpice> | null;
 }
