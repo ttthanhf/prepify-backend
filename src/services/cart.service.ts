@@ -32,8 +32,10 @@ class CartService {
 					id: customer!.id
 				}
 			},
-			relations: ['mealKit', 'mealKit.recipe'],
+			relations: ['mealKit', 'mealKit.recipe', 'mealKit.extraSpice'],
 			select: {
+				has_extra_spice: true,
+				quantity: true,
 				mealKit: {
 					id: true,
 					price: true,
@@ -42,6 +44,11 @@ class CartService {
 						id: true,
 						name: true,
 						slug: true
+					},
+					extraSpice: {
+						id: true,
+						name: true,
+						price: true
 					}
 				}
 			}
@@ -52,6 +59,10 @@ class CartService {
 		const mealKitItemExisted: { [key: string]: any } = {};
 
 		for (const cart of carts) {
+			if (!cart.has_extra_spice) {
+				cart.mealKit.extraSpice = null;
+			}
+
 			const recipeCart = mapperUtil.mapEntityToClass(
 				cart.mealKit.recipe,
 				RecipeCartResponse
@@ -62,6 +73,11 @@ class CartService {
 				MealKitCartResponse
 			);
 
+			if (cart.mealKit.extraSpice && cart.has_extra_spice) {
+				mealKitCart.extraSpice.image =
+					'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+			}
+
 			const mealKitItemList: Array<MealKitCartResponse> = [];
 			if (!mealKitItemExisted[cart.mealKit.recipe.id]) {
 				const mealKits = await mealKitRepository.find({
@@ -70,10 +86,16 @@ class CartService {
 							id: cart.mealKit.recipe.id
 						}
 					},
+					relations: ['extraSpice'],
 					select: {
 						id: true,
 						serving: true,
-						price: true
+						price: true,
+						extraSpice: {
+							id: true,
+							name: true,
+							price: true
+						}
 					}
 				});
 				for (const mealKit of mealKits) {
@@ -83,16 +105,20 @@ class CartService {
 					);
 					mealKitItemList.push(mealKitCartResponse);
 				}
+				for (const mealKitItem of mealKitItemList) {
+					if (mealKitItem.extraSpice) {
+						mealKitItem.extraSpice.image =
+							'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+					}
+				}
 				mealKitItemExisted[cart.mealKit.recipe.id] = mealKitItemList;
 			}
 
 			const mealKitItems = mealKitItemExisted[cart.mealKit.recipe.id];
 
-			const cartItem = new CartItemResponse();
-			cartItem.id = cart.id;
+			const cartItem = mapperUtil.mapEntityToClass(cart, CartItemResponse);
 			cartItem.recipe = recipeCart;
 			cartItem.mealKitSelected = mealKitCart;
-			cartItem.quantity = cart.quantity;
 			cartItem.mealKits = mealKitItems;
 
 			if (images) {
@@ -118,7 +144,7 @@ class CartService {
 
 	async createCartHandle(req: FastifyRequest, res: FastifyResponse) {
 		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
-		const { mealkitId, quantity }: CartCreateRequest =
+		const { mealkitId, quantity, has_extra_spice }: CartCreateRequest =
 			req.body as CartCreateRequest;
 
 		const mealKit = await mealKitRepository.findOneBy({
@@ -154,6 +180,7 @@ class CartService {
 			cart.isCart = true;
 			cart.mealKit = mealKit;
 			cart.quantity = quantity;
+			cart.has_extra_spice = has_extra_spice;
 			await orderDetailRepository.create(cart);
 		}
 
@@ -163,7 +190,7 @@ class CartService {
 
 	async updateCartHandle(req: FastifyRequest, res: FastifyResponse) {
 		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
-		const { quantity, mealkitId, cartId }: CartUpdateRequest =
+		const { quantity, mealkitId, cartId, has_extra_spice }: CartUpdateRequest =
 			req.body as CartUpdateRequest;
 
 		const response = new ResponseModel(res);
@@ -192,6 +219,7 @@ class CartService {
 			}
 			cart.mealKit.id = mealKit.id;
 			cart.quantity = quantity;
+			cart.has_extra_spice = has_extra_spice;
 			await orderDetailRepository.update(cart);
 		} else {
 			response.message = 'MealKit not in cart !';
@@ -202,11 +230,15 @@ class CartService {
 	}
 
 	async deleteCartHandle(req: FastifyRequest, res: FastifyResponse) {
+		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
 		const { cartIds }: CartDeleteRequest = req.body as CartDeleteRequest;
 		const response = new ResponseModel(res);
 
 		const carts = await orderDetailRepository.findBy({
-			id: In(cartIds)
+			id: In(cartIds),
+			customer: {
+				id: customer!.id
+			}
 		});
 
 		if (carts.length != 0) {

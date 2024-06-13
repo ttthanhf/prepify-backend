@@ -20,6 +20,12 @@ export class OrderDetail {
 	@Column()
 	price!: number;
 
+	@Column({
+		type: 'boolean',
+		default: false
+	})
+	has_extra_spice!: boolean;
+
 	@ManyToOne(() => Order, (order) => order.orderDetails)
 	order!: Relation<Order>;
 

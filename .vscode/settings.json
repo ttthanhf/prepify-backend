@@ -15,5 +15,15 @@
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"editor.fontWeight": "normal",
-	"cSpell.words": ["fastify", "httpstatuscode", "mealkit", "typebox", "typeorm"]
+	"cSpell.words": [
+		"ENVIROMENT",
+		"fastify",
+		"httpstatuscode",
+		"mealkit",
+		"openapi",
+		"Prepify",
+		"typebox",
+		"typeorm",
+		"uuidv"
+	]
 }
