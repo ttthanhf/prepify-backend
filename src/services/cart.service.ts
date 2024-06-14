@@ -181,6 +181,7 @@ class CartService {
 				quantity > 99
 			) {
 				response.message = 'Quantity not lower 1 or higher 99 item';
+				response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 				return response.send();
 			}
 			await orderDetailRepository.update(cart);
@@ -207,6 +208,7 @@ class CartService {
 
 		if (quantity < 1 || quantity > 99) {
 			response.message = 'Quantity not lower 1 or higher 99 item';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			return response.send();
 		}
 
