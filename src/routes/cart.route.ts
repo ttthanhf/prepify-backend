@@ -20,7 +20,7 @@ export default async function route(
 		cartController.getCart
 	);
 	app.post(
-		'/cart',
+		'/cart/add',
 		{
 			schema: {
 				body: cartCreateRequestSchema
@@ -30,7 +30,7 @@ export default async function route(
 		cartController.createCart
 	);
 	app.put(
-		'/cart',
+		'/cart/update',
 		{
 			schema: {
 				body: cartUpdateRequestSchema
@@ -39,8 +39,8 @@ export default async function route(
 		},
 		cartController.updateCart
 	);
-	app.delete(
-		'/cart',
+	app.post(
+		'/cart/delete',
 		{
 			schema: {
 				body: cartDeleteRequestSchema
