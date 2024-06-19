@@ -13,7 +13,10 @@ export class Area {
 	name!: string;
 
 	@Column()
-	price!: number;
+	instantPrice!: number;
+
+	@Column()
+	standardPrice!: number;
 
 	@OneToMany(() => Batch, (batch) => batch.area)
 	batches!: Batch[];

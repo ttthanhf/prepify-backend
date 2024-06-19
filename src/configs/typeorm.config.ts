@@ -22,6 +22,7 @@ import { Nutrition } from '~models/entities/nutrition.entity';
 import { Unit } from '~models/entities/unit.entity';
 import { ENVIROMENT } from '~constants/env.constant';
 import { ExtraSpice } from '~models/entities/extra-spice.entity';
+import { Config } from '~models/entities/config.entity';
 
 const TYPEORM_CONFIG: DataSourceOptions = {
 	type: 'mariadb',
@@ -50,7 +51,8 @@ const TYPEORM_CONFIG: DataSourceOptions = {
 		RecipeNutrition,
 		Nutrition,
 		Unit,
-		ExtraSpice
+		ExtraSpice,
+		Config
 	],
 	synchronize: false, //warning its will - with db - if y delete entity - db will delete it
 	logging: envConfig.ENVIROMENT == ENVIROMENT.DEVELOPMENT,
