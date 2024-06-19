@@ -1,5 +1,6 @@
 import { _Object } from '@aws-sdk/client-s3';
 import { Redis, RedisKey } from 'ioredis';
+import { Customer } from '~models/entities/customer.entity';
 
 const recoveryPasswordTail = '-recovery-password';
 
@@ -11,6 +12,27 @@ class RedisUtil {
 			this.redis = new Redis();
 			console.log('Redis init successfully !');
 		}
+	}
+
+	async setCheckout(customer: Customer, checkout: any) {
+		return await this.redis.set(
+			'checkout-' + customer.id,
+			JSON.stringify(checkout),
+			'EX',
+			60 * 60
+		);
+	}
+
+	async getCheckout(customer: Customer) {
+		const checkout = await this.redis.get('checkout-' + customer.id);
+		if (checkout) {
+			return JSON.parse(checkout);
+		}
+		return null;
+	}
+
+	async removeCheckout(customer: Customer) {
+		return await this.redis.del('checkout-' + customer.id);
 	}
 
 	async setImagesRecipes(images: object) {
