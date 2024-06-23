@@ -19,6 +19,7 @@
 		"autoload",
 		"ENVIROMENT",
 		"fastify",
+		"fullname",
 		"httpstatuscode",
 		"levelcook",
 		"mealkit",

@@ -174,6 +174,9 @@ class CartService {
 
 		if (cart) {
 			cart.quantity = cart.quantity + quantity;
+			if (!cart.has_extra_spice && has_extra_spice) {
+				cart.has_extra_spice = has_extra_spice;
+			}
 			if (
 				cart.quantity > 99 ||
 				cart.quantity < 1 ||
