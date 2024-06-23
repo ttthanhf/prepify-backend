@@ -14,6 +14,7 @@ import mapperUtil from '~utils/mapper.util';
 import areaRepository from '~repositories/area.repository';
 import configRepository from '~repositories/config.repository';
 import redisUtil from '~utils/redis.util';
+import paymentRepository from '~repositories/payment.repository';
 
 class CheckoutService {
 	async getCheckoutHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -97,11 +98,14 @@ class CheckoutService {
 		standardDate.month = standardCurrentDate.getMonth();
 		standardDate.year = standardCurrentDate.getFullYear();
 
+		const payments = await paymentRepository.findAll();
+
 		const checkoutResponse = new CheckoutResponse();
 		checkoutResponse.items = items;
 		checkoutResponse.area = areaResponseList;
 		checkoutResponse.instantDate = instantDate;
 		checkoutResponse.standardDate = standardDate;
+		checkoutResponse.payments = payments;
 
 		await redisUtil.setCheckout(customer!, checkoutResponse);
 

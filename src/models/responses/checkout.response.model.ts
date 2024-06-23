@@ -20,9 +20,16 @@ export class ItemResponse {
 	serving!: number;
 }
 
+export class PaymentResponse {
+	id!: string;
+	name!: string;
+	icon!: string;
+}
+
 export class CheckoutResponse {
 	items!: Array<ItemResponse>;
 	area!: Array<AreaResponse>;
+	payments!: Array<PaymentResponse>;
 	instantDate!: ShippingDate;
 	standardDate!: ShippingDate;
 }
