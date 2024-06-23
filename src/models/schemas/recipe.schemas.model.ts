@@ -1,29 +1,30 @@
 import { Static, Type } from '@sinclair/typebox';
+import { LevelCook } from '~constants/levelcook.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 
 export const recipeCreateRequestSchema = Type.Object({
 	name: Type.String(),
 	ingredients: Type.Array(
 		Type.Object({
-			ingredient_id: Type.Number(),
+			ingredient_id: Type.String(),
 			amount: Type.Number(),
-			unit_id: Type.Number()
+			unit_id: Type.String()
 		})
 	),
-	category: Type.Number(),
-	foodStyle: Type.Array(Type.Number()),
+	category: Type.String(),
+	foodStyles: Type.Array(Type.String()),
 	steps: Type.String(),
 	nutrition: Type.Array(
 		Type.Object({
-			nutrition_id: Type.Number(),
+			nutrition_id: Type.String(),
 			amount: Type.Number(),
-			unit_id: Type.Number()
+			unit_id: Type.String()
 		})
 	),
 	images: Type.Optional(Type.Array(Type.String())),
 	time: Type.Number({ description: 'Time cook' }),
-	video: Type.Optional(Type.String({ description: 'URL youtube' })),
-	level: Type.String()
+	videoUrl: Type.Optional(Type.String({ description: 'URL youtube' })),
+	level: Type.Enum(LevelCook)
 });
 
 export type RecipeCreateRequest = Static<typeof recipeCreateRequestSchema>;
