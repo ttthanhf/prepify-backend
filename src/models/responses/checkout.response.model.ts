@@ -10,6 +10,12 @@ export class AreaResponse {
 	instantPrice!: number;
 	standardPrice!: number;
 }
+export class ExtraSpiceResponse {
+	id!: string;
+	name!: string;
+	image!: string;
+	price!: string;
+}
 
 export class ItemResponse {
 	id!: string;
@@ -18,6 +24,8 @@ export class ItemResponse {
 	price!: number;
 	quantity!: number;
 	serving!: number;
+	slug!: string;
+	extraSpice!: ExtraSpiceResponse | null;
 }
 
 export class PaymentResponse {

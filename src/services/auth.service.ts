@@ -33,25 +33,25 @@ class AuthService {
 
 	async loginHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { email, phone, password }: LoginRequest = req.body as LoginRequest;
-		const respose = new ResponseModel(res);
+		const response = new ResponseModel(res);
 
 		if (!(email || phone)) {
-			respose.message = 'Missing phone or email field';
-			respose.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
-			return respose.send();
+			response.message = 'Missing phone or email field';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
 		}
 
 		const user = await userRepository.findOneBy(email ? { email } : { phone });
 
-		if (user && (await bcryptUtil.compare(password, user.password))) {
-			respose.message = 'Login success';
-			respose.data = this.getAccessToken(user);
-			return respose.send();
+		if (user && (await bcryptUtil.compare(password, user.password!))) {
+			response.message = 'Login success';
+			response.data = this.getAccessToken(user);
+			return response.send();
 		}
 
-		respose.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-		respose.message = 'Account not exist';
-		return respose.send();
+		response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+		response.message = 'Account not exist';
+		return response.send();
 	}
 	async registerHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { phone, password, email, fullname }: RegisterRequest =
@@ -61,12 +61,12 @@ class AuthService {
 			where: [{ email: email || undefined }, { phone: phone || undefined }]
 		});
 
-		const respose = new ResponseModel(res);
+		const response = new ResponseModel(res);
 
 		if (user.length != 0) {
-			respose.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
-			respose.message = 'Email or phone exist';
-			return respose.send();
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Email or phone exist';
+			return response.send();
 		}
 
 		const newUser = new User();
@@ -81,17 +81,17 @@ class AuthService {
 		newCustomer.user = newUser;
 		await customerRepository.create(newCustomer);
 
-		respose.message = 'Created new user';
-		respose.data = this.getAccessToken(newUser);
-		return respose.send();
+		response.message = 'Created new user';
+		response.data = this.getAccessToken(newUser);
+		return response.send();
 	}
 
 	async getUrlGoogle(req: FastifyRequest, res: FastifyResponse) {
-		const respose = new ResponseModel(res);
-		respose.data = {
+		const response = new ResponseModel(res);
+		response.data = {
 			url: oauth2Util.getUrlGoogleLogin()
 		};
-		return respose.send();
+		return response.send();
 	}
 	async loginWithGoogleHandle(
 		req: FastifyRequest<{ Querystring: AuthorizationTokenConfig }>,
@@ -183,7 +183,7 @@ class AuthService {
 			info?.type !== Token.FORGOTPASSWORD
 		) {
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
-			response.message = 'Token invaild';
+			response.message = 'Token invalid';
 			return response.send();
 		}
 
