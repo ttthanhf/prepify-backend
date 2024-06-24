@@ -19,6 +19,8 @@
 		"autoload",
 		"ENVIROMENT",
 		"fastify",
+		"fieldname",
+		"FORGOTPASSWORD",
 		"fullname",
 		"httpstatuscode",
 		"levelcook",

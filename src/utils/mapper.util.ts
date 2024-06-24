@@ -1,13 +1,13 @@
 import { ObjectLiteral } from 'typeorm';
 
-function mapEntityToClass<Entity extends ObjectLiteral>(
+function mapEntityToClass<Entity extends ObjectLiteral, T extends object>(
 	entity: Entity,
-	ClassDTO: any
-) {
+	ClassDTO: new () => T
+): T {
 	const classDTO = new ClassDTO();
 	Object.keys(classDTO).forEach((key) => {
 		if (entity.hasOwnProperty(key)) {
-			classDTO[key] = entity[key];
+			(classDTO as any)[key] = entity[key];
 		}
 	});
 	return classDTO;

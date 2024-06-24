@@ -1,4 +1,4 @@
-export class RecipeShopReponseModel {
+export class RecipeShopResponseModel {
 	id!: string;
 	name!: string;
 	slug!: string;
