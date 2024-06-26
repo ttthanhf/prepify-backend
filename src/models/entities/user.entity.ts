@@ -12,6 +12,7 @@ import {
 	PrimaryColumn,
 	Relation
 } from 'typeorm';
+import { ExpoPushToken } from './expo-push-token.entity';
 
 @Entity({ name: 'user' })
 export class User {
@@ -55,4 +56,7 @@ export class User {
 
 	@ManyToOne(() => Area, (area) => area.users)
 	area?: Relation<Area>;
+
+	@OneToMany(() => ExpoPushToken, (expoPushToken) => expoPushToken.user)
+	expoPushTokens!: ExpoPushToken[];
 }

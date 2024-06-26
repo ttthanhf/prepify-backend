@@ -23,6 +23,7 @@ import { Unit } from '~models/entities/unit.entity';
 import { ENVIROMENT } from '~constants/env.constant';
 import { ExtraSpice } from '~models/entities/extra-spice.entity';
 import { Config } from '~models/entities/config.entity';
+import { ExpoPushToken } from '~models/entities/expo-push-token.entity';
 
 const TYPEORM_CONFIG: DataSourceOptions = {
 	type: 'mariadb',
@@ -52,7 +53,8 @@ const TYPEORM_CONFIG: DataSourceOptions = {
 		Nutrition,
 		Unit,
 		ExtraSpice,
-		Config
+		Config,
+		ExpoPushToken
 	],
 	synchronize: false, //warning its will - with db - if y delete entity - db will delete it
 	logging: envConfig.ENVIROMENT == ENVIROMENT.DEVELOPMENT,
