@@ -17,7 +17,7 @@ export default async function expoPushTokenRoute(
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
-				allowedRoles: [Role.CUSTOMER, Role.SHIPPER]
+				allowedRoles: [Role.ADMIN, Role.SHIPPER]
 			}
 		},
 		expoPushTokenController.savePushToken

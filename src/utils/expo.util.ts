@@ -10,8 +10,7 @@ class ExpoUtil {
 		data: Record<string, unknown>
 	) {
 		if (!Expo.isExpoPushToken(pushToken)) {
-			console.error(`Push token ${pushToken} is not a valid Expo push token`);
-			return;
+			throw new Error(`Push token ${pushToken} is not a valid Expo push token`);
 		}
 
 		const messages: ExpoPushMessage[] = [
@@ -32,7 +31,7 @@ class ExpoUtil {
 				const ticketChunk = await this.expo.sendPushNotificationsAsync(chunk);
 				tickets.push(...ticketChunk);
 			} catch (error) {
-				console.error(error);
+				throw new Error(`Error sending push notification: ${error}`);
 			}
 		}
 
