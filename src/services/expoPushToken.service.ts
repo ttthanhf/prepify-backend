@@ -31,9 +31,7 @@ class ExpoPushTokenService {
 
 			if (existingToken) {
 				if (existingToken.pushToken === pushToken) {
-					response.data = {
-						message: 'Push token already saved'
-					};
+					response.message = 'Push token already saved';
 					return response.send();
 				}
 				await expoPushTokenRepository.update(expoPushToken);
@@ -41,9 +39,7 @@ class ExpoPushTokenService {
 				await expoPushTokenRepository.create(expoPushToken);
 			}
 
-			response.data = {
-				message: 'Push token saved successfully'
-			};
+			response.message = 'Push token saved successfully';
 			return response.send();
 		} catch (error) {
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
