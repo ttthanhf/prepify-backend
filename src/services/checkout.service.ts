@@ -14,6 +14,9 @@ import mapperUtil from '~utils/mapper.util';
 import areaRepository from '~repositories/area.repository';
 import configRepository from '~repositories/config.repository';
 import redisUtil from '~utils/redis.util';
+import paymentRepository from '~repositories/payment.repository';
+import { DEFAULT_IMAGE } from '~constants/default.constant';
+import { ExtraSpiceResponse } from '~models/responses/cart.response.model';
 
 class CheckoutService {
 	async getCheckoutHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -40,7 +43,7 @@ class CheckoutService {
 				},
 				id: In(cartIds)
 			},
-			relations: ['mealKit', 'mealKit.recipe'],
+			relations: ['mealKit', 'mealKit.recipe', 'mealKit.extraSpice'],
 			select: {
 				id: true,
 				quantity: true,
@@ -49,6 +52,11 @@ class CheckoutService {
 					price: true,
 					recipe: {
 						name: true
+					},
+					extraSpice: {
+						id: true,
+						name: true,
+						price: true
 					}
 				}
 			}
@@ -56,10 +64,23 @@ class CheckoutService {
 
 		const items: Array<ItemResponse> = [];
 		for (const cart of carts) {
+			let extraSpice = null;
+			if (cart.mealKit.extraSpice) {
+				extraSpice = mapperUtil.mapEntityToClass(
+					cart.mealKit.extraSpice,
+					ExtraSpiceResponse
+				);
+				extraSpice.image = DEFAULT_IMAGE;
+			}
+
 			const itemResponse = mapperUtil.mapEntityToClass(cart, ItemResponse);
 			itemResponse.name = cart.mealKit.recipe.name;
 			itemResponse.price = cart.mealKit.price;
 			itemResponse.serving = cart.mealKit.serving;
+			itemResponse.slug =
+				cart.mealKit.recipe.name + '.' + cart.mealKit.recipe.id;
+			itemResponse.image = DEFAULT_IMAGE;
+			itemResponse.extraSpice = extraSpice;
 			items.push(itemResponse);
 		}
 
@@ -97,11 +118,14 @@ class CheckoutService {
 		standardDate.month = standardCurrentDate.getMonth();
 		standardDate.year = standardCurrentDate.getFullYear();
 
+		const payments = await paymentRepository.findAll();
+
 		const checkoutResponse = new CheckoutResponse();
 		checkoutResponse.items = items;
 		checkoutResponse.area = areaResponseList;
 		checkoutResponse.instantDate = instantDate;
 		checkoutResponse.standardDate = standardDate;
+		checkoutResponse.payments = payments;
 
 		await redisUtil.setCheckout(customer!, checkoutResponse);
 

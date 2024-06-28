@@ -19,6 +19,7 @@ import {
 import redisUtil from '~utils/redis.util';
 import envConfig from '~configs/env.config';
 import mapperUtil from '~utils/mapper.util';
+import { DEFAULT_IMAGE } from '~constants/default.constant';
 
 class CartService {
 	async getCartHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -75,8 +76,7 @@ class CartService {
 			);
 
 			if (cart.mealKit.extraSpice && cart.has_extra_spice) {
-				mealKitCart.extraSpice.image =
-					'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+				mealKitCart.extraSpice.image = DEFAULT_IMAGE;
 			}
 
 			const mealKitItemList: Array<MealKitCartResponse> = [];
@@ -108,8 +108,7 @@ class CartService {
 				}
 				for (const mealKitItem of mealKitItemList) {
 					if (mealKitItem.extraSpice) {
-						mealKitItem.extraSpice.image =
-							'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+						mealKitItem.extraSpice.image = DEFAULT_IMAGE;
 					}
 				}
 				mealKitItemExisted[cart.mealKit.recipe.id] = mealKitItemList;
@@ -129,12 +128,10 @@ class CartService {
 				if (indexImage != -1) {
 					cartItem.image = envConfig.S3_HOST + images[indexImage].Key;
 				} else {
-					cartItem.image =
-						'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+					cartItem.image = DEFAULT_IMAGE;
 				}
 			} else {
-				cartItem.image =
-					'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
+				cartItem.image = DEFAULT_IMAGE;
 			}
 
 			CartList.push(cartItem);
@@ -174,6 +171,9 @@ class CartService {
 
 		if (cart) {
 			cart.quantity = cart.quantity + quantity;
+			if (!cart.has_extra_spice && has_extra_spice) {
+				cart.has_extra_spice = has_extra_spice;
+			}
 			if (
 				cart.quantity > 99 ||
 				cart.quantity < 1 ||

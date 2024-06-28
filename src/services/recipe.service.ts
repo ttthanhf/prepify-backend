@@ -1,10 +1,11 @@
 import { _Object } from '@aws-sdk/client-s3';
 import { MultipartFile } from '@fastify/multipart';
 import envConfig from '~configs/env.config';
+import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import { Recipe } from '~models/entities/recipe.entity';
-import { RecipeShopReponseModel } from '~models/responses/recipe.reponse.model';
+import { RecipeShopResponseModel as RecipeShopResponseModel } from '~models/responses/recipe.reponse.model';
 import ResponseModel from '~models/responses/response.model';
 import {
 	RecipeGetRequest,
@@ -239,21 +240,17 @@ class RecipeService {
 			}
 		});
 
-		const recipeShopReponseModelList: Array<RecipeShopReponseModel> = [];
+		const recipeShopResponseModelList: Array<RecipeShopResponseModel> = [];
 		recipes.forEach((recipe) => {
-			const recipeShopReponseModel = new RecipeShopReponseModel();
-			recipeShopReponseModel.id = recipe.id;
-			recipeShopReponseModel.name = recipe.name;
-			recipeShopReponseModel.slug = recipe.slug;
-			recipeShopReponseModel.foodStyle = recipe?.foodStyles?.[0]?.name;
-			recipeShopReponseModel.mainImage =
-				recipe?.images[0] ||
-				'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
-			recipeShopReponseModel.subImage =
-				recipe?.images[1] ||
-				'https://prepify.thanhf.dev/assets/home-banner-GLRYjKkm.png';
-			recipeShopReponseModel.level = recipe.level;
-			recipeShopReponseModel.time = recipe.time;
+			const recipeShopResponseModel = new RecipeShopResponseModel();
+			recipeShopResponseModel.id = recipe.id;
+			recipeShopResponseModel.name = recipe.name;
+			recipeShopResponseModel.slug = recipe.slug;
+			recipeShopResponseModel.foodStyle = recipe?.foodStyles?.[0]?.name;
+			recipeShopResponseModel.mainImage = recipe?.images[0] || DEFAULT_IMAGE;
+			recipeShopResponseModel.subImage = recipe?.images[1] || DEFAULT_IMAGE;
+			recipeShopResponseModel.level = recipe.level;
+			recipeShopResponseModel.time = recipe.time;
 
 			if (recipe.mealKits.length != 0) {
 				let lowestPriceMealKit = recipe.mealKits[0];
@@ -262,16 +259,16 @@ class RecipeService {
 						lowestPriceMealKit = recipe.mealKits[i];
 					}
 				}
-				recipeShopReponseModel.price = lowestPriceMealKit.price;
-				recipeShopReponseModel.star = lowestPriceMealKit.rating;
+				recipeShopResponseModel.price = lowestPriceMealKit.price;
+				recipeShopResponseModel.star = lowestPriceMealKit.rating;
 			}
 
-			recipeShopReponseModelList.push(recipeShopReponseModel);
+			recipeShopResponseModelList.push(recipeShopResponseModel);
 		});
 
 		const response = new ResponseModel(res);
 		response.data = {
-			recipes: recipeShopReponseModelList,
+			recipes: recipeShopResponseModelList,
 			itemTotal,
 			pageIndex,
 			pageSize,

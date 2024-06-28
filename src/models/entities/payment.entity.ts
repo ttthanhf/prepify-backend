@@ -10,6 +10,9 @@ export class Payment {
 	@Column()
 	name!: string;
 
+	@Column()
+	icon!: string;
+
 	@OneToMany(() => OrderPayment, (orderPayment) => orderPayment.payment)
 	orderPayments!: OrderPayment[];
 }
