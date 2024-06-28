@@ -22,4 +22,15 @@ export default async function expoPushTokenRoute(
 		},
 		expoPushTokenController.savePushToken
 	);
+
+	app.get(
+		'/expo-push-token/:device_id',
+		{
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.ADMIN, Role.SHIPPER]
+			}
+		},
+		expoPushTokenController.getPushTokenByDeviceId
+	);
 }
