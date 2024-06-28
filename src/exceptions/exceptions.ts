@@ -6,21 +6,19 @@ export default async function exceptionsHandle(app: Fastify) {
 	app.setErrorHandler(
 		(error: FastifyError, request: FastifyRequest, reply: FastifyResponse) => {
 			const validation = error.validation || [];
-			const reponse = new ResponseModel(reply);
-			reponse.statusCode = 400;
-			console.log(error);
+			const response = new ResponseModel(reply);
+			response.statusCode = 400;
+			request.log.error(error);
 			if (validation.length > 0) {
 				if (validation[0].message?.startsWith('must match pattern')) {
-					reponse.message = `${validation[0].instancePath.slice(1)} not correct format`;
+					response.message = `${validation[0].instancePath.slice(1)} not correct format`;
 				} else {
-					request.log.error(error);
-					reponse.message = String(error);
+					response.message = String(error);
 				}
 			} else {
-				request.log.error(error);
-				reponse.message = String(error);
+				response.message = String(error);
 			}
-			return reponse.send();
+			return response.send();
 		}
 	);
 }
