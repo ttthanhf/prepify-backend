@@ -17,6 +17,8 @@
 	"editor.fontWeight": "normal",
 	"cSpell.words": [
 		"autoload",
+		"datetime",
+		"deliverymethod",
 		"ENVIROMENT",
 		"fastify",
 		"fieldname",

@@ -17,6 +17,7 @@ import redisUtil from '~utils/redis.util';
 import paymentRepository from '~repositories/payment.repository';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { ExtraSpiceResponse } from '~models/responses/cart.response.model';
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 
 class CheckoutService {
 	async getCheckoutHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -47,6 +48,7 @@ class CheckoutService {
 			select: {
 				id: true,
 				quantity: true,
+				has_extra_spice: true,
 				mealKit: {
 					serving: true,
 					price: true,
@@ -62,10 +64,16 @@ class CheckoutService {
 			}
 		});
 
+		if (carts.length == 0) {
+			response.message = 'No item can add in checkout';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
 		const items: Array<ItemResponse> = [];
 		for (const cart of carts) {
 			let extraSpice = null;
-			if (cart.mealKit.extraSpice) {
+			if (cart.has_extra_spice && cart.mealKit.extraSpice) {
 				extraSpice = mapperUtil.mapEntityToClass(
 					cart.mealKit.extraSpice,
 					ExtraSpiceResponse
