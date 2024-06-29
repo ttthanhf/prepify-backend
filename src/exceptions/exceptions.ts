@@ -9,6 +9,7 @@ export default async function exceptionsHandle(app: Fastify) {
 			const response = new ResponseModel(reply);
 			response.statusCode = 400;
 			request.log.error(error);
+			console.log(error);
 			if (validation.length > 0) {
 				if (validation[0].message?.startsWith('must match pattern')) {
 					response.message = `${validation[0].instancePath.slice(1)} not correct format`;

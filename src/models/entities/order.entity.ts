@@ -40,8 +40,13 @@ export class Order {
 	@Column()
 	phone!: string;
 
-	@Column()
-	transactionId!: string; // optional in the future
+	// @Column()
+	// transactionId!: string; // optional in the future
+
+	@Column({
+		nullable: true
+	})
+	note?: string;
 
 	@Column({
 		type: 'enum',

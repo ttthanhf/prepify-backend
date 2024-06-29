@@ -43,6 +43,12 @@ class AuthService {
 
 		const user = await userRepository.findOneBy(email ? { email } : { phone });
 
+		if (!user!.password) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'Account not exist';
+			return response.send();
+		}
+
 		if (user && (await bcryptUtil.compare(password, user.password!))) {
 			response.message = 'Login success';
 			response.data = this.getAccessToken(user);
