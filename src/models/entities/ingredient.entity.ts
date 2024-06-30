@@ -23,24 +23,6 @@ export class Ingredient {
 	category!: string;
 
 	@Column()
-	portionSize!: number;
-
-	@Column()
-	calories!: number;
-
-	@Column()
-	carbohydrate!: number;
-
-	@Column()
-	dietaryFiber!: number;
-
-	@Column()
-	protein!: number;
-
-	@Column()
-	fat!: number;
-
-	@Column()
 	price!: number;
 
 	@Column()
