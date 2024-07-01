@@ -1,15 +1,26 @@
 import { _Object } from '@aws-sdk/client-s3';
+import { MultipartFile } from '@fastify/multipart';
 import { FastifyRequest } from 'fastify';
 import envConfig from '~configs/env.config';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
+import { Recipe } from '~models/entities/recipe.entity';
 import { RecipeModeratorResponseModel } from '~models/responses/moderator/recipe.response';
 import ResponseModel from '~models/responses/response.model';
 import { recipeModeratorQueryGetRequest } from '~models/schemas/moderator/recipe.schemas.model';
+import {
+	recipeCreateRequestSchema,
+	recipeUpdateRequestSchema
+} from '~models/schemas/recipe.schemas.model';
 import recipeRepository from '~repositories/recipe.repository';
 import { FastifyResponse } from '~types/fastify.type';
+import mapperUtil from '~utils/mapper.util';
+import objectUtil from '~utils/object.util';
 import redisUtil from '~utils/redis.util';
 import s3Util from '~utils/s3.util';
+import stringUtil from '~utils/string.util';
+import validateUtil from '~utils/validate.util';
 
 class RecipeModeratorService {
 	async getRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -148,6 +159,94 @@ class RecipeModeratorService {
 			pageSize,
 			pageTotal
 		};
+		return response.send();
+	}
+
+	async updateRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { recipe_id }: any = req.params as Object;
+		const recipeObj = {} as Recipe;
+
+		const recipe = await recipeRepository.findOneBy({
+			id: recipe_id
+		});
+
+		const response = new ResponseModel(res);
+		if (!recipe) {
+			response.message = 'Recipe not found';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
+		for await (const part of req.parts()) {
+			if (part.type == 'field') {
+				objectUtil.setProperty(
+					recipeObj,
+					part.fieldname as keyof Recipe,
+					stringUtil.tryParseStringToJSON(String(part.value))
+				);
+			}
+		}
+
+		validateUtil.validate(res, recipeUpdateRequestSchema, recipeObj);
+
+		mapperUtil.mapObjToEntity(recipe, recipeObj);
+
+		await recipeRepository.update(recipe);
+
+		return response.send();
+	}
+
+	async createRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+		const recipeObj = {} as Recipe;
+		const files: Array<MultipartFile> = [];
+		const response = new ResponseModel(res);
+
+		for await (const part of req.parts()) {
+			if (part.type == 'field') {
+				objectUtil.setProperty(
+					recipeObj,
+					part.fieldname as keyof Recipe,
+					stringUtil.tryParseStringToJSON(String(part.value))
+				);
+			} else if (part.type == 'file') {
+				if (part.fieldname == 'images') {
+					if (part.mimetype.startsWith('image/')) {
+						files.push(part);
+					} else {
+						response.message = 'Images have some file not image';
+						response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+						return response.send();
+					}
+				}
+			}
+		}
+
+		const newRecipe = new Recipe();
+
+		validateUtil.validate(res, recipeCreateRequestSchema, recipeObj);
+
+		mapperUtil.mapObjToEntity(newRecipe, recipeObj);
+
+		newRecipe.slug =
+			stringUtil
+				.removeVietnameseTones(newRecipe.name)
+				.toLocaleLowerCase('vi')
+				.replaceAll(' ', '-') +
+			'.' +
+			newRecipe.id;
+
+		await recipeRepository.create(newRecipe);
+
+		for (const file of files) {
+			await s3Util.uploadImage({
+				data: await file.toBuffer(),
+				name: newRecipe.id,
+				type: 'recipe'
+			});
+		}
+
+		await redisUtil.removeImagesRecipes();
+
 		return response.send();
 	}
 }

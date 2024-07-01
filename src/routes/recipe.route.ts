@@ -1,7 +1,4 @@
-import authMiddleware from '~middlewares/auth.middleware';
-
 import { Fastify } from '~types/fastify.type';
-import { Role } from '~constants/role.constant';
 import recipeController from '~controllers/recipe.controller';
 import { recipeQueryGetRequestSchema } from '~models/schemas/recipe.schemas.model';
 
@@ -18,31 +15,5 @@ export default async function recipeRoute(
 			}
 		},
 		recipeController.getRecipe
-	);
-	app.post(
-		'/recipes',
-		{
-			schema: {
-				consumes: ['multipart/form-data']
-			},
-			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
-			config: {
-				allowedRoles: [Role.MODERATOR, Role.ADMIN]
-			}
-		},
-		recipeController.createRecipe
-	);
-	app.put(
-		'/recipes/:recipe_id',
-		{
-			schema: {
-				consumes: ['multipart/form-data']
-			},
-			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
-			config: {
-				allowedRoles: [Role.MODERATOR, Role.ADMIN]
-			}
-		},
-		recipeController.updateRecipe
 	);
 }
