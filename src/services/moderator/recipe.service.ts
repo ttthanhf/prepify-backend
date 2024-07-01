@@ -362,6 +362,24 @@ class RecipeModeratorService {
 
 		return response.send();
 	}
+
+	async deleteRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { recipe_id }: any = req.params as Object;
+		const recipe = await recipeRepository.findOneBy({
+			id: recipe_id
+		});
+
+		const response = new ResponseModel(res);
+		if (!recipe) {
+			response.message = 'Recipe not found';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
+		await recipeRepository.removeOne(recipe);
+
+		return response.send();
+	}
 }
 
 export default new RecipeModeratorService();

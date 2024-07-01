@@ -58,4 +58,14 @@ export default async function recipeRoute(
 		},
 		recipeModeratorController.updateRecipe
 	);
+	app.delete(
+		'/recipes/:recipe_id',
+		{
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		recipeModeratorController.deleteRecipe
+	);
 }
