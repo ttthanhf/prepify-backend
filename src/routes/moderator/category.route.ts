@@ -54,4 +54,15 @@ export default async function categoryRoute(
 		},
 		categoryController.updateCategory
 	);
+
+	app.delete(
+		'/categories/:id',
+		{
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		categoryController.deleteCategory
+	);
 }
