@@ -25,6 +25,7 @@ import {
 	recipeUpdateRequestSchema
 } from '~models/schemas/recipe.schemas.model';
 import foodStyleRepository from '~repositories/foodStyle.repository';
+import mealKitRepository from '~repositories/mealKit.repository';
 import recipeRepository from '~repositories/recipe.repository';
 import { FastifyResponse } from '~types/fastify.type';
 import mapperUtil from '~utils/mapper.util';
@@ -372,6 +373,21 @@ class RecipeModeratorService {
 		const response = new ResponseModel(res);
 		if (!recipe) {
 			response.message = 'Recipe not found';
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			return response.send();
+		}
+
+		const count = await mealKitRepository.count({
+			where: {
+				recipe: {
+					id: recipe.id
+				}
+			},
+			relations: ['recipe']
+		});
+
+		if (count != 0) {
+			response.message = 'Some meal kit existed in this recipe';
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			return response.send();
 		}
