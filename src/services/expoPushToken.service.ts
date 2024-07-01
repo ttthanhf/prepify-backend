@@ -47,6 +47,38 @@ class ExpoPushTokenService {
 			return response.send();
 		}
 	}
+
+	async getExpoPushTokenByDeviceIdHandle(
+		req: FastifyRequest,
+		res: FastifyResponse
+	) {
+		const { device_id }: any = req.params as Object;
+
+		const response = new ResponseModel(res);
+		try {
+			const existingToken = await expoPushTokenRepository.findOne({
+				where: {
+					deviceId: device_id
+				}
+			});
+
+			if (!existingToken) {
+				response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+				response.message = 'Push token is not found';
+				return response.send();
+			}
+
+			response.data = {
+				token: existingToken
+			};
+
+			return response.send();
+		} catch (error) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Failed to get push token';
+			return response.send();
+		}
+	}
 }
 
 export default new ExpoPushTokenService();
