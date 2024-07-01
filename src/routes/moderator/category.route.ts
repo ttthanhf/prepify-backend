@@ -1,4 +1,7 @@
-import { categoryModeratorQueryGetRequestSchema } from '~models/schemas/moderator/category.schemas.model';
+import {
+	categoryModeratorQueryCreateRequestSchema,
+	categoryModeratorQueryGetRequestSchema
+} from '~models/schemas/moderator/category.schemas.model';
 import authMiddleware from '~middlewares/auth.middleware';
 import { Role } from '~constants/role.constant';
 import { Fastify } from '~types/fastify.type';
@@ -21,5 +24,19 @@ export default async function recipeRoute(
 			}
 		},
 		categoryController.getCategory
+	);
+
+	app.post(
+		'/categories',
+		{
+			schema: {
+				body: categoryModeratorQueryCreateRequestSchema
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		categoryController.createCategory
 	);
 }
