@@ -9,6 +9,7 @@ import {
 	categoryModeratorQueryUpdateRequest
 } from '~models/schemas/moderator/category.schemas.model';
 import categoryRepository from '~repositories/category,repository';
+import recipeRepository from '~repositories/recipe.repository';
 import { FastifyResponse } from '~types/fastify.type';
 
 class CategoryModeratorService {
@@ -31,10 +32,10 @@ class CategoryModeratorService {
 			.createQueryBuilder('category')
 			.leftJoinAndSelect('category.recipes', 'recipe')
 			.select(['category.id AS id', 'category.name AS name'])
-			.addSelect('COUNT(category.id)', 'totalRecipes')
+			.addSelect('COUNT(recipe.id)', 'totalRecipes')
 			.groupBy('category.id')
-			.take(pageSize)
-			.skip((pageIndex - 1) * pageSize);
+			.take(Number(pageSize))
+			.skip((Number(pageIndex) - 1) * Number(pageSize));
 
 		switch (query.sortBy) {
 			case SortBy.NAME:
@@ -66,7 +67,7 @@ class CategoryModeratorService {
 		}));
 
 		const itemTotal = categories.length;
-		const pageTotal = Math.ceil(itemTotal / pageSize);
+		const pageTotal = Math.ceil(itemTotal / Number(pageSize));
 
 		const response = new ResponseModel(res);
 		response.data = {
@@ -148,6 +149,42 @@ class CategoryModeratorService {
 		} catch (error) {
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			response.message = 'Failed to update category';
+			return response.send();
+		}
+	}
+
+	async deleteCategoryHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { id }: any = req.params as Object;
+
+		const category = await categoryRepository.findOneBy({
+			id: id
+		});
+
+		const response = new ResponseModel(res);
+		if (!category) {
+			response.message = 'Category not found';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
+		// Check if the category has any recipes
+		const existingRecipe = await recipeRepository.findOneBy({
+			category: category
+		});
+
+		if (existingRecipe) {
+			response.message = 'Category has recipes';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
+		try {
+			await categoryRepository.removeOne(category);
+			response.message = 'Category deleted successfully';
+			return response.send();
+		} catch (error) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Failed to delete category';
 			return response.send();
 		}
 	}
