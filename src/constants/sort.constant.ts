@@ -6,5 +6,10 @@ export enum OrderBy {
 export enum SortBy {
 	NEWEST = 'newest',
 	POPULAR = 'popular',
-	PRICE = 'price'
+	PRICE = 'price',
+	LEVEL = 'level',
+	CATEGORY = 'category',
+	TIME = 'time',
+	NAME = 'name',
+	TOTALMEALKIT = 'totalmealkit'
 }

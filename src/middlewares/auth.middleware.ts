@@ -8,16 +8,16 @@ import headerUtil from '~utils/header.util';
 async function requireToken(req: FastifyRequest, res: FastifyResponse) {
 	const token = headerUtil.extractAuthorization(req.headers);
 	const isValid = jwtUtil.verify(token);
-	const reponse = new ResponseModel(res);
+	const response = new ResponseModel(res);
 	if (!token) {
-		reponse.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
-		reponse.message = 'Token not found';
-		reponse.send();
+		response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+		response.message = 'Token not found';
+		response.send();
 	}
 	if (!isValid) {
-		reponse.statusCode = HTTP_STATUS_CODE.UNAUTHORIZED;
-		reponse.message = 'Token invalid';
-		reponse.send();
+		response.statusCode = HTTP_STATUS_CODE.UNAUTHORIZED;
+		response.message = 'Token invalid';
+		response.send();
 	}
 }
 
@@ -28,10 +28,10 @@ async function requirePhone(req: FastifyRequest, res: FastifyResponse) {
 		id: info.userId
 	});
 	if (!user?.phone) {
-		const reponse = new ResponseModel(res);
-		reponse.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
-		reponse.message = 'Phone require';
-		reponse.send();
+		const response = new ResponseModel(res);
+		response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+		response.message = 'Phone require';
+		response.send();
 	}
 }
 

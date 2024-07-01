@@ -17,6 +17,9 @@
 	"editor.fontWeight": "normal",
 	"cSpell.words": [
 		"autoload",
+		"datas",
+		"datetime",
+		"deliverymethod",
 		"ENVIROMENT",
 		"fastify",
 		"fieldname",
@@ -27,6 +30,7 @@
 		"mealkit",
 		"openapi",
 		"Prepify",
+		"TOTALMEALKIT",
 		"typebox",
 		"typeorm",
 		"uuidv"

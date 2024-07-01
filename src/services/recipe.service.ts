@@ -143,7 +143,7 @@ class RecipeService {
 		let recipeQuery = recipeRepository
 			.getRepository()
 			.createQueryBuilder('recipe')
-			.leftJoinAndSelect('recipe.mealKits', 'mealKit')
+			.innerJoinAndSelect('recipe.mealKits', 'mealKit')
 			.leftJoinAndSelect('mealKit.orderDetails', 'orderDetail')
 			.leftJoinAndSelect('recipe.foodStyles', 'foodStyle')
 			.groupBy('recipe.id')
