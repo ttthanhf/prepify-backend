@@ -76,6 +76,7 @@ class ExpoPushTokenService {
 		} catch (error) {
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			response.message = 'Failed to get push token';
+			return response.send();
 		}
 	}
 }
