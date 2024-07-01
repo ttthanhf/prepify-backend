@@ -20,6 +20,16 @@ export default async function recipeRoute(
 				allowedRoles: [Role.MODERATOR]
 			}
 		},
+		recipeModeratorController.getAllRecipe
+	);
+	app.get(
+		'/recipes/:recipe_id',
+		{
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
 		recipeModeratorController.getRecipe
 	);
 	app.post(
