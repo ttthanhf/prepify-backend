@@ -1,11 +1,17 @@
 import { _Object } from '@aws-sdk/client-s3';
 import { MultipartFile } from '@fastify/multipart';
 import { FastifyRequest } from 'fastify';
+import { In } from 'typeorm';
 import envConfig from '~configs/env.config';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
+import { Ingredient } from '~models/entities/ingredient.entity';
+import { Nutrition } from '~models/entities/nutrition.entity';
+import { RecipeIngredient } from '~models/entities/recipe-ingredient.entity';
+import { RecipeNutrition } from '~models/entities/recipe-nutrition.entity';
 import { Recipe } from '~models/entities/recipe.entity';
+import { Unit } from '~models/entities/unit.entity';
 import { RecipeModeratorResponseModel } from '~models/responses/moderator/recipe.response';
 import ResponseModel from '~models/responses/response.model';
 import { recipeModeratorQueryGetRequest } from '~models/schemas/moderator/recipe.schemas.model';
@@ -13,6 +19,7 @@ import {
 	recipeCreateRequestSchema,
 	recipeUpdateRequestSchema
 } from '~models/schemas/recipe.schemas.model';
+import foodStyleRepository from '~repositories/foodStyle.repository';
 import recipeRepository from '~repositories/recipe.repository';
 import { FastifyResponse } from '~types/fastify.type';
 import mapperUtil from '~utils/mapper.util';
@@ -201,6 +208,10 @@ class RecipeModeratorService {
 		const files: Array<MultipartFile> = [];
 		const response = new ResponseModel(res);
 
+		let foodStylesRequest = [];
+		let nutritionsRequest = [];
+		let ingredientsRequest = [];
+
 		for await (const part of req.parts()) {
 			if (part.type == 'field') {
 				objectUtil.setProperty(
@@ -208,6 +219,18 @@ class RecipeModeratorService {
 					part.fieldname as keyof Recipe,
 					stringUtil.tryParseStringToJSON(String(part.value))
 				);
+
+				switch (part.fieldname) {
+					case 'foodStyles':
+						foodStylesRequest = await JSON.parse(part.value as any);
+						break;
+					case 'nutrition':
+						nutritionsRequest = await JSON.parse(part.value as any);
+						break;
+					case 'ingredients':
+						ingredientsRequest = await JSON.parse(part.value as any);
+						break;
+				}
 			} else if (part.type == 'file') {
 				if (part.fieldname == 'images') {
 					if (part.mimetype.startsWith('image/')) {
@@ -234,6 +257,27 @@ class RecipeModeratorService {
 				.replaceAll(' ', '-') +
 			'.' +
 			newRecipe.id;
+
+		const foodStyles = await foodStyleRepository.findBy({
+			id: In(foodStylesRequest)
+		});
+		newRecipe.foodStyles = foodStyles;
+
+		newRecipe.recipeNutritions = nutritionsRequest.map((item: any) => {
+			const recipeNutrition = new RecipeNutrition();
+			recipeNutrition.amount = item.amount;
+			recipeNutrition.nutrition = { id: item.nutrition_id } as Nutrition;
+			recipeNutrition.unit = { id: item.unit_id } as Unit;
+			return recipeNutrition;
+		});
+
+		newRecipe.recipeIngredients = ingredientsRequest.map((item: any) => {
+			const recipeIngredient = new RecipeIngredient();
+			recipeIngredient.amount = item.amount;
+			recipeIngredient.ingredient = { id: item.ingredient_id } as Ingredient;
+			recipeIngredient.unit = { id: item.unit_id } as Unit;
+			return recipeIngredient;
+		});
 
 		await recipeRepository.create(newRecipe);
 
