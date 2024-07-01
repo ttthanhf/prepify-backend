@@ -12,7 +12,12 @@ import { RecipeIngredient } from '~models/entities/recipe-ingredient.entity';
 import { RecipeNutrition } from '~models/entities/recipe-nutrition.entity';
 import { Recipe } from '~models/entities/recipe.entity';
 import { Unit } from '~models/entities/unit.entity';
-import { RecipeModeratorResponseModel } from '~models/responses/moderator/recipe.response';
+import {
+	AllRecipeModeratorResponseModel,
+	IngredientRecipeModeratorResponseModel,
+	NutritionRecipeModeratorResponseModel,
+	RecipeModeratorResponseModel
+} from '~models/responses/moderator/recipe.response';
 import ResponseModel from '~models/responses/response.model';
 import { recipeModeratorQueryGetRequest } from '~models/schemas/moderator/recipe.schemas.model';
 import {
@@ -30,7 +35,7 @@ import stringUtil from '~utils/string.util';
 import validateUtil from '~utils/validate.util';
 
 class RecipeModeratorService {
-	async getRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+	async getAllRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
 		const query: recipeModeratorQueryGetRequest =
 			req.query as recipeModeratorQueryGetRequest;
 
@@ -143,10 +148,11 @@ class RecipeModeratorService {
 			}
 		});
 
-		const recipeModeratorResponseModelList: Array<RecipeModeratorResponseModel> =
+		const recipeModeratorResponseModelList: Array<AllRecipeModeratorResponseModel> =
 			[];
 		recipes.forEach((recipe) => {
-			const recipeModeratorResponseModel = new RecipeModeratorResponseModel();
+			const recipeModeratorResponseModel =
+				new AllRecipeModeratorResponseModel();
 			recipeModeratorResponseModel.id = recipe.id;
 			recipeModeratorResponseModel.name = recipe.name;
 			recipeModeratorResponseModel.slug = recipe.slug;
@@ -166,6 +172,69 @@ class RecipeModeratorService {
 			pageSize,
 			pageTotal
 		};
+		return response.send();
+	}
+
+	async getRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { recipe_id }: any = req.params as Object;
+		const recipe = await recipeRepository.findOne({
+			where: {
+				id: recipe_id
+			},
+			relations: [
+				'recipeIngredients',
+				'recipeIngredients.ingredient',
+				'recipeIngredients.unit',
+				'recipeNutritions',
+				'recipeNutritions.nutrition',
+				'recipeNutritions.unit',
+				'category',
+				'foodStyles'
+			]
+		});
+
+		const response = new ResponseModel(res);
+		if (!recipe) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'Recipe not found';
+			return response.send();
+		}
+
+		const ingredientRecipeModeratorResponseModelList: Array<IngredientRecipeModeratorResponseModel> =
+			recipe.recipeIngredients.map((item) => ({
+				ingredient_id: item.ingredient.id,
+				unit_id: item.unit.id,
+				amount: item.amount
+			}));
+
+		const nutritionRecipeModeratorResponseModelList: Array<NutritionRecipeModeratorResponseModel> =
+			recipe.recipeNutritions.map((item) => ({
+				nutrition_id: item.nutrition.id,
+				amount: item.amount,
+				unit_id: item.unit.id
+			}));
+
+		const foodStylesRecipeModeratorResponseModelList = recipe.foodStyles.reduce(
+			(acc, item) => {
+				acc[item.type] = item.id;
+				return acc;
+			},
+			{} as Record<string, string>
+		);
+
+		const recipeModeratorResponseModel = mapperUtil.mapEntityToClass(
+			recipe,
+			RecipeModeratorResponseModel
+		);
+		recipeModeratorResponseModel.category = recipe.category.id;
+		recipeModeratorResponseModel.ingredients =
+			ingredientRecipeModeratorResponseModelList;
+		recipeModeratorResponseModel.nutrition =
+			nutritionRecipeModeratorResponseModelList;
+		recipeModeratorResponseModel.foodStyles =
+			foodStylesRecipeModeratorResponseModelList;
+
+		response.data = recipeModeratorResponseModel;
 		return response.send();
 	}
 
