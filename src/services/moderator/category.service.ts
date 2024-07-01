@@ -1,7 +1,12 @@
 import { FastifyRequest } from 'fastify';
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
+import { Category } from '~models/entities/category.entity';
 import ResponseModel from '~models/responses/response.model';
-import { categoryModeratorQueryGetRequest } from '~models/schemas/moderator/category.schemas.model';
+import {
+	categoryModeratorQueryCreateRequest,
+	categoryModeratorQueryGetRequest
+} from '~models/schemas/moderator/category.schemas.model';
 import categoryRepository from '~repositories/category,repository';
 import { FastifyResponse } from '~types/fastify.type';
 
@@ -52,13 +57,19 @@ class CategoryModeratorService {
 		}
 
 		const categories = await categoryQuery.getRawMany();
-		const itemTotal = categories.length;
 
+		// Convert totalRecipes to a number
+		const formattedCategories = categories.map((category) => ({
+			...category,
+			totalRecipes: Number(category.totalRecipes)
+		}));
+
+		const itemTotal = categories.length;
 		const pageTotal = Math.ceil(itemTotal / pageSize);
 
 		const response = new ResponseModel(res);
 		response.data = {
-			data: categories,
+			data: formattedCategories,
 			itemTotal,
 			pageTotal,
 			pageIndex,
@@ -66,6 +77,37 @@ class CategoryModeratorService {
 		};
 
 		return response.send();
+	}
+
+	async createCategoryHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { name } = req.body as categoryModeratorQueryCreateRequest;
+
+		const response = new ResponseModel(res);
+		try {
+			const existingCategory = await categoryRepository.findOne({
+				where: {
+					name
+				}
+			});
+
+			if (existingCategory) {
+				response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+				response.message = 'Category already exists';
+				return response.send();
+			}
+
+			const category = new Category();
+			category.name = name;
+
+			await categoryRepository.create(category);
+
+			response.message = 'Category created successfully';
+			return response.send();
+		} catch (error) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Failed to create category';
+			return response.send();
+		}
 	}
 }
 
