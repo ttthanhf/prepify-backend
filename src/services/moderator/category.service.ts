@@ -5,7 +5,8 @@ import { Category } from '~models/entities/category.entity';
 import ResponseModel from '~models/responses/response.model';
 import {
 	categoryModeratorQueryCreateRequest,
-	categoryModeratorQueryGetRequest
+	categoryModeratorQueryGetRequest,
+	categoryModeratorQueryUpdateRequest
 } from '~models/schemas/moderator/category.schemas.model';
 import categoryRepository from '~repositories/category,repository';
 import { FastifyResponse } from '~types/fastify.type';
@@ -106,6 +107,47 @@ class CategoryModeratorService {
 		} catch (error) {
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			response.message = 'Failed to create category';
+			return response.send();
+		}
+	}
+
+	async updateCategoryHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { id }: any = req.params as Object;
+		const { name } = req.body as categoryModeratorQueryUpdateRequest;
+
+		const category = await categoryRepository.findOneBy({
+			id: id
+		});
+
+		const response = new ResponseModel(res);
+		if (!category) {
+			response.message = 'Category not found';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
+		// Check if the category name already exists
+		const existingCategory = await categoryRepository.findOne({
+			where: {
+				name
+			}
+		});
+
+		if (existingCategory) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Category already exists';
+			return response.send();
+		}
+
+		try {
+			category.name = name;
+
+			await categoryRepository.update(category);
+			response.message = 'Category updated successfully';
+			return response.send();
+		} catch (error) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Failed to update category';
 			return response.send();
 		}
 	}

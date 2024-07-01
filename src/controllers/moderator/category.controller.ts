@@ -9,6 +9,10 @@ class CategoryModeratorController {
 	async createCategory(req: FastifyRequest, res: FastifyResponse) {
 		return categoryModeratorService.createCategoryHandle(req, res);
 	}
+
+	async updateCategory(req: FastifyRequest, res: FastifyResponse) {
+		return categoryModeratorService.updateCategoryHandle(req, res);
+	}
 }
 
 export default new CategoryModeratorController();
