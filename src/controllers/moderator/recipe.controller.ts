@@ -14,6 +14,9 @@ class RecipeModeratorController {
 	async updateRecipe(req: FastifyRequest, res: FastifyResponse) {
 		return recipeModeratorService.updateRecipeHandle(req, res);
 	}
+	async deleteRecipe(req: FastifyRequest, res: FastifyResponse) {
+		return recipeModeratorService.deleteRecipeHandle(req, res);
+	}
 }
 
 export default new RecipeModeratorController();
