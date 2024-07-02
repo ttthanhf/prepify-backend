@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RecipeNutrition } from './recipe-nutrition.entity';
 import { RecipeIngredient } from './recipe-ingredient.entity';
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { Ingredient } from './ingredient.entity';
 
 @Entity({ name: 'unit' })
 export class Unit {
@@ -11,6 +12,12 @@ export class Unit {
 	@Column()
 	name!: string;
 
+	@Column({
+		type: 'datetime',
+		default: new Date()
+	})
+	createdAt: Date = new Date();
+
 	@OneToMany(() => RecipeNutrition, (recipeNutrition) => recipeNutrition.unit)
 	recipeNutritions!: RecipeNutrition[];
 
@@ -19,4 +26,7 @@ export class Unit {
 		(recipeIngredient) => recipeIngredient.unit
 	)
 	recipeIngredients!: RecipeIngredient[];
+
+	@OneToMany(() => Ingredient, (ingredient) => ingredient.unit)
+	ingredients!: Ingredient[];
 }

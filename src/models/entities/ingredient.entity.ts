@@ -40,6 +40,6 @@ export class Ingredient {
 	)
 	customerIngredients!: CustomerIngredient[];
 
-	@ManyToOne(() => Unit, (unit) => unit.recipeIngredients)
+	@ManyToOne(() => Unit, (unit) => unit.ingredients)
 	unit!: Relation<Unit>;
 }
