@@ -84,6 +84,12 @@ class MealKitModeratorService {
 			);
 		}
 
+		if (query.status !== undefined) {
+			mealKitQuery = mealKitQuery.andWhere('mealkit.status = :status', {
+				status: query.status
+			});
+		}
+
 		const [mealKits, itemTotal] = await mealKitQuery.getManyAndCount();
 
 		const pageTotal = Math.ceil(itemTotal / pageSize);

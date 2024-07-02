@@ -28,7 +28,8 @@ export const mealKitModeratorGetRequestSchema = Type.Object({
 	orderBy: Type.Optional(Type.Enum(OrderBy)),
 	sortBy: Type.Optional(Type.Enum(SortBy)),
 	pageSize: Type.Optional(Type.Number()),
-	pageIndex: Type.Optional(Type.Number())
+	pageIndex: Type.Optional(Type.Number()),
+	status: Type.Optional(Type.Boolean())
 });
 
 export type MealKitModeratorGetRequest = Static<

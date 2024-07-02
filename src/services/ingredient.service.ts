@@ -10,14 +10,19 @@ class IngredientService {
 		let ingredient: any;
 		if (query) {
 			try {
-				ingredient = await ingredientRepository.findBy(
-					JSON.parse(JSON.stringify(query))
-				);
+				ingredient = await ingredientRepository.find({
+					where: JSON.parse(JSON.stringify(query)),
+					relations: ['unit']
+				});
 			} catch (error) {
-				ingredient = await ingredientRepository.findAll();
+				ingredient = await ingredientRepository.find({
+					relations: ['unit']
+				});
 			}
 		} else {
-			ingredient = await ingredientRepository.findAll();
+			ingredient = await ingredientRepository.find({
+				relations: ['unit']
+			});
 		}
 
 		const response = new ResponseModel(res);
