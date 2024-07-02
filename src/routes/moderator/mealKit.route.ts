@@ -16,7 +16,7 @@ export default async function route(
 		'/mealkits',
 		{
 			schema: {
-				queryString: mealKitModeratorGetRequestSchema
+				querystring: mealKitModeratorGetRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
