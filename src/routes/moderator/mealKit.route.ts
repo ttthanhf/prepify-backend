@@ -61,4 +61,15 @@ export default async function route(
 		},
 		mealkitController.createMealkit
 	);
+
+	app.put(
+		'/mealkits/:id/status/toggle',
+		{
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		mealkitController.toggleStatus
+	);
 }
