@@ -5,7 +5,8 @@ import { Unit } from '~models/entities/unit.entity';
 import ResponseModel from '~models/responses/response.model';
 import {
 	unitModeratorQueryCreateRequest,
-	unitModeratorQueryGetRequest
+	unitModeratorQueryGetRequest,
+	unitModeratorQueryUpdateRequest
 } from '~models/schemas/moderator/unit.schemas.model';
 import unitRepository from '~repositories/unit.repository';
 import { FastifyResponse } from '~types/fastify.type';
@@ -102,6 +103,47 @@ class UnitModeratorService {
 		} catch (error) {
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			response.message = 'Failed to create unit';
+			return response.send();
+		}
+	}
+
+	async updateUnitHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { id }: any = req.params as Object;
+		const { name } = req.body as unitModeratorQueryUpdateRequest;
+
+		const unit = await unitRepository.findOneBy({
+			id: id
+		});
+
+		const response = new ResponseModel(res);
+		if (!unit) {
+			response.message = 'Unit not found';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
+		// Check if the unit name already exists
+		const existingUnit = await unitRepository.findOne({
+			where: {
+				name
+			}
+		});
+
+		if (existingUnit) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Unit already exists';
+			return response.send();
+		}
+
+		try {
+			unit.name = name;
+
+			await unitRepository.update(unit);
+			response.message = 'Unit updated successfully';
+			return response.send();
+		} catch (error) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Failed to update unit';
 			return response.send();
 		}
 	}

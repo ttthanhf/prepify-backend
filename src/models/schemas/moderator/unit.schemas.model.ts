@@ -20,3 +20,11 @@ export const unitModeratorQueryCreateRequestSchema = Type.Object({
 export type unitModeratorQueryCreateRequest = Static<
 	typeof unitModeratorQueryCreateRequestSchema
 >;
+
+export const unitModeratorQueryUpdateRequestSchema = Type.Object({
+	name: Type.String()
+});
+
+export type unitModeratorQueryUpdateRequest = Static<
+	typeof unitModeratorQueryUpdateRequestSchema
+>;
