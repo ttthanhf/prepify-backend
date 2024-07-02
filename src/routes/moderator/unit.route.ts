@@ -54,4 +54,15 @@ export default async function unitRoute(
 		},
 		unitController.updateUnit
 	);
+
+	app.delete(
+		'/units/:id',
+		{
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		unitController.deleteUnit
+	);
 }
