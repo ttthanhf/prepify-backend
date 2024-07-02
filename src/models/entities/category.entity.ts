@@ -10,6 +10,12 @@ export class Category {
 	@Column()
 	name!: string;
 
+	@Column({
+		type: 'datetime',
+		default: new Date()
+	})
+	createdAt: Date = new Date();
+
 	@OneToMany(() => Recipe, (recipe) => recipe.category)
 	recipes!: Recipe[];
 }
