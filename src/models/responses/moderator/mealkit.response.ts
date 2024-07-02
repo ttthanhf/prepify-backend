@@ -3,8 +3,10 @@ export class GetMealKitModeratorResponse {
 	recipeName!: string;
 	serving!: number;
 	price!: number;
+	image!: string;
 	extraSpice?: {
 		name: string;
 		price: number;
+		image: string;
 	};
 }
