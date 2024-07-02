@@ -1,3 +1,4 @@
+import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import { ExtraSpice } from '~models/entities/extra-spice.entity';
@@ -102,12 +103,16 @@ class MealKitModeratorService {
 				GetMealKitModeratorResponse
 			);
 			getAllMealKitModeratorResponse.recipeName = item.recipe.name;
+			getAllMealKitModeratorResponse.image = DEFAULT_IMAGE;
+			if (getAllMealKitModeratorResponse.extraSpice) {
+				getAllMealKitModeratorResponse.extraSpice.image = DEFAULT_IMAGE;
+			}
 			getAllMealKitModeratorResponseList.push(getAllMealKitModeratorResponse);
 		});
 
 		const response = new ResponseModel(res);
 		response.data = {
-			mealKits: getAllMealKitModeratorResponseList,
+			data: getAllMealKitModeratorResponseList,
 			itemTotal,
 			pageTotal,
 			pageIndex,
