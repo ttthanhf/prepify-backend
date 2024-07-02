@@ -26,6 +26,8 @@ import {
 } from '~models/schemas/recipe.schemas.model';
 import foodStyleRepository from '~repositories/foodStyle.repository';
 import mealKitRepository from '~repositories/mealKit.repository';
+import recipeIngredientRepository from '~repositories/recipe-ingredient.repository';
+import recipeNutritionRepository from '~repositories/recipe-nutrition.repository';
 import recipeRepository from '~repositories/recipe.repository';
 import { FastifyResponse } from '~types/fastify.type';
 import mapperUtil from '~utils/mapper.util';
@@ -333,23 +335,25 @@ class RecipeModeratorService {
 		});
 		newRecipe.foodStyles = foodStyles;
 
-		newRecipe.recipeNutritions = nutritionsRequest.map((item: any) => {
-			const recipeNutrition = new RecipeNutrition();
-			recipeNutrition.amount = item.amount;
-			recipeNutrition.nutrition = { id: item.nutrition_id } as Nutrition;
-			recipeNutrition.unit = { id: item.unit_id } as Unit;
-			return recipeNutrition;
-		});
+		await recipeRepository.create(newRecipe);
 
-		newRecipe.recipeIngredients = ingredientsRequest.map((item: any) => {
+		ingredientsRequest.forEach(async (item: any) => {
 			const recipeIngredient = new RecipeIngredient();
 			recipeIngredient.amount = item.amount;
 			recipeIngredient.ingredient = { id: item.ingredient_id } as Ingredient;
 			recipeIngredient.unit = { id: item.unit_id } as Unit;
-			return recipeIngredient;
+			recipeIngredient.recipe = newRecipe;
+			await recipeIngredientRepository.create(recipeIngredient);
 		});
 
-		await recipeRepository.create(newRecipe);
+		nutritionsRequest.forEach(async (item: any) => {
+			const recipeNutrition = new RecipeNutrition();
+			recipeNutrition.amount = item.amount;
+			recipeNutrition.nutrition = { id: item.nutrition_id } as Nutrition;
+			recipeNutrition.unit = { id: item.unit_id } as Unit;
+			recipeNutrition.recipe = newRecipe;
+			await recipeNutritionRepository.create(recipeNutrition);
+		});
 
 		for (const file of files) {
 			await s3Util.uploadImage({
