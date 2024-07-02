@@ -4,6 +4,7 @@ export class GetMealKitModeratorResponse {
 	serving!: number;
 	price!: number;
 	image!: string;
+	status!: string;
 	extraSpice?: {
 		name: string;
 		price: number;

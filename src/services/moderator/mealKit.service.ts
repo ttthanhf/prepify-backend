@@ -74,6 +74,18 @@ class MealKitModeratorService {
 			case SortBy.PRICE:
 				mealKitQuery = mealKitQuery.orderBy('mealkit.price', orderBy);
 				break;
+			case SortBy.RECIPENAME:
+				mealKitQuery = mealKitQuery.orderBy('recipe.name', orderBy);
+				break;
+			case SortBy.STATUS:
+				mealKitQuery = mealKitQuery.orderBy('mealkit.status', orderBy);
+				break;
+			case SortBy.EXTRASPICENAME:
+				mealKitQuery = mealKitQuery.orderBy('extraSpice.name', orderBy);
+				break;
+			case SortBy.EXTRASPICEPRICE:
+				mealKitQuery = mealKitQuery.orderBy('extraSpice.price', orderBy);
+				break;
 		}
 
 		if (query.search) {
@@ -85,10 +97,15 @@ class MealKitModeratorService {
 			);
 		}
 
-		if (query.status !== undefined) {
-			mealKitQuery = mealKitQuery.andWhere('mealkit.status = :status', {
-				status: query.status
-			});
+		if (query.status) {
+			if (query.status) {
+				const statusArray = query.status
+					.split(',')
+					.map((status) => status === 'true');
+				mealKitQuery = mealKitQuery.andWhere('mealkit.status IN (:...status)', {
+					status: statusArray
+				});
+			}
 		}
 
 		const [mealKits, itemTotal] = await mealKitQuery.getManyAndCount();
