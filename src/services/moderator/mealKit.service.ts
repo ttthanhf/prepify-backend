@@ -187,6 +187,26 @@ class MealKitModeratorService {
 		response.data = getAllMealKitModeratorResponse;
 		return response.send();
 	}
+
+	async toggleStatusHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { id }: any = req.params as Object;
+
+		const mealKit = await mealKitRepository.findOneBy({
+			id
+		});
+
+		const response = new ResponseModel(res);
+		if (!mealKit) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'Item not exist';
+			return response.send();
+		}
+
+		mealKit.status = !mealKit.status;
+		await mealKitRepository.update(mealKit);
+
+		return response.send();
+	}
 }
 
 export default new MealKitModeratorService();

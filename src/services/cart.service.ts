@@ -26,35 +26,32 @@ class CartService {
 		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
 		const response = new ResponseModel(res);
 
-		const carts = await orderDetailRepository.find({
-			where: {
-				isCart: true,
-				customer: {
-					id: customer!.id
-				}
-			},
-			relations: ['mealKit', 'mealKit.recipe', 'mealKit.extraSpice'],
-			select: {
-				id: true,
-				has_extra_spice: true,
-				quantity: true,
-				mealKit: {
-					id: true,
-					price: true,
-					serving: true,
-					recipe: {
-						id: true,
-						name: true,
-						slug: true
-					},
-					extraSpice: {
-						id: true,
-						name: true,
-						price: true
-					}
-				}
-			}
-		});
+		const carts = await orderDetailRepository
+			.getRepository()
+			.createQueryBuilder('orderDetail')
+			.innerJoinAndSelect('orderDetail.mealKit', 'mealKit')
+			.innerJoinAndSelect('mealKit.recipe', 'recipe')
+			.innerJoinAndSelect('mealKit.extraSpice', 'extraSpice')
+			.where('orderDetail.isCart = :isCart', { isCart: true })
+			.andWhere('orderDetail.customer.id = :customerId', {
+				customerId: customer!.id
+			})
+			.andWhere('mealKit.status = :mealKitStatus', { mealKitStatus: true })
+			.select([
+				'orderDetail.id',
+				'orderDetail.has_extra_spice',
+				'orderDetail.quantity',
+				'mealKit.id',
+				'mealKit.price',
+				'mealKit.serving',
+				'recipe.id',
+				'recipe.name',
+				'recipe.slug',
+				'extraSpice.id',
+				'extraSpice.name',
+				'extraSpice.price'
+			])
+			.getMany();
 
 		const CartList: Array<CartItemResponse> = [];
 		const images = await redisUtil.getImagesRecipes();

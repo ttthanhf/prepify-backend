@@ -18,9 +18,9 @@ class MealKitModeratorController {
 		return mealKitService.updateMealKitHandle(req, res);
 	}
 
-	// async deleteCategory(req: FastifyRequest, res: FastifyResponse) {
-	// 	return categoryModeratorService.deleteCategoryHandle(req, res);
-	// }
+	async toggleStatus(req: FastifyRequest, res: FastifyResponse) {
+		return mealKitService.toggleStatusHandle(req, res);
+	}
 }
 
 export default new MealKitModeratorController();

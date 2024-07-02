@@ -62,7 +62,8 @@ class RecipeService {
 				'mealKit.price',
 				'mealKit.rating',
 				'foodStyle.name'
-			]);
+			])
+			.where('mealKit.status = true');
 
 		if (sortBy === SortBy.POPULAR) {
 			recipeQuery = recipeQuery
