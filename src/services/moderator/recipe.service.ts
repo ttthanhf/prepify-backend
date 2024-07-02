@@ -92,7 +92,11 @@ class RecipeModeratorService {
 				break;
 			case SortBy.NEWEST:
 			default:
-				recipeQuery = recipeQuery.orderBy('recipe.createdAt', orderBy);
+				if (orderBy) {
+					recipeQuery = recipeQuery.orderBy('recipe.createdAt', OrderBy.DESC);
+				} else {
+					recipeQuery = recipeQuery.orderBy('recipe.createdAt', orderBy);
+				}
 				break;
 		}
 

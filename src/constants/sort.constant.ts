@@ -11,6 +11,7 @@ export enum SortBy {
 	CATEGORY = 'category',
 	TIME = 'time',
 	NAME = 'name',
+	SERVING = 'serving',
 	TOTALMEALKIT = 'totalmealkit',
 	TOTALRECIPES = 'totalRecipes'
 }

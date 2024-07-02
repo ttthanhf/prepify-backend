@@ -28,10 +28,12 @@
 		"httpstatuscode",
 		"levelcook",
 		"mealkit",
+		"mealkits",
 		"nutritions",
 		"openapi",
 		"Prepify",
 		"TOTALMEALKIT",
+		"TOTALRECIPES",
 		"typebox",
 		"typeorm",
 		"uuidv"
