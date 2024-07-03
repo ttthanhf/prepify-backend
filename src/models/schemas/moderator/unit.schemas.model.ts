@@ -12,3 +12,11 @@ export const unitModeratorQueryGetRequestSchema = Type.Object({
 export type unitModeratorQueryGetRequest = Static<
 	typeof unitModeratorQueryGetRequestSchema
 >;
+
+export const unitModeratorQueryCreateRequestSchema = Type.Object({
+	name: Type.String()
+});
+
+export type unitModeratorQueryCreateRequest = Static<
+	typeof unitModeratorQueryCreateRequestSchema
+>;

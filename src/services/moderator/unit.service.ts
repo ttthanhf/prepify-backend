@@ -1,7 +1,12 @@
 import { FastifyRequest } from 'fastify';
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
+import { Unit } from '~models/entities/unit.entity';
 import ResponseModel from '~models/responses/response.model';
-import { unitModeratorQueryGetRequest } from '~models/schemas/moderator/unit.schemas.model';
+import {
+	unitModeratorQueryCreateRequest,
+	unitModeratorQueryGetRequest
+} from '~models/schemas/moderator/unit.schemas.model';
 import unitRepository from '~repositories/unit.repository';
 import { FastifyResponse } from '~types/fastify.type';
 
@@ -69,6 +74,36 @@ class UnitModeratorService {
 		};
 
 		return response.send();
+	}
+
+	async createUnitHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { name } = req.body as unitModeratorQueryCreateRequest;
+		const response = new ResponseModel(res);
+		try {
+			const existingUnit = await unitRepository.findOne({
+				where: {
+					name
+				}
+			});
+
+			if (existingUnit) {
+				response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+				response.message = 'Unit already exists';
+				return response.send();
+			}
+
+			const unit = new Unit();
+			unit.name = name;
+
+			await unitRepository.create(unit);
+
+			response.message = 'Unit created successfully';
+			return response.send();
+		} catch (error) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Failed to create unit';
+			return response.send();
+		}
 	}
 }
 
