@@ -14,6 +14,10 @@ class CategoryModeratorController {
 	async updateUnit(req: FastifyRequest, res: FastifyResponse) {
 		return unitModeratorService.updateUnitHandle(req, res);
 	}
+
+	async deleteUnit(req: FastifyRequest, res: FastifyResponse) {
+		return unitModeratorService.deleteUnitHandle(req, res);
+	}
 }
 
 export default new CategoryModeratorController();

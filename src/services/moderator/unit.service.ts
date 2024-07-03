@@ -8,6 +8,9 @@ import {
 	unitModeratorQueryGetRequest,
 	unitModeratorQueryUpdateRequest
 } from '~models/schemas/moderator/unit.schemas.model';
+import ingredientRepository from '~repositories/ingredient.repository';
+import recipeIngredientRepository from '~repositories/recipe-ingredient.repository';
+import recipeNutritionRepository from '~repositories/recipe-nutrition.repository';
 import unitRepository from '~repositories/unit.repository';
 import { FastifyResponse } from '~types/fastify.type';
 
@@ -144,6 +147,52 @@ class UnitModeratorService {
 		} catch (error) {
 			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 			response.message = 'Failed to update unit';
+			return response.send();
+		}
+	}
+
+	async deleteUnitHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { id }: any = req.params as Object;
+
+		const unit = await unitRepository.findOneBy({
+			id: id
+		});
+
+		const response = new ResponseModel(res);
+		if (!unit) {
+			response.message = 'Unit not found';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
+		// Check if the unit is being used in other tables
+		const isUsedInRecipeNutrition = await recipeNutritionRepository.count({
+			where: { unit: unit }
+		});
+		const isUsedInRecipeIngredient = await recipeIngredientRepository.count({
+			where: { unit: unit }
+		});
+		const isUsedInIngredient = await ingredientRepository.count({
+			where: { unit: unit }
+		});
+
+		if (
+			isUsedInRecipeNutrition > 0 ||
+			isUsedInRecipeIngredient > 0 ||
+			isUsedInIngredient > 0
+		) {
+			response.message = 'Unit is being used in other tables';
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			return response.send();
+		}
+
+		try {
+			await unitRepository.removeOne(unit);
+			response.message = 'Unit deleted successfully';
+			return response.send();
+		} catch (error) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Failed to delete unit';
 			return response.send();
 		}
 	}
