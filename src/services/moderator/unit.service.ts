@@ -1,6 +1,7 @@
 import { FastifyRequest } from 'fastify';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
+import { UnitType } from '~constants/unittype.constant';
 import { Unit } from '~models/entities/unit.entity';
 import ResponseModel from '~models/responses/response.model';
 import {
@@ -13,6 +14,7 @@ import recipeIngredientRepository from '~repositories/recipe-ingredient.reposito
 import recipeNutritionRepository from '~repositories/recipe-nutrition.repository';
 import unitRepository from '~repositories/unit.repository';
 import { FastifyResponse } from '~types/fastify.type';
+import validateUtil from '~utils/validate.util';
 
 class UnitModeratorService {
 	async getUnitHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -64,8 +66,16 @@ class UnitModeratorService {
 			);
 		}
 
-		const units = await unitQuery.getMany();
-		const itemTotal = units.length;
+		// filter by type
+		if (query.type) {
+			const unitTypes = query.type.split(',');
+			unitTypes.push('all');
+			unitQuery = unitQuery.andWhere('unit.type IN (:...unitTypes)', {
+				unitTypes
+			});
+		}
+
+		const [units, itemTotal] = await unitQuery.getManyAndCount();
 		const pageTotal = Math.ceil(itemTotal / Number(pageSize));
 
 		const response = new ResponseModel(res);
@@ -81,7 +91,7 @@ class UnitModeratorService {
 	}
 
 	async createUnitHandle(req: FastifyRequest, res: FastifyResponse) {
-		const { name } = req.body as unitModeratorQueryCreateRequest;
+		const { name, type } = req.body as unitModeratorQueryCreateRequest;
 		const response = new ResponseModel(res);
 		try {
 			const existingUnit = await unitRepository.findOne({
@@ -99,6 +109,25 @@ class UnitModeratorService {
 			const unit = new Unit();
 			unit.name = name;
 
+			// Check if the type is valid
+			const typeArray = type.split(',');
+			if (!validateUtil.isValidEnumArray(UnitType, typeArray)) {
+				response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+				response.message = 'Invalid unit type provided';
+				return response.send();
+			}
+
+			if (
+				typeArray.includes(UnitType.INGREDIENT) &&
+				typeArray.includes(UnitType.NUTRITION)
+			) {
+				unit.type = UnitType.ALL;
+			} else if (typeArray.includes(UnitType.INGREDIENT)) {
+				unit.type = UnitType.INGREDIENT;
+			} else if (typeArray.includes(UnitType.NUTRITION)) {
+				unit.type = UnitType.NUTRITION;
+			}
+
 			await unitRepository.create(unit);
 
 			response.message = 'Unit created successfully';
@@ -112,7 +141,7 @@ class UnitModeratorService {
 
 	async updateUnitHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { id }: any = req.params as Object;
-		const { name } = req.body as unitModeratorQueryUpdateRequest;
+		const { name, type } = req.body as unitModeratorQueryUpdateRequest;
 
 		const unit = await unitRepository.findOneBy({
 			id: id
@@ -140,6 +169,25 @@ class UnitModeratorService {
 
 		try {
 			unit.name = name;
+
+			// Check if the type is valid
+			const typeArray = type.split(',');
+			if (!validateUtil.isValidEnumArray(UnitType, typeArray)) {
+				response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+				response.message = 'Invalid unit type provided';
+				return response.send();
+			}
+
+			if (
+				typeArray.includes(UnitType.INGREDIENT) &&
+				typeArray.includes(UnitType.NUTRITION)
+			) {
+				unit.type = UnitType.ALL;
+			} else if (typeArray.includes(UnitType.INGREDIENT)) {
+				unit.type = UnitType.INGREDIENT;
+			} else if (typeArray.includes(UnitType.NUTRITION)) {
+				unit.type = UnitType.NUTRITION;
+			}
 
 			await unitRepository.update(unit);
 			response.message = 'Unit updated successfully';

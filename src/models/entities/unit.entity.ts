@@ -3,6 +3,7 @@ import { RecipeNutrition } from './recipe-nutrition.entity';
 import { RecipeIngredient } from './recipe-ingredient.entity';
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Ingredient } from './ingredient.entity';
+import { UnitType } from '~constants/unittype.constant';
 
 @Entity({ name: 'unit' })
 export class Unit {
@@ -29,4 +30,7 @@ export class Unit {
 
 	@OneToMany(() => Ingredient, (ingredient) => ingredient.unit)
 	ingredients!: Ingredient[];
+
+	@Column({ type: 'enum', enum: UnitType })
+	type!: UnitType;
 }
