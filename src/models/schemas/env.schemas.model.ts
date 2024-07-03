@@ -27,7 +27,11 @@ const envSchema = Type.Object({
 	S3_END_POINT: Type.String(),
 	S3_HOST: Type.String(),
 	LOG_LEVEL: Type.String(),
-	ENVIROMENT: Type.String()
+	ENVIROMENT: Type.String(),
+	RABBITMQ_HOST: Type.String(),
+	RABBITMQ_PORT: Type.Number(),
+	RABBITMQ_USER: Type.String(),
+	RABBITMQ_PASSWORD: Type.String()
 });
 
 export type EnvSchema = Static<typeof envSchema>;
