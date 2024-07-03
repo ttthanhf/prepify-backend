@@ -6,7 +6,8 @@ export const unitModeratorQueryGetRequestSchema = Type.Object({
 	pageIndex: Type.Optional(Type.Number()),
 	orderBy: Type.Optional(Type.Enum(OrderBy)),
 	sortBy: Type.Optional(Type.Enum(SortBy)),
-	searchUnit: Type.Optional(Type.String())
+	searchUnit: Type.Optional(Type.String()),
+	type: Type.Optional(Type.String())
 });
 
 export type unitModeratorQueryGetRequest = Static<
@@ -14,7 +15,8 @@ export type unitModeratorQueryGetRequest = Static<
 >;
 
 export const unitModeratorQueryCreateRequestSchema = Type.Object({
-	name: Type.String()
+	name: Type.String(),
+	type: Type.String()
 });
 
 export type unitModeratorQueryCreateRequest = Static<
@@ -22,7 +24,8 @@ export type unitModeratorQueryCreateRequest = Static<
 >;
 
 export const unitModeratorQueryUpdateRequestSchema = Type.Object({
-	name: Type.String()
+	name: Type.String(),
+	type: Type.String()
 });
 
 export type unitModeratorQueryUpdateRequest = Static<

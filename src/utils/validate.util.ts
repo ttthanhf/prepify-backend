@@ -17,6 +17,15 @@ function validate(res: Response, schema: any, obj: Object) {
 	return;
 }
 
+function isValidEnumArray<T extends object>(
+	enumType: T,
+	values: any[]
+): values is T[keyof T][] {
+	const enumValues = Object.values(enumType);
+	return values.every((value) => enumValues.includes(value));
+}
+
 export default {
-	validate
+	validate,
+	isValidEnumArray
 };
