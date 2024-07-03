@@ -2,7 +2,8 @@ import { Role } from '~constants/role.constant';
 import authMiddleware from '~middlewares/auth.middleware';
 import {
 	unitModeratorQueryCreateRequestSchema,
-	unitModeratorQueryGetRequestSchema
+	unitModeratorQueryGetRequestSchema,
+	unitModeratorQueryUpdateRequestSchema
 } from '~models/schemas/moderator/unit.schemas.model';
 import { Fastify } from '~types/fastify.type';
 import unitController from '~controllers/moderator/unit.controller';
@@ -38,5 +39,19 @@ export default async function unitRoute(
 			}
 		},
 		unitController.createUnit
+	);
+
+	app.put(
+		'/units/:id',
+		{
+			schema: {
+				body: unitModeratorQueryUpdateRequestSchema
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		unitController.updateUnit
 	);
 }
