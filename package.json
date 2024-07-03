@@ -28,6 +28,7 @@
 		"@fastify/type-provider-typebox": "^4.0.0",
 		"@sinclair/typebox": "^0.32.31",
 		"ajv": "^8.14.0",
+		"amqplib": "^0.10.4",
 		"bcrypt": "^5.1.1",
 		"env-schema": "^5.2.1",
 		"expo-server-sdk": "^3.10.0",
@@ -45,6 +46,7 @@
 	"devDependencies": {
 		"@swc/cli": "^0.3.12",
 		"@swc/core": "^1.5.6",
+		"@types/amqplib": "^0.10.5",
 		"@types/bcrypt": "^5.0.2",
 		"@types/node": "^20.12.10",
 		"@types/nodemailer": "^6.4.15",
