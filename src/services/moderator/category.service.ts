@@ -2,6 +2,7 @@ import { FastifyRequest } from 'fastify';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import { Category } from '~models/entities/category.entity';
+import { Recipe } from '~models/entities/recipe.entity';
 import ResponseModel from '~models/responses/response.model';
 import {
 	categoryModeratorQueryCreateRequest,
@@ -30,10 +31,14 @@ class CategoryModeratorService {
 		let categoryQuery = categoryRepository
 			.getRepository()
 			.createQueryBuilder('category')
-			.leftJoinAndSelect('category.recipes', 'recipe')
-			.select(['category.id AS id', 'category.name AS name'])
-			.addSelect('COUNT(recipe.id)', 'totalRecipes')
-			.groupBy('category.id')
+			.select(['category.id', 'category.name'])
+			.addSelect((subQuery) => {
+				return subQuery
+					.select('COUNT(recipe.id)', 'count')
+					.from(Recipe, 'recipe')
+					.where('recipe.category.id = category.id');
+			}, 'recipesCount')
+			.loadRelationCountAndMap('category.totalRecipes', 'category.recipes')
 			.take(Number(pageSize))
 			.skip((Number(pageIndex) - 1) * Number(pageSize));
 
@@ -42,10 +47,10 @@ class CategoryModeratorService {
 				categoryQuery = categoryQuery.orderBy('category.name', orderBy);
 				break;
 			case SortBy.TOTALRECIPES:
-				categoryQuery = categoryQuery.orderBy('totalRecipes', orderBy);
+				categoryQuery = categoryQuery.orderBy('recipesCount', orderBy);
 				break;
 			default:
-				categoryQuery = categoryQuery.orderBy('category.name', orderBy);
+				categoryQuery = categoryQuery.orderBy('category.createdAt', orderBy);
 				break;
 		}
 
@@ -58,20 +63,13 @@ class CategoryModeratorService {
 			);
 		}
 
-		const categories = await categoryQuery.getRawMany();
+		const [categories, itemTotal] = await categoryQuery.getManyAndCount();
 
-		// Convert totalRecipes to a number
-		const formattedCategories = categories.map((category) => ({
-			...category,
-			totalRecipes: Number(category.totalRecipes)
-		}));
-
-		const itemTotal = categories.length;
 		const pageTotal = Math.ceil(itemTotal / Number(pageSize));
 
 		const response = new ResponseModel(res);
 		response.data = {
-			data: formattedCategories,
+			data: categories,
 			itemTotal,
 			pageTotal,
 			pageIndex,
