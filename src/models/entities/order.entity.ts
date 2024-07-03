@@ -6,6 +6,7 @@ import { OrderStatus } from '~constants/orderstatus.constant';
 import { Area } from './area.entity';
 import { v4 as uuidv4 } from 'uuid';
 import {
+	BeforeInsert,
 	Column,
 	Entity,
 	ManyToOne,
@@ -14,6 +15,7 @@ import {
 	Relation
 } from 'typeorm';
 import { OrderPayment } from './order-payment.entity';
+import { createUniqueTrackingNumber } from '~utils/order.util';
 
 @Entity({ name: 'order' })
 export class Order {
@@ -54,6 +56,12 @@ export class Order {
 	})
 	status!: OrderStatus;
 
+	@Column({
+		unique: true,
+		length: 17
+	})
+	trackingNumber!: string;
+
 	@ManyToOne(() => Customer, (customer) => customer.orders)
 	customer!: Relation<Customer>;
 
@@ -71,4 +79,10 @@ export class Order {
 
 	@ManyToOne(() => Area, (area) => area.orders)
 	area!: Relation<Area>;
+
+	@BeforeInsert()
+	initOrder() {
+		this.trackingNumber = createUniqueTrackingNumber();
+		this.status = OrderStatus.CREATED;
+	}
 }
