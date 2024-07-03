@@ -5,6 +5,7 @@ export enum OrderBy {
 
 export enum SortBy {
 	STATUS = 'status',
+	TITLE = 'title',
 	NEWEST = 'newest',
 	POPULAR = 'popular',
 	PRICE = 'price',
