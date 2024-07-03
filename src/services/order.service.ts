@@ -43,6 +43,8 @@ class OrderService {
 		let totalPrice = 0;
 		let checkoutItems: OrderDetail[] = [];
 
+		const order = new Order();
+
 		await checkout.items.forEach(async (item: ItemResponse) => {
 			const checkoutItem = await orderDetailRepository.findOne({
 				where: {
@@ -55,6 +57,7 @@ class OrderService {
 			});
 			checkoutItem!.isCart = false;
 			checkoutItem!.price = checkoutItem!.mealKit.price;
+			checkoutItem!.order = order;
 			checkoutItems.push(checkoutItem!);
 
 			//cal total price
@@ -94,7 +97,6 @@ class OrderService {
 			id: orderCreateRequest.paymentId
 		});
 
-		const order = new Order();
 		order.customer = customer!;
 		order.area = area!;
 		order.address = orderCreateRequest.address;
