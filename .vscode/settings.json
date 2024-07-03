@@ -17,6 +17,7 @@
 	"editor.fontWeight": "normal",
 	"cSpell.words": [
 		"autoload",
+		"categoryname",
 		"datas",
 		"datetime",
 		"deliverymethod",
@@ -39,6 +40,7 @@
 		"TOTALRECIPES",
 		"typebox",
 		"typeorm",
+		"unitname",
 		"uuidv"
 	]
 }
