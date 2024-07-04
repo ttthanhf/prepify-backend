@@ -24,7 +24,22 @@ export const recipeCreateRequestSchema = Type.Object({
 	images: Type.Optional(Type.Array(Type.String())),
 	time: Type.Number({ description: 'Time cook' }),
 	videoUrl: Type.Optional(Type.String({ description: 'URL youtube' })),
-	level: Type.Enum(LevelCook)
+	level: Type.Enum(LevelCook),
+	mealKits: Type.Array(
+		Type.Object({
+			mealKit: Type.Object({
+				serving: Type.Number(),
+				price: Type.Number()
+			}),
+			extraSpice: Type.Optional(
+				Type.Object({
+					name: Type.String(),
+					image: Type.Optional(Type.String()),
+					price: Type.Number()
+				})
+			)
+		})
+	)
 });
 
 export type RecipeCreateRequest = Static<typeof recipeCreateRequestSchema>;

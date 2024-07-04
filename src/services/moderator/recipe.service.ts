@@ -6,7 +6,9 @@ import envConfig from '~configs/env.config';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
+import { ExtraSpice } from '~models/entities/extra-spice.entity';
 import { Ingredient } from '~models/entities/ingredient.entity';
+import { MealKit } from '~models/entities/meal-kit.entity';
 import { Nutrition } from '~models/entities/nutrition.entity';
 import { RecipeIngredient } from '~models/entities/recipe-ingredient.entity';
 import { RecipeNutrition } from '~models/entities/recipe-nutrition.entity';
@@ -24,6 +26,7 @@ import {
 	recipeCreateRequestSchema,
 	recipeUpdateRequestSchema
 } from '~models/schemas/recipe.schemas.model';
+import extraSpiceRepository from '~repositories/extraSpice.repository';
 import foodStyleRepository from '~repositories/foodStyle.repository';
 import mealKitRepository from '~repositories/mealKit.repository';
 import recipeIngredientRepository from '~repositories/recipe-ingredient.repository';
@@ -287,6 +290,7 @@ class RecipeModeratorService {
 		let foodStylesRequest = [];
 		let nutritionsRequest = [];
 		let ingredientsRequest = [];
+		let mealKitsRequest = [];
 
 		for await (const part of req.parts()) {
 			if (part.type == 'field') {
@@ -305,6 +309,9 @@ class RecipeModeratorService {
 						break;
 					case 'ingredients':
 						ingredientsRequest = await JSON.parse(part.value as any);
+						break;
+					case 'mealKits':
+						mealKitsRequest = await JSON.parse(part.value as any);
 						break;
 				}
 			} else if (part.type == 'file') {
@@ -358,6 +365,34 @@ class RecipeModeratorService {
 			recipeNutrition.recipe = newRecipe;
 			await recipeNutritionRepository.create(recipeNutrition);
 		});
+
+		mealKitsRequest.forEach(async (item: any) => {
+			const mealKit = new MealKit();
+			mealKit.serving = item.mealKit.serving;
+			mealKit.price = item.mealKit.price;
+			mealKit.status = true;
+			await mealKitRepository.create(mealKit);
+			if (item.extraSpice) {
+				const extraSpice = new ExtraSpice();
+				extraSpice.mealKit = mealKit;
+				extraSpice.name = item.extraSpice.name;
+				extraSpice.price = item.extraSpice.price;
+				await extraSpiceRepository.create(extraSpice);
+			}
+		});
+
+		// 	const mealKitEntity = new MealKit();
+		// 	mapperUtil.mapObjToEntity(mealKitEntity, mealKitData.mealKit);
+		// 	mealKitEntity.recipe = newRecipe;
+		// 	await mealKitRepository.create(mealKitEntity);
+
+		// 	if (mealKitData.extraSpice) {
+		// 		const extraSpiceEntity = new ExtraSpice();
+		// 		mapperUtil.mapObjToEntity(extraSpiceEntity, mealKitData.extraSpice);
+		// 		extraSpiceEntity.mealKit = mealKitEntity;
+		// 		await extraSpiceRepository.create(extraSpiceEntity);
+		// 	}
+		// }
 
 		for (const file of files) {
 			await s3Util.uploadImage({
