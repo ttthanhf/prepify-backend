@@ -22,6 +22,7 @@ export const recipeCreateRequestSchema = Type.Object({
 		})
 	),
 	images: Type.Optional(Type.Array(Type.String())),
+	imagesExtraSpice: Type.Optional(Type.Array(Type.String())),
 	time: Type.Number({ description: 'Time cook' }),
 	videoUrl: Type.Optional(Type.String({ description: 'URL youtube' })),
 	level: Type.Enum(LevelCook),
@@ -33,8 +34,8 @@ export const recipeCreateRequestSchema = Type.Object({
 			}),
 			extraSpice: Type.Optional(
 				Type.Object({
+					imageName: Type.String(),
 					name: Type.String(),
-					image: Type.Optional(Type.String()),
 					price: Type.Number()
 				})
 			)

@@ -1,14 +1,13 @@
 import { _Object } from '@aws-sdk/client-s3';
-import envConfig from '~configs/env.config';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
+import { ImageType } from '~constants/image.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import { RecipeShopResponseModel as RecipeShopResponseModel } from '~models/responses/recipe.reponse.model';
 import ResponseModel from '~models/responses/response.model';
 import { RecipeGetRequest } from '~models/schemas/recipe.schemas.model';
+import imageRepository from '~repositories/image.repository';
 import recipeRepository from '~repositories/recipe.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
-import redisUtil from '~utils/redis.util';
-import s3Util from '~utils/s3.util';
 
 class RecipeService {
 	async getRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -114,32 +113,18 @@ class RecipeService {
 
 		const pageTotal = Math.ceil(itemTotal / pageSize);
 
-		let images = await redisUtil.getImagesRecipes();
-		if (images === null) {
-			const datas3 = await s3Util.getImages({
-				type: 'recipe'
+		for (const recipe of recipes) {
+			const images = await imageRepository.findBy({
+				type: ImageType.RECIPE,
+				entityId: recipe.id
 			});
-			req.log.info('Call s3 get images');
-			images = datas3.Contents;
+
 			if (images) {
-				await redisUtil.setImagesRecipes(images);
+				recipe.images = images.map((image) => image.url);
 			} else {
-				images = [];
+				recipe.images = [DEFAULT_IMAGE];
 			}
 		}
-
-		recipes.forEach((recipe) => {
-			if (!images) {
-				return;
-			}
-			const indexImage = images.findIndex((image: _Object) => {
-				return image.Key?.includes(recipe.id);
-			});
-			if (indexImage != -1) {
-				recipe.images.push(envConfig.S3_HOST + images[indexImage].Key);
-				images.splice(indexImage, 1);
-			}
-		});
 
 		const recipeShopResponseModelList: Array<RecipeShopResponseModel> = [];
 		recipes.forEach((recipe) => {
@@ -148,8 +133,8 @@ class RecipeService {
 			recipeShopResponseModel.name = recipe.name;
 			recipeShopResponseModel.slug = recipe.slug;
 			recipeShopResponseModel.foodStyle = recipe?.foodStyles?.[0]?.name;
-			recipeShopResponseModel.mainImage = recipe?.images[0] || DEFAULT_IMAGE;
-			recipeShopResponseModel.subImage = recipe?.images[1] || DEFAULT_IMAGE;
+			recipeShopResponseModel.mainImage = recipe.images[0] || DEFAULT_IMAGE;
+			recipeShopResponseModel.subImage = recipe.images[1] || DEFAULT_IMAGE;
 			recipeShopResponseModel.level = recipe.level;
 			recipeShopResponseModel.time = recipe.time;
 
