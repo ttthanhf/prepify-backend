@@ -31,7 +31,11 @@ const envSchema = Type.Object({
 	RABBITMQ_HOST: Type.String(),
 	RABBITMQ_PORT: Type.Number(),
 	RABBITMQ_USER: Type.String(),
-	RABBITMQ_PASSWORD: Type.String()
+	RABBITMQ_PASSWORD: Type.String(),
+	VNPAY_ID: Type.String(),
+	VNPAY_KEY: Type.String(),
+	VNPAY_REDIRECT: Type.String(),
+	VNPAY_URL: Type.String()
 });
 
 export type EnvSchema = Static<typeof envSchema>;
