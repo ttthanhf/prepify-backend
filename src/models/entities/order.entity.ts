@@ -83,6 +83,6 @@ export class Order {
 	@BeforeInsert()
 	initOrder() {
 		this.trackingNumber = createUniqueTrackingNumber();
-		this.status = OrderStatus.CREATED;
+		this.status = OrderStatus.WAITING;
 	}
 }

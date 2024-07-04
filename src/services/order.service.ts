@@ -106,7 +106,6 @@ class OrderService {
 		order.phone = user!.phone;
 		order.payment = payment!;
 		order.note = orderCreateRequest.note ?? undefined;
-		order.status = OrderStatus.CREATED;
 
 		await orderRepository.create(order);
 		await redisUtil.removeCheckout(customer!);

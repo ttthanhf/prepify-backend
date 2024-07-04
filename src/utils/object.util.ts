@@ -33,7 +33,27 @@ function hideProperties<T extends object, K extends string>(
 	return result;
 }
 
+function objectToQueryString(obj: { [key: string]: any }): string {
+	return Object.keys(obj)
+		.map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`)
+		.join('&');
+}
+
+function sortObject<T extends Record<string, any>>(obj: T): T {
+	const sorted: Partial<T> = {};
+	const keys = Object.keys(obj).sort();
+
+	for (const key of keys) {
+		const value = obj[key];
+		sorted[key as keyof T] = value;
+	}
+
+	return sorted as T;
+}
+
 export default {
 	setProperty,
-	hideProperties
+	hideProperties,
+	objectToQueryString,
+	sortObject
 };

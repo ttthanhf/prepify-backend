@@ -122,7 +122,7 @@ class CartService {
 				entityId: cartItem.recipe.id
 			});
 
-			if (images) {
+			if (images[0]) {
 				cartItem.image = images[0].url;
 			} else {
 				cartItem.image = DEFAULT_IMAGE;

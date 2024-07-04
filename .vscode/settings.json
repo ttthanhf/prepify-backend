@@ -18,6 +18,7 @@
 	"cSpell.words": [
 		"autoload",
 		"categoryname",
+		"CLIENTURL",
 		"datas",
 		"datetime",
 		"DELIVEREDBY",
@@ -37,13 +38,16 @@
 		"nutritions",
 		"openapi",
 		"ORDERDATE",
+		"orderstatus",
 		"Prepify",
+		"RABBITMQ",
 		"recipename",
 		"TOTALMEALKIT",
 		"TOTALRECIPES",
 		"typebox",
 		"typeorm",
 		"unitname",
-		"uuidv"
+		"uuidv",
+		"VNPAY"
 	]
 }
