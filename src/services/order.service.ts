@@ -1,6 +1,7 @@
 import { FastifyRequest } from 'fastify';
 import { DeliveryMethod } from '~constants/deliverymethod.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { OrderStatus } from '~constants/orderstatus.constant';
 import { OrderDetail } from '~models/entities/order-detail.entity';
 import { Order } from '~models/entities/order.entity';
 import { ItemResponse } from '~models/responses/checkout.response.model';
@@ -105,6 +106,7 @@ class OrderService {
 		order.phone = user!.phone;
 		order.payment = payment!;
 		order.note = orderCreateRequest.note ?? undefined;
+		order.status = OrderStatus.CREATED;
 
 		await orderRepository.create(order);
 		await redisUtil.removeCheckout(customer!);

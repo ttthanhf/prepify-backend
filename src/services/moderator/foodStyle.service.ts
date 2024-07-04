@@ -142,10 +142,12 @@ class FoodStyleModeratorService {
 		foodStyle.title = query.title;
 		foodStyle.type = stringUtil
 			.removeVietnameseTones(query.title)
-			.replaceAll(' ', '-');
+			.replaceAll(' ', '-')
+			.toLowerCase();
 		foodStyle.slug = stringUtil
 			.removeVietnameseTones(query.name)
-			.replaceAll(' ', '-');
+			.replaceAll(' ', '-')
+			.toLowerCase();
 
 		const isError = await foodStyleRepository.findOneBy({
 			slug: foodStyle.slug,
