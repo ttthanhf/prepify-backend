@@ -22,4 +22,15 @@ export default async function orderRoute(
 		},
 		orderController.getOrders
 	);
+
+	app.get(
+		'/orders/:id',
+		{
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		orderController.getOrderById
+	);
 }

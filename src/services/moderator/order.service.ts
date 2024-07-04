@@ -1,3 +1,4 @@
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import ResponseModel from '~models/responses/response.model';
 import { orderModeratorQueryGetRequest } from '~models/schemas/moderator/order.schemas.model';
@@ -31,11 +32,8 @@ class OrderModeratorService {
 
 		// sortBy deliveredBy | status | orderDate
 		switch (query.sortBy) {
-			case SortBy.DELIVEREDBY:
-				orderQuery = orderQuery.orderBy('order.name', orderBy);
-				break;
 			case SortBy.STATUS:
-				orderQuery = orderQuery.orderBy('user.name', orderBy);
+				orderQuery = orderQuery.orderBy('order.status', orderBy);
 				break;
 			case SortBy.ORDERDATE:
 				orderQuery = orderQuery.orderBy('order.datetime', orderBy);
@@ -57,15 +55,17 @@ class OrderModeratorService {
 
 		// filter by area name [key: area]
 		if (query.area) {
-			orderQuery = orderQuery.andWhere('LOWER(area.name) = LOWER(:area)', {
-				area: query.area
+			const areas = query.area.split(',');
+			orderQuery = orderQuery.andWhere('LOWER(area.name) IN (:...areas)', {
+				areas
 			});
 		}
 
 		// filter by status [key: status]
 		if (query.status) {
-			orderQuery = orderQuery.andWhere('order.status = :status', {
-				status: query.status
+			const statuses = query.status.split(',');
+			orderQuery = orderQuery.andWhere('order.status IN (:...statuses)', {
+				statuses
 			});
 		}
 
@@ -91,6 +91,39 @@ class OrderModeratorService {
 		};
 
 		return response.send();
+	}
+
+	async getOrderByIdHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { id } = req.params as { id: string };
+		const response = new ResponseModel(res);
+		try {
+			const order = await orderRepository.getRepository().findOne({
+				where: {
+					id
+				},
+				relations: [
+					'customer',
+					'area',
+					'orderDetails',
+					'customer.user',
+					'orderDetails.mealKit',
+					'orderDetails.mealKit.recipe'
+				]
+			});
+
+			if (!order) {
+				response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+				response.message = 'Order not found';
+				return response.send();
+			}
+
+			response.data = order;
+			return response.send();
+		} catch (error) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Internal server error';
+			return response.send();
+		}
 	}
 }
 
