@@ -1,11 +1,9 @@
-import {
-	S3Client,
-	PutObjectCommand,
-	ListObjectsV2Command
-} from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import envConfig from '~configs/env.config';
 import s3Config from '~configs/s3.config';
-import { GetImages, UploadImages } from '~types/s3.type';
+import { Image } from '~models/entities/image.entity';
+import imageRepository from '~repositories/image.repository';
+import { UploadImages } from '~types/s3.type';
 
 class UploadUtil {
 	s3!: S3Client;
@@ -17,31 +15,29 @@ class UploadUtil {
 	}
 
 	async uploadImage(file: UploadImages) {
-		return await this.s3.send(
+		const filename =
+			file.type +
+			'-' +
+			file.name +
+			'-T-' +
+			String(Date.now()) +
+			'-' +
+			String(Math.floor(Math.random() * 900) + 100) +
+			'.png';
+
+		await this.s3.send(
 			new PutObjectCommand({
 				Bucket: envConfig.S3_BUCKET,
-				Key:
-					file.type +
-					'-' +
-					file.name +
-					'-T-' +
-					String(Date.now()) +
-					'-' +
-					String(Math.floor(Math.random() * 900) + 100) +
-					'.webp',
+				Key: filename,
 				Body: file.data
 			})
 		);
-	}
 
-	async getImages(file: GetImages) {
-		return await this.s3.send(
-			new ListObjectsV2Command({
-				Bucket: envConfig.S3_BUCKET,
-				Prefix: file.name ? file.type + '-' + file.name : file.type + '-',
-				MaxKeys: 1000000000
-			})
-		);
+		const image = new Image();
+		image.entityId = file.name;
+		image.type = file.type;
+		image.url = envConfig.S3_HOST + filename;
+		await imageRepository.create(image);
 	}
 }
 

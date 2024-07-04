@@ -2,9 +2,9 @@ import { _Object } from '@aws-sdk/client-s3';
 import { MultipartFile } from '@fastify/multipart';
 import { FastifyRequest } from 'fastify';
 import { In } from 'typeorm';
-import envConfig from '~configs/env.config';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { ImageType } from '~constants/image.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import { ExtraSpice } from '~models/entities/extra-spice.entity';
 import { Ingredient } from '~models/entities/ingredient.entity';
@@ -28,6 +28,7 @@ import {
 } from '~models/schemas/recipe.schemas.model';
 import extraSpiceRepository from '~repositories/extraSpice.repository';
 import foodStyleRepository from '~repositories/foodStyle.repository';
+import imageRepository from '~repositories/image.repository';
 import mealKitRepository from '~repositories/mealKit.repository';
 import recipeIngredientRepository from '~repositories/recipe-ingredient.repository';
 import recipeNutritionRepository from '~repositories/recipe-nutrition.repository';
@@ -35,7 +36,6 @@ import recipeRepository from '~repositories/recipe.repository';
 import { FastifyResponse } from '~types/fastify.type';
 import mapperUtil from '~utils/mapper.util';
 import objectUtil from '~utils/object.util';
-import redisUtil from '~utils/redis.util';
 import s3Util from '~utils/s3.util';
 import stringUtil from '~utils/string.util';
 import validateUtil from '~utils/validate.util';
@@ -131,32 +131,18 @@ class RecipeModeratorService {
 
 		const pageTotal = Math.ceil(itemTotal / pageSize);
 
-		let images = await redisUtil.getImagesRecipes();
-		if (images === null) {
-			const datas3 = await s3Util.getImages({
-				type: 'recipe'
+		for (const recipe of recipes) {
+			const images = await imageRepository.findBy({
+				type: ImageType.RECIPE,
+				entityId: recipe.id
 			});
-			req.log.info('Call s3 get images');
-			images = datas3.Contents;
+
 			if (images) {
-				await redisUtil.setImagesRecipes(images);
+				recipe.images = images.map((image) => image.url);
 			} else {
-				images = [];
+				recipe.images = [DEFAULT_IMAGE];
 			}
 		}
-
-		recipes.forEach((recipe) => {
-			if (!images) {
-				return;
-			}
-			const indexImage = images.findIndex((image: _Object) => {
-				return image.Key?.includes(recipe.id);
-			});
-			if (indexImage != -1) {
-				recipe.images.push(envConfig.S3_HOST + images[indexImage].Key);
-				images.splice(indexImage, 1);
-			}
-		});
 
 		const recipeModeratorResponseModelList: Array<AllRecipeModeratorResponseModel> =
 			[];
@@ -166,7 +152,7 @@ class RecipeModeratorService {
 			recipeModeratorResponseModel.id = recipe.id;
 			recipeModeratorResponseModel.name = recipe.name;
 			recipeModeratorResponseModel.slug = recipe.slug;
-			recipeModeratorResponseModel.image = recipe?.images[0] || DEFAULT_IMAGE;
+			recipeModeratorResponseModel.image = recipe.images[0];
 			recipeModeratorResponseModel.level = recipe.level;
 			recipeModeratorResponseModel.time = recipe.time;
 			recipeModeratorResponseModel.category = recipe.category;
@@ -285,6 +271,7 @@ class RecipeModeratorService {
 	async createRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
 		const recipeObj = {} as Recipe;
 		const files: Array<MultipartFile> = [];
+		const imagesExtraSpice: Array<MultipartFile> = [];
 		const response = new ResponseModel(res);
 
 		let foodStylesRequest = [];
@@ -318,6 +305,14 @@ class RecipeModeratorService {
 				if (part.fieldname == 'images') {
 					if (part.mimetype.startsWith('image/')) {
 						files.push(part);
+					} else {
+						response.message = 'Images have some file not image';
+						response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+						return response.send();
+					}
+				} else if (part.fieldname == 'imagesExtraSpice') {
+					if (part.mimetype.startsWith('image/')) {
+						imagesExtraSpice.push(part);
 					} else {
 						response.message = 'Images have some file not image';
 						response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
@@ -368,6 +363,7 @@ class RecipeModeratorService {
 
 		mealKitsRequest.forEach(async (item: any) => {
 			const mealKit = new MealKit();
+			mealKit.recipe = newRecipe;
 			mealKit.serving = item.mealKit.serving;
 			mealKit.price = item.mealKit.price;
 			mealKit.status = true;
@@ -377,32 +373,33 @@ class RecipeModeratorService {
 				extraSpice.mealKit = mealKit;
 				extraSpice.name = item.extraSpice.name;
 				extraSpice.price = item.extraSpice.price;
+
 				await extraSpiceRepository.create(extraSpice);
+
+				for (const image of imagesExtraSpice) {
+					if (image.filename.includes(extraSpice.id)) {
+						await s3Util.uploadImage({
+							data: await image.toBuffer(),
+							name: extraSpice.id,
+							type: ImageType.EXTRASPICE
+						});
+						const index = imagesExtraSpice.indexOf(image);
+						if (index !== -1) {
+							imagesExtraSpice.splice(index, 1);
+						}
+						break;
+					}
+				}
 			}
 		});
-
-		// 	const mealKitEntity = new MealKit();
-		// 	mapperUtil.mapObjToEntity(mealKitEntity, mealKitData.mealKit);
-		// 	mealKitEntity.recipe = newRecipe;
-		// 	await mealKitRepository.create(mealKitEntity);
-
-		// 	if (mealKitData.extraSpice) {
-		// 		const extraSpiceEntity = new ExtraSpice();
-		// 		mapperUtil.mapObjToEntity(extraSpiceEntity, mealKitData.extraSpice);
-		// 		extraSpiceEntity.mealKit = mealKitEntity;
-		// 		await extraSpiceRepository.create(extraSpiceEntity);
-		// 	}
-		// }
 
 		for (const file of files) {
 			await s3Util.uploadImage({
 				data: await file.toBuffer(),
 				name: newRecipe.id,
-				type: 'recipe'
+				type: ImageType.RECIPE
 			});
 		}
-
-		await redisUtil.removeImagesRecipes();
 
 		return response.send();
 	}

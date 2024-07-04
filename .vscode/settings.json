@@ -22,6 +22,7 @@
 		"datetime",
 		"deliverymethod",
 		"ENVIROMENT",
+		"EXTRASPICE",
 		"extraspicename",
 		"extraspiceprice",
 		"fastify",
