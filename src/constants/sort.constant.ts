@@ -4,6 +4,11 @@ export enum OrderBy {
 }
 
 export enum SortBy {
+	ADDRESS = 'address',
+	EMAIL = 'email',
+	FULLNAME = 'fullname',
+	PHONE = 'phone',
+	AREA = 'area',
 	STATUS = 'status',
 	TITLE = 'title',
 	NEWEST = 'newest',

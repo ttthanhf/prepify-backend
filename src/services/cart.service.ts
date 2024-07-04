@@ -16,10 +16,10 @@ import {
 	MealKitCartResponse,
 	RecipeCartResponse
 } from '~models/responses/cart.response.model';
-import redisUtil from '~utils/redis.util';
-import envConfig from '~configs/env.config';
 import mapperUtil from '~utils/mapper.util';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
+import { ImageType } from '~constants/image.constant';
+import imageRepository from '~repositories/image.repository';
 
 class CartService {
 	async getCartHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -54,7 +54,6 @@ class CartService {
 			.getMany();
 
 		const CartList: Array<CartItemResponse> = [];
-		const images = await redisUtil.getImagesRecipes();
 		const mealKitItemExisted: { [key: string]: any } = {};
 
 		for (const cart of carts) {
@@ -118,15 +117,13 @@ class CartService {
 			cartItem.mealKitSelected = mealKitCart;
 			cartItem.mealKits = mealKitItems;
 
+			const images = await imageRepository.findBy({
+				type: ImageType.RECIPE,
+				entityId: cartItem.recipe.id
+			});
+
 			if (images) {
-				const indexImage = images.findIndex((image) => {
-					return image.Key?.includes(cart.mealKit.recipe.id);
-				});
-				if (indexImage != -1) {
-					cartItem.image = envConfig.S3_HOST + images[indexImage].Key;
-				} else {
-					cartItem.image = DEFAULT_IMAGE;
-				}
+				cartItem.image = images[0].url;
 			} else {
 				cartItem.image = DEFAULT_IMAGE;
 			}
