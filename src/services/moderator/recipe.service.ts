@@ -185,7 +185,9 @@ class RecipeModeratorService {
 				'recipeNutritions.nutrition',
 				'recipeNutritions.unit',
 				'category',
-				'foodStyles'
+				'foodStyles',
+				'mealKits',
+				'mealKits.extraSpice'
 			]
 		});
 
@@ -229,6 +231,22 @@ class RecipeModeratorService {
 			nutritionRecipeModeratorResponseModelList;
 		recipeModeratorResponseModel.foodStyles =
 			foodStylesRecipeModeratorResponseModelList;
+		recipeModeratorResponseModel.mealKits = recipe.mealKits;
+
+		for (const item of recipeModeratorResponseModel.mealKits) {
+			if (item.extraSpice) {
+				const images = await imageRepository.findBy({
+					type: ImageType.EXTRASPICE,
+					entityId: item.extraSpice.id
+				});
+
+				if (images[0]) {
+					item.extraSpice.image = images[0].url;
+				} else {
+					item.extraSpice.image = DEFAULT_IMAGE;
+				}
+			}
+		}
 
 		response.data = recipeModeratorResponseModel;
 		return response.send();
@@ -377,7 +395,7 @@ class RecipeModeratorService {
 				await extraSpiceRepository.create(extraSpice);
 
 				for (const image of imagesExtraSpice) {
-					if (image.filename.includes(extraSpice.id)) {
+					if (image.filename.includes(item.extraSpice.imageName)) {
 						await s3Util.uploadImage({
 							data: await image.toBuffer(),
 							name: extraSpice.id,

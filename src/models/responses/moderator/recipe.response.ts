@@ -1,4 +1,5 @@
 import { LevelCook } from '~constants/levelcook.constant';
+import { MealKit } from '~models/entities/meal-kit.entity';
 
 export class AllRecipeModeratorResponseModel {
 	id!: string;
@@ -33,6 +34,7 @@ export class RecipeModeratorResponseModel {
 	foodStyles!: Record<string, string>;
 	steps!: string;
 	nutrition!: NutritionRecipeModeratorResponseModel[];
+	mealKits!: MealKit[];
 	images!: string[];
 	time!: number;
 	videoUrl!: string;

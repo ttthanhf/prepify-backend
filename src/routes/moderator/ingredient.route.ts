@@ -1,7 +1,11 @@
 import authMiddleware from '~middlewares/auth.middleware';
 import { Role } from '~constants/role.constant';
 import { Fastify } from '~types/fastify.type';
-import { ingredientModeratorQueryGetRequestSchema } from '~models/schemas/moderator/ingredient.schemas.model';
+import {
+	ingredientModeratorCreateRequestSchema,
+	ingredientModeratorQueryGetRequestSchema,
+	ingredientModeratorUpdateRequestSchema
+} from '~models/schemas/moderator/ingredient.schemas.model';
 import ingredientController from '~controllers/moderator/ingredient.controller';
 
 export default async function categoryRoute(
@@ -21,5 +25,41 @@ export default async function categoryRoute(
 			}
 		},
 		ingredientController.getAllIngredient
+	);
+	app.get(
+		'/ingredients/:id',
+		{
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		ingredientController.getIngredient
+	);
+	app.post(
+		'/ingredients',
+		{
+			schema: {
+				body: ingredientModeratorCreateRequestSchema
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		ingredientController.createIngredient
+	);
+	app.put(
+		'/ingredients/:id',
+		{
+			schema: {
+				body: ingredientModeratorUpdateRequestSchema
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		ingredientController.updateIngredient
 	);
 }

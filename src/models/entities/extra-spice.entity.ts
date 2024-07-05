@@ -23,4 +23,6 @@ export class ExtraSpice {
 	@OneToOne(() => MealKit, (mealkit) => mealkit.extraSpice)
 	@JoinColumn()
 	mealKit!: Relation<MealKit>;
+
+	image?: string;
 }
