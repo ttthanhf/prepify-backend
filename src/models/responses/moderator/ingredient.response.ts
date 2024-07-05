@@ -5,4 +5,5 @@ export class IngredientModeratorGetResponse {
 	price!: number;
 	image!: string;
 	unit!: string;
+	updatedAt!: Date;
 }

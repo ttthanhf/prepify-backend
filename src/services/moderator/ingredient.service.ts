@@ -1,10 +1,20 @@
 import { FastifyRequest } from 'fastify';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { ImageType } from '~constants/image.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
+import { UnitType } from '~constants/unittype.constant';
+import { Image } from '~models/entities/image.entity';
+import { Ingredient } from '~models/entities/ingredient.entity';
 import { IngredientModeratorGetResponse } from '~models/responses/moderator/ingredient.response';
 import ResponseModel from '~models/responses/response.model';
-import { IngredientModeratorQueryGetRequest } from '~models/schemas/moderator/ingredient.schemas.model';
+import {
+	IngredientModeratorCreateRequest,
+	IngredientModeratorQueryGetRequest
+} from '~models/schemas/moderator/ingredient.schemas.model';
+import imageRepository from '~repositories/image.repository';
 import ingredientRepository from '~repositories/ingredient.repository';
+import unitRepository from '~repositories/unit.repository';
 import { FastifyResponse } from '~types/fastify.type';
 import mapperUtil from '~utils/mapper.util';
 
@@ -66,15 +76,26 @@ class IngredientModeratorService {
 		const ingredientModeratorGetResponseList: Array<IngredientModeratorGetResponse> =
 			[];
 
-		ingredients.forEach((item) => {
+		for (const item of ingredients) {
 			const ingredientModeratorGetResponse = mapperUtil.mapEntityToClass(
 				item,
 				IngredientModeratorGetResponse
 			);
 			ingredientModeratorGetResponse.unit = item.unit.name;
-			ingredientModeratorGetResponse.image = DEFAULT_IMAGE;
+
+			const images = await imageRepository.findBy({
+				type: ImageType.INGREDIENT,
+				entityId: item.id
+			});
+
+			if (images[0]) {
+				ingredientModeratorGetResponse.image = images[0].url;
+			} else {
+				ingredientModeratorGetResponse.image = DEFAULT_IMAGE;
+			}
+
 			ingredientModeratorGetResponseList.push(ingredientModeratorGetResponse);
-		});
+		}
 
 		const response = new ResponseModel(res);
 		response.data = {
@@ -84,6 +105,111 @@ class IngredientModeratorService {
 			pageIndex,
 			pageSize
 		};
+		return response.send();
+	}
+
+	async getIngredientHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { id }: any = req.params;
+		const response = new ResponseModel(res);
+		const ingredient = await ingredientRepository.findOne({
+			where: {
+				id
+			},
+			relations: ['unit']
+		});
+		if (!ingredient) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'Item not found';
+			return response.send();
+		}
+		response.data = ingredient;
+		return response.send();
+	}
+
+	async createIngredientHandle(req: FastifyRequest, res: FastifyResponse) {
+		const query: IngredientModeratorCreateRequest =
+			req.body as IngredientModeratorCreateRequest;
+
+		const response = new ResponseModel(res);
+
+		const ingredient = new Ingredient();
+		ingredient.name = query.name;
+		ingredient.price = query.price;
+		ingredient.category = query.category;
+		ingredient.updatedAt = new Date();
+
+		const unit = await unitRepository.findOneBy({
+			id: query.unit,
+			type: UnitType.INGREDIENT
+		});
+		if (!unit) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Unit not found';
+			return response.send();
+		}
+		ingredient.unit = unit;
+
+		await ingredientRepository.create(ingredient);
+
+		const image = new Image();
+		image.type = ImageType.INGREDIENT;
+		image.url = query.imageURL;
+		image.entityId = ingredient.id;
+		await imageRepository.create(image);
+
+		return response.send();
+	}
+
+	async updateIngredientHandle(req: FastifyRequest, res: FastifyResponse) {
+		const query: IngredientModeratorCreateRequest =
+			req.body as IngredientModeratorCreateRequest;
+		const { id }: any = req.params;
+		const response = new ResponseModel(res);
+		const ingredient = await ingredientRepository.findOne({
+			where: {
+				id
+			},
+			relations: ['unit']
+		});
+		if (!ingredient) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'Item not found';
+			return response.send();
+		}
+
+		ingredient.name = query.name;
+		ingredient.price = query.price;
+		ingredient.category = query.category;
+		ingredient.updatedAt = new Date();
+
+		const unit = await unitRepository.findOneBy({
+			id: query.unit,
+			type: UnitType.INGREDIENT
+		});
+		if (!unit) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Unit not found';
+			return response.send();
+		}
+		ingredient.unit = unit;
+
+		await ingredientRepository.update(ingredient);
+
+		let image = await imageRepository.findOneBy({
+			entityId: ingredient.id,
+			type: ImageType.INGREDIENT
+		});
+
+		if (image) {
+			image.url = query.imageURL;
+		} else {
+			image = new Image();
+			image.type = ImageType.INGREDIENT;
+			image.url = query.imageURL;
+			image.entityId = ingredient.id;
+		}
+		await imageRepository.update(image);
+
 		return response.send();
 	}
 }

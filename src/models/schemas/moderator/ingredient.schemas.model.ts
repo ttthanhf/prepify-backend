@@ -12,3 +12,22 @@ export const ingredientModeratorQueryGetRequestSchema = Type.Object({
 export type IngredientModeratorQueryGetRequest = Static<
 	typeof ingredientModeratorQueryGetRequestSchema
 >;
+
+export const ingredientModeratorCreateRequestSchema = Type.Object({
+	name: Type.String(),
+	price: Type.Number(),
+	unit: Type.String(),
+	category: Type.String(),
+	imageURL: Type.String()
+});
+
+export type IngredientModeratorCreateRequest = Static<
+	typeof ingredientModeratorCreateRequestSchema
+>;
+
+export const ingredientModeratorUpdateRequestSchema =
+	ingredientModeratorCreateRequestSchema;
+
+export type IngredientModeratorUpdateRequest = Static<
+	typeof ingredientModeratorUpdateRequestSchema
+>;

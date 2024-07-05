@@ -28,6 +28,11 @@ export class Ingredient {
 	@Column()
 	description?: string;
 
+	@Column({
+		type: 'datetime'
+	})
+	updatedAt!: Date;
+
 	@OneToMany(
 		() => RecipeIngredient,
 		(recipeIngredient) => recipeIngredient.ingredient
