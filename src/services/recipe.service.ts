@@ -1,16 +1,22 @@
 import { _Object } from '@aws-sdk/client-s3';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { ImageType } from '~constants/image.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
-import { RecipeShopResponseModel as RecipeShopResponseModel } from '~models/responses/recipe.reponse.model';
+import {
+	RecipeDetailShopResponse,
+	RecipeShopResponseModel as RecipeShopResponseModel
+} from '~models/responses/recipe.reponse.model';
 import ResponseModel from '~models/responses/response.model';
 import { RecipeGetRequest } from '~models/schemas/recipe.schemas.model';
 import imageRepository from '~repositories/image.repository';
+import orderDetailRepository from '~repositories/orderDetail.repository';
 import recipeRepository from '~repositories/recipe.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import mapperUtil from '~utils/mapper.util';
 
 class RecipeService {
-	async getRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+	async getAllRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
 		const query: RecipeGetRequest = req.query as RecipeGetRequest;
 
 		const pageSize =
@@ -160,6 +166,70 @@ class RecipeService {
 			pageSize,
 			pageTotal
 		};
+		return response.send();
+	}
+
+	async getRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { slug }: any = req.params;
+
+		const recipe = await recipeRepository.findOne({
+			where: {
+				slug
+			},
+			relations: ['mealKits', 'mealKits.extraSpice']
+		});
+		const response = new ResponseModel(res);
+		if (!recipe) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'Item not found';
+			return response.send();
+		}
+
+		const recipeDetailShopResponse = mapperUtil.mapEntityToClass(
+			recipe,
+			RecipeDetailShopResponse
+		);
+
+		for (const item of recipe.mealKits) {
+			if (item.extraSpice) {
+				const images = await imageRepository.findBy({
+					type: ImageType.EXTRASPICE,
+					entityId: item.extraSpice.id
+				});
+
+				item.extraSpice.image = images[0] ? images[0].url : DEFAULT_IMAGE;
+			}
+		}
+
+		const images = await imageRepository.findBy({
+			type: ImageType.RECIPE,
+			entityId: recipe.id
+		});
+
+		if (images) {
+			recipeDetailShopResponse.images = images.map((image) => image.url);
+		} else {
+			recipeDetailShopResponse.images = [DEFAULT_IMAGE];
+		}
+
+		recipeDetailShopResponse.totalFeedback = 0;
+		recipeDetailShopResponse.star = 0;
+
+		const sold = await orderDetailRepository.count({
+			where: {
+				isCart: false,
+				mealKit: {
+					recipe: {
+						id: recipe.id
+					}
+				}
+			},
+			relations: ['mealKit', 'mealKit.recipe']
+		});
+
+		recipeDetailShopResponse.sold = sold;
+
+		response.data = recipeDetailShopResponse;
 		return response.send();
 	}
 }

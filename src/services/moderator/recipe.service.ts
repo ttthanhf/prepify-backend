@@ -233,6 +233,17 @@ class RecipeModeratorService {
 			foodStylesRecipeModeratorResponseModelList;
 		recipeModeratorResponseModel.mealKits = recipe.mealKits;
 
+		const images = await imageRepository.findBy({
+			type: ImageType.RECIPE,
+			entityId: recipe.id
+		});
+
+		if (images) {
+			recipeModeratorResponseModel.images = images.map((image) => image.url);
+		} else {
+			recipeModeratorResponseModel.images = [DEFAULT_IMAGE];
+		}
+
 		for (const item of recipeModeratorResponseModel.mealKits) {
 			if (item.extraSpice) {
 				const images = await imageRepository.findBy({
