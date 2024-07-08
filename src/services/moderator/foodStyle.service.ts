@@ -134,7 +134,6 @@ class FoodStyleModeratorService {
 		const response = new ResponseModel(res);
 		if (!foodStyle) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Item not found';
 			return response.send();
 		}
 
@@ -176,7 +175,6 @@ class FoodStyleModeratorService {
 		const response = new ResponseModel(res);
 		if (!foodStyle) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Item not found';
 			return response.send();
 		}
 
