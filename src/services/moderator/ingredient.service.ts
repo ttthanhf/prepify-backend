@@ -119,7 +119,6 @@ class IngredientModeratorService {
 		});
 		if (!ingredient) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Item not found';
 			return response.send();
 		}
 
@@ -181,7 +180,6 @@ class IngredientModeratorService {
 		});
 		if (!ingredient) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Item not found';
 			return response.send();
 		}
 

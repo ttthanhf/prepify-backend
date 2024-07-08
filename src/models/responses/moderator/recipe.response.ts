@@ -16,18 +16,21 @@ export class AllRecipeModeratorResponseModel {
 }
 
 export class IngredientRecipeModeratorResponseModel {
+	id!: string;
 	ingredient_id!: string;
 	amount!: number;
 	unit_id!: string;
 }
 
 export class NutritionRecipeModeratorResponseModel {
+	id!: string;
 	nutrition_id!: string;
 	amount!: number;
 	unit_id!: string;
 }
 
 export class RecipeModeratorResponseModel {
+	id!: string;
 	name!: string;
 	ingredients!: IngredientRecipeModeratorResponseModel[];
 	category!: string;
