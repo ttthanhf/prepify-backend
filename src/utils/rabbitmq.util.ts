@@ -1,6 +1,11 @@
 import * as amqp from 'amqplib';
 import envConfig from '~configs/env.config';
-import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
+import {
+	ExchangeKeys,
+	QueueKeys,
+	RABBITMQ_BINDINGS,
+	RABBITMQ_CONSTANT
+} from '~constants/rabbitmq.constant';
 
 interface Exchange {
 	type: string;
@@ -12,14 +17,17 @@ interface QueueBinding {
 }
 
 class RabbitMQUtil {
+	static instance: RabbitMQUtil;
 	private rabbitmq!: amqp.Connection;
 	private channel!: amqp.Channel;
 	private exchanges: Map<string, Exchange>;
 	private queues: Map<string, QueueBinding>;
+	private queueOptions: Map<string, amqp.Options.AssertQueue>;
 
-	constructor() {
+	private constructor() {
 		this.exchanges = new Map<string, Exchange>();
 		this.queues = new Map<string, QueueBinding>();
+		this.queueOptions = new Map<string, amqp.Options.AssertQueue>();
 		this.initRabbitMQ();
 	}
 
@@ -29,6 +37,9 @@ class RabbitMQUtil {
 		user: string,
 		password: string
 	): Promise<void> {
+		if (this.isConnected()) {
+			return;
+		}
 		try {
 			const url = `amqp://${user}:${password}@${host}:${port}`;
 			this.rabbitmq = await amqp.connect(url);
@@ -40,6 +51,10 @@ class RabbitMQUtil {
 	}
 
 	public async initRabbitMQ() {
+		if (this.isConnected() || this.rabbitmq) {
+			return;
+		}
+
 		await this.connect(
 			envConfig.RABBITMQ_HOST,
 			envConfig.RABBITMQ_PORT,
@@ -47,25 +62,31 @@ class RabbitMQUtil {
 			envConfig.RABBITMQ_PASSWORD
 		);
 
-		// Add exchanges
-		this.addExchange(RABBITMQ_CONSTANT.EXCHANGE.ORDER, 'direct');
-		this.addExchange(RABBITMQ_CONSTANT.EXCHANGE.NOTIFICATION, 'direct');
+		for (const exchangeKey in RABBITMQ_CONSTANT.EXCHANGE) {
+			const exchangeName =
+				RABBITMQ_CONSTANT.EXCHANGE[exchangeKey as ExchangeKeys];
+			this.addExchange(exchangeName, 'direct', { durable: true });
+		}
 
-		// Add queues
-		this.addQueue(RABBITMQ_CONSTANT.QUEUE.ORDER);
-		this.addQueue(RABBITMQ_CONSTANT.QUEUE.NOTIFICATION);
+		// Create queues
+		for (const queueKey in RABBITMQ_CONSTANT.QUEUE) {
+			const queueName = RABBITMQ_CONSTANT.QUEUE[queueKey as QueueKeys];
+			if (queueName == RABBITMQ_CONSTANT.QUEUE.ORDER_BATCH) {
+				this.addQueue(queueName, {
+					durable: true,
+					arguments: { 'x-max-priority': 10 }
+				});
+			} else {
+				this.addQueue(queueName);
+			}
+		}
 
-		// Bind queues
-		this.bindQueue(
-			RABBITMQ_CONSTANT.QUEUE.ORDER,
-			RABBITMQ_CONSTANT.EXCHANGE.ORDER,
-			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER
-		);
-		this.bindQueue(
-			RABBITMQ_CONSTANT.QUEUE.NOTIFICATION,
-			RABBITMQ_CONSTANT.EXCHANGE.NOTIFICATION,
-			RABBITMQ_CONSTANT.ROUTING_KEY.NOTIFICATION
-		);
+		for (const binding of RABBITMQ_BINDINGS) {
+			const queueName = binding.queue;
+			const exchangeName = binding.exchange;
+			const routingKey = binding.routingKey;
+			this.bindQueue(queueName, exchangeName, routingKey);
+		}
 
 		// Assert exchanges and queues
 		await this.assertExchanges();
@@ -95,16 +116,18 @@ class RabbitMQUtil {
 		}
 	}
 
-	public addQueue(name: string): void {
+	public addQueue(name: string, options?: amqp.Options.AssertQueue): void {
 		if (!this.queues.has(name)) {
 			this.queues.set(name, {});
+			this.queueOptions.set(name, options || {});
 		}
 	}
 
 	public async assertQueues(): Promise<void> {
 		for (const [name] of this.queues.entries()) {
 			try {
-				await this.channel.assertQueue(name);
+				const options = this.queueOptions.get(name) || {};
+				await this.channel.assertQueue(name, options);
 			} catch (error) {
 				console.error(`Error asserting queue ${name}: ${error}`);
 			}
@@ -150,6 +173,25 @@ class RabbitMQUtil {
 		}
 	}
 
+	public async publishMessageToDelayQueue(
+		exchange: string,
+		routingKey: string,
+		message: string,
+		delay: number,
+		priority?: number
+	): Promise<void> {
+		try {
+			this.channel.publish(exchange, routingKey, Buffer.from(message), {
+				headers: {
+					'x-delay': delay
+				},
+				priority: priority ?? 0
+			});
+		} catch (error: any) {
+			console.error('Send message error:', error);
+		}
+	}
+
 	public async subscribe(
 		queue: string,
 		onMessage: (msg: amqp.ConsumeMessage | null) => void
@@ -169,6 +211,17 @@ class RabbitMQUtil {
 			console.error(`Closing error: ${error}`);
 		}
 	}
+
+	public isConnected(): boolean {
+		return this.rabbitmq !== undefined;
+	}
+
+	public static getInstance(): RabbitMQUtil {
+		if (!RabbitMQUtil.instance) {
+			RabbitMQUtil.instance = new RabbitMQUtil();
+		}
+		return RabbitMQUtil.instance;
+	}
 }
 
-export default new RabbitMQUtil();
+export default RabbitMQUtil;

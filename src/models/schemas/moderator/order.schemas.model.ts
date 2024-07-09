@@ -12,6 +12,6 @@ export const orderModeratorQueryGetRequestSchema = Type.Object({
 	status: Type.Optional(Type.Enum(OrderStatus)) // filter by status [key: status]
 });
 
-export type orderModeratorQueryGetRequest = Static<
+export type OrderModeratorQueryGetRequest = Static<
 	typeof orderModeratorQueryGetRequestSchema
 >;

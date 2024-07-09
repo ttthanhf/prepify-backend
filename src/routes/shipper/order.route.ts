@@ -17,11 +17,11 @@ export default async function route(
 		{
 			schema: {
 				queryString: orderShipperGetRequestSchema
-			},
-			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
-			config: {
-				allowedRoles: [Role.SHIPPER]
 			}
+			// onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			// config: {
+			// 	allowedRoles: [Role.SHIPPER]
+			// }
 		},
 		orderController.getOrders
 	);
@@ -42,12 +42,12 @@ export default async function route(
 
 	app.get(
 		'/orders/number',
-		// {
-		// 	onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
-		// 	config: {
-		// 		allowedRoles: [Role.SHIPPER]
-		// 	}
-		// },
+		{
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.SHIPPER]
+			}
+		},
 		orderController.getNumberOfOrdersByStatus
 	);
 }

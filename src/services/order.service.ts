@@ -1,7 +1,7 @@
 import { FastifyRequest } from 'fastify';
 import { DeliveryMethod } from '~constants/deliverymethod.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
-import { OrderStatus } from '~constants/orderstatus.constant';
+import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
 import { OrderDetail } from '~models/entities/order-detail.entity';
 import { Order } from '~models/entities/order.entity';
 import { ItemResponse } from '~models/responses/checkout.response.model';
@@ -14,6 +14,7 @@ import orderDetailRepository from '~repositories/orderDetail.repository';
 import paymentRepository from '~repositories/payment.repository';
 import userRepository from '~repositories/user.repository';
 import { FastifyResponse } from '~types/fastify.type';
+import RabbitMQUtil from '~utils/rabbitmq.util';
 import redisUtil from '~utils/redis.util';
 import userUtil from '~utils/user.util';
 
@@ -106,6 +107,8 @@ class OrderService {
 		order.phone = user!.phone;
 		order.payment = payment!;
 		order.note = orderCreateRequest.note ?? undefined;
+		order.isPriority =
+			orderCreateRequest.deliveryMethod == DeliveryMethod.INSTANT;
 
 		await orderRepository.create(order);
 		await redisUtil.removeCheckout(customer!);
@@ -113,6 +116,14 @@ class OrderService {
 			await orderDetailRepository.update(checkoutItem!);
 		});
 
+		const rabbitmqInstance = RabbitMQUtil.getInstance();
+		// if the order is not paid during 1 hour, cancel the order
+		await rabbitmqInstance.publishMessageToDelayQueue(
+			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,
+			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CANCEL,
+			JSON.stringify(order),
+			60 * 60 * 1000 // 1 hour
+		);
 		return response.send();
 	}
 }

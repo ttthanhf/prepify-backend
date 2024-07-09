@@ -50,7 +50,8 @@
 			"~routes/*": ["./routes/*"],
 			"~services/*": ["./services/*"],
 			"~types/*": ["./types/*"],
-			"~utils/*": ["./utils/*"]
+			"~utils/*": ["./utils/*"],
+			"~workers/*": ["./workers/*"]
 		}
 	},
 	"ts-node": {

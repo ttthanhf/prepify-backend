@@ -80,6 +80,11 @@ export class Order {
 	@ManyToOne(() => Area, (area) => area.orders)
 	area!: Relation<Area>;
 
+	@Column({
+		type: 'boolean'
+	})
+	isPriority!: boolean;
+
 	@BeforeInsert()
 	initOrder() {
 		this.trackingNumber = createUniqueTrackingNumber();
