@@ -4,8 +4,13 @@ import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { ImageType } from '~constants/image.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import {
+	FoodStylesRecipeDetailShopResponse,
+	IngredientsRecipeDetailShopResponse,
+	ItemRecipeDetailShopResponse,
+	NutritionRecipeDetailShopResponse,
 	RecipeDetailShopResponse,
-	RecipeShopResponseModel as RecipeShopResponseModel
+	RecipeShopResponseModel as RecipeShopResponseModel,
+	UnitRecipeDetailShopResponse
 } from '~models/responses/recipe.reponse.model';
 import ResponseModel from '~models/responses/response.model';
 import { RecipeGetRequest } from '~models/schemas/recipe.schemas.model';
@@ -176,18 +181,24 @@ class RecipeService {
 			where: {
 				slug
 			},
-			relations: ['mealKits', 'mealKits.extraSpice']
+			relations: [
+				'mealKits',
+				'mealKits.extraSpice',
+				'category',
+				'foodStyles',
+				'recipeIngredients',
+				'recipeIngredients.unit',
+				'recipeIngredients.ingredient',
+				'recipeNutritions',
+				'recipeNutritions.unit',
+				'recipeNutritions.nutrition'
+			]
 		});
 		const response = new ResponseModel(res);
 		if (!recipe) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
 			return response.send();
 		}
-
-		const recipeDetailShopResponse = mapperUtil.mapEntityToClass(
-			recipe,
-			RecipeDetailShopResponse
-		);
 
 		for (const item of recipe.mealKits) {
 			if (item.extraSpice) {
@@ -200,19 +211,24 @@ class RecipeService {
 			}
 		}
 
+		const itemRecipeDetailShopResponse = mapperUtil.mapEntityToClass(
+			recipe,
+			ItemRecipeDetailShopResponse
+		);
+
 		const images = await imageRepository.findBy({
 			type: ImageType.RECIPE,
 			entityId: recipe.id
 		});
 
 		if (images) {
-			recipeDetailShopResponse.images = images.map((image) => image.url);
+			itemRecipeDetailShopResponse.images = images.map((image) => image.url);
 		} else {
-			recipeDetailShopResponse.images = [DEFAULT_IMAGE];
+			itemRecipeDetailShopResponse.images = [DEFAULT_IMAGE];
 		}
 
-		recipeDetailShopResponse.totalFeedback = 0;
-		recipeDetailShopResponse.star = 0;
+		itemRecipeDetailShopResponse.totalFeedback = 0;
+		itemRecipeDetailShopResponse.star = 0;
 
 		const sold = await orderDetailRepository.count({
 			where: {
@@ -226,7 +242,73 @@ class RecipeService {
 			relations: ['mealKit', 'mealKit.recipe']
 		});
 
-		recipeDetailShopResponse.sold = sold;
+		itemRecipeDetailShopResponse.sold = sold;
+
+		const foodStylesRecipeDetailShopResponseList: Array<FoodStylesRecipeDetailShopResponse> =
+			[];
+		recipe.foodStyles.forEach((item) => {
+			const foodStylesRecipeDetailShopResponse = mapperUtil.mapEntityToClass(
+				item,
+				FoodStylesRecipeDetailShopResponse
+			);
+			foodStylesRecipeDetailShopResponseList.push(
+				foodStylesRecipeDetailShopResponse
+			);
+		});
+
+		const ingredientsRecipeDetailShopResponseList: Array<IngredientsRecipeDetailShopResponse> =
+			[];
+		for (const item of recipe.recipeIngredients) {
+			const ingredientsRecipeDetailShopResponse = mapperUtil.mapEntityToClass(
+				item.ingredient,
+				IngredientsRecipeDetailShopResponse
+			);
+			const unit = mapperUtil.mapEntityToClass(
+				item.unit,
+				UnitRecipeDetailShopResponse
+			);
+			ingredientsRecipeDetailShopResponse.unit = unit;
+
+			const image = await imageRepository.findOneBy({
+				type: ImageType.INGREDIENT,
+				entityId: item.ingredient.id
+			});
+
+			if (image) {
+				ingredientsRecipeDetailShopResponse.imageURL = image.url;
+			} else {
+				ingredientsRecipeDetailShopResponse.imageURL = DEFAULT_IMAGE;
+			}
+
+			ingredientsRecipeDetailShopResponseList.push(
+				ingredientsRecipeDetailShopResponse
+			);
+		}
+
+		const nutritionRecipeDetailShopResponseList: Array<NutritionRecipeDetailShopResponse> =
+			[];
+		recipe.recipeNutritions.forEach((item) => {
+			const nutritionRecipeDetailShopResponse = mapperUtil.mapEntityToClass(
+				item.nutrition,
+				NutritionRecipeDetailShopResponse
+			);
+			const unit = mapperUtil.mapEntityToClass(
+				item.unit,
+				UnitRecipeDetailShopResponse
+			);
+			nutritionRecipeDetailShopResponse.units = unit;
+			nutritionRecipeDetailShopResponseList.push(
+				nutritionRecipeDetailShopResponse
+			);
+		});
+
+		const recipeDetailShopResponse = new RecipeDetailShopResponse();
+		recipeDetailShopResponse.recipe = itemRecipeDetailShopResponse;
+		recipeDetailShopResponse.foodStyles =
+			foodStylesRecipeDetailShopResponseList;
+		recipeDetailShopResponse.ingredients =
+			ingredientsRecipeDetailShopResponseList;
+		recipeDetailShopResponse.nutritions = nutritionRecipeDetailShopResponseList;
 
 		response.data = recipeDetailShopResponse;
 		return response.send();
