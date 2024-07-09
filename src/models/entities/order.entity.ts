@@ -62,6 +62,14 @@ export class Order {
 	})
 	trackingNumber!: string;
 
+	@Column()
+	deliveryCount!: number;
+
+	@Column({
+		type: 'boolean'
+	})
+	isPriority!: boolean;
+
 	@ManyToOne(() => Customer, (customer) => customer.orders)
 	customer!: Relation<Customer>;
 
@@ -84,5 +92,6 @@ export class Order {
 	initOrder() {
 		this.trackingNumber = createUniqueTrackingNumber();
 		this.status = OrderStatus.WAITING;
+		this.deliveryCount = 0;
 	}
 }
