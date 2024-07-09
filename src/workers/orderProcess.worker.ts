@@ -61,7 +61,7 @@ class OrderProcessWorker {
 		// subscribe to the order queue
 		// get the order from the queue
 		// convert msg to order
-		// if order date is after 6pm, calculate the time to 7am the next day, send to delay queue
+		// if order date is after 7pm, calculate the time to 7am the next day, send to delay queue
 
 		const order: Order = JSON.parse(msg!.content.toString());
 		if (order.datetime.getHours() >= 19) {
@@ -137,7 +137,7 @@ class OrderProcessWorker {
 		// Combine current date and time frame to get datetime
 		const datetime = combineDateAndTimeFrame(moment(), nextTimeFrame!.time);
 		// Find or create a batch for that area
-		let batch = await this.findCurrentBatch(area, datetime);
+		let batch = await this.findCurrentAvailableBatch(area, datetime);
 		if (!batch) {
 			batch = new Batch();
 			batch.area = area;
@@ -151,7 +151,7 @@ class OrderProcessWorker {
 		orderBatch.order = order;
 		orderBatch.status = OrderStatus.CREATED;
 
-		orderBatch.datetime = nextTimeFrame?.time.toDate();
+		orderBatch.datetime = datetime.toDate();
 
 		batch.orderBatches.push(orderBatch);
 		order.orderBatches.push(orderBatch);
@@ -159,9 +159,11 @@ class OrderProcessWorker {
 		await orderBatchRepository.create(orderBatch);
 		await batchRepository.update(batch);
 		await orderRepository.update(order);
+
+		// notify the shipper to deliver the order (send to the shipper queue)
 	}
 
-	private async findCurrentBatch(
+	private async findCurrentAvailableBatch(
 		area: Area,
 		datetime: moment.Moment
 	): Promise<Batch | null> {
@@ -170,6 +172,7 @@ class OrderProcessWorker {
 			datetime: datetime.toDate()
 		});
 
+		// if batch is full of orders, return null to create another batch
 		if (batch && batch?.orderBatches.length >= 10) {
 			return null;
 		}

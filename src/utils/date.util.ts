@@ -50,6 +50,16 @@ export const calDurationUntilNextTimeFrame = (
 	return { timeUntilNextTimeFrame, nextTimeFrame: closestTimeFrame };
 };
 
+export const combineDateAndTimeFrame = (
+	date: moment.Moment,
+	time: moment.Moment
+): moment.Moment => {
+	return moment(
+		date.format('YYYY-MM-DD') + ' ' + time.format('HH:mm:ss'),
+		'YYYY-MM-DD HH:mm:ss'
+	);
+};
+
 export default {
 	formatDateToYYYYMMDDHHMMSS,
 	calDurationUntilTargetTime,

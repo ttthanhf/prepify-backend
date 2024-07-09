@@ -26,7 +26,8 @@ export class Order {
 	address!: string;
 
 	@Column({
-		type: 'date'
+		type: 'datetime',
+		default: () => 'NOW()'
 	})
 	datetime!: Date;
 

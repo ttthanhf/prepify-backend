@@ -11,6 +11,8 @@ import orderRepository from '~repositories/order.repository';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { VNPayGet } from '~models/schemas/payment.schemas.model';
+import RabbitMQUtil from '~utils/rabbitmq.util';
+import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
 
 class PaymentService {
 	async getPaymentUrlHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -123,6 +125,13 @@ class PaymentService {
 			if (order.status == OrderStatus.WAITING) {
 				order.status = OrderStatus.CREATED;
 				await orderRepository.update(order);
+				const rabbitmqInstance = await RabbitMQUtil.getInstance();
+				// if the order is not paid during 1 hour, cancel the order
+				await rabbitmqInstance.publishMessage(
+					RABBITMQ_CONSTANT.EXCHANGE.ORDER_CREATE,
+					RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CREATE,
+					JSON.stringify(order)
+				);
 				response.data = {
 					success: true,
 					error: false

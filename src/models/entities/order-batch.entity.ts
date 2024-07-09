@@ -22,7 +22,7 @@ export class OrderBatch {
 	status!: OrderStatus;
 
 	@Column({
-		type: 'date'
+		type: 'datetime'
 	})
 	datetime?: Date;
 }

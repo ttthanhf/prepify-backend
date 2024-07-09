@@ -62,10 +62,22 @@ class RabbitMQUtil {
 			envConfig.RABBITMQ_PASSWORD
 		);
 
+		const delayedExchange = [
+			RABBITMQ_CONSTANT.EXCHANGE.ORDER_BATCH,
+			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,
+			RABBITMQ_CONSTANT.EXCHANGE.ORDER_PROCESS
+		];
+
 		for (const exchangeKey in RABBITMQ_CONSTANT.EXCHANGE) {
 			const exchangeName =
 				RABBITMQ_CONSTANT.EXCHANGE[exchangeKey as ExchangeKeys];
-			this.addExchange(exchangeName, 'direct', { durable: true });
+			if (delayedExchange.includes(exchangeName)) {
+				this.addExchange(exchangeName, 'x-delayed-message', {
+					arguments: { 'x-delayed-type': 'direct' }
+				});
+			} else {
+				this.addExchange(exchangeName, 'direct', { durable: true });
+			}
 		}
 
 		// Create queues

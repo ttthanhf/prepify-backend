@@ -5,7 +5,7 @@ import path from 'path';
 import swaggerConfig from '~configs/swagger.config';
 import exceptionsHandle from './exceptions/exceptions';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import OrderProcessWorker from '~workers/orderProcessing.worker';
+import OrderProcessWorker from '~workers/orderProcess.worker';
 import RabbitMQUtil from '~utils/rabbitmq.util';
 require('dotenv').config();
 

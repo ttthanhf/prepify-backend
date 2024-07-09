@@ -102,7 +102,7 @@ class OrderService {
 		order.customer = customer!;
 		order.area = area!;
 		order.address = orderCreateRequest.address;
-		order.datetime = new Date();
+		// order.datetime = getCurrentDatetime();
 		order.totalPrice = totalPrice;
 		order.phone = user!.phone;
 		order.payment = payment!;
@@ -122,7 +122,7 @@ class OrderService {
 			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,
 			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CANCEL,
 			JSON.stringify(order),
-			60 * 60 * 1000 // 1 hour
+			2 * 60 * 1000 // 1 hour
 		);
 		return response.send();
 	}
