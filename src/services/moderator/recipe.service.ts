@@ -33,6 +33,7 @@ import extraSpiceRepository from '~repositories/extraSpice.repository';
 import foodStyleRepository from '~repositories/foodStyle.repository';
 import imageRepository from '~repositories/image.repository';
 import mealKitRepository from '~repositories/mealKit.repository';
+import orderDetailRepository from '~repositories/orderDetail.repository';
 import recipeIngredientRepository from '~repositories/recipe-ingredient.repository';
 import recipeNutritionRepository from '~repositories/recipe-nutrition.repository';
 import recipeRepository from '~repositories/recipe.repository';
@@ -237,6 +238,21 @@ class RecipeModeratorService {
 		recipeModeratorResponseModel.foodStyles =
 			foodStylesRecipeModeratorResponseModelList;
 		recipeModeratorResponseModel.mealKits = recipe.mealKits;
+
+		const sold = await orderDetailRepository.count({
+			where: {
+				isCart: false,
+				mealKit: {
+					recipe: {
+						id: recipe.id
+					}
+				}
+			},
+			relations: ['mealKit', 'mealKit.recipe']
+		});
+		recipeModeratorResponseModel.sold = sold;
+		recipeModeratorResponseModel.star = 0;
+		recipeModeratorResponseModel.totalFeedbacks = 0;
 
 		const images = await imageRepository.findBy({
 			type: ImageType.RECIPE,

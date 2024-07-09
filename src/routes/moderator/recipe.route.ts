@@ -6,7 +6,8 @@ import {
 	ingredientRecipeUpdateRequestSchema,
 	mealkitsRecipeUpdateRequestSchema,
 	nutritionRecipeUpdateRequestSchema,
-	recipeModeratorQueryGetRequestSchema
+	recipeModeratorQueryGetRequestSchema,
+	recipeUpdateRequestSchema
 } from '~models/schemas/moderator/recipe.schemas.model';
 
 export default async function recipeRoute(
@@ -54,7 +55,7 @@ export default async function recipeRoute(
 		'/recipes/:recipe_id',
 		{
 			schema: {
-				consumes: ['multipart/form-data']
+				body: recipeUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
