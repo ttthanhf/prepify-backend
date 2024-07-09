@@ -5,6 +5,10 @@ class OrderController {
 	async orderHandle(req: FastifyRequest, res: FastifyResponse) {
 		return orderService.orderHandle(req, res);
 	}
+
+	async getAllOrder(req: FastifyRequest, res: FastifyResponse) {
+		return orderService.getAllOrderHandle(req, res);
+	}
 }
 
 export default new OrderController();

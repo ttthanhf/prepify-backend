@@ -15,7 +15,9 @@ export class RecipeNutrition {
 	@ManyToOne(() => Nutrition, (nutrition) => nutrition.recipeNutritions)
 	nutrition!: Nutrition;
 
-	@Column()
+	@Column({
+		type: 'float'
+	})
 	amount!: number;
 
 	@ManyToOne(() => Unit, (unit) => unit.recipeNutritions)
