@@ -207,7 +207,8 @@ class RecipeModeratorService {
 				id: item.id,
 				ingredient_id: item.ingredient.id,
 				unit_id: item.unit.id,
-				amount: item.amount
+				amount: item.amount,
+				price: item.ingredient.price
 			}));
 
 		const nutritionRecipeModeratorResponseModelList: Array<NutritionRecipeModeratorResponseModel> =

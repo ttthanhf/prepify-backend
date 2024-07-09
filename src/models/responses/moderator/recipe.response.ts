@@ -20,6 +20,7 @@ export class IngredientRecipeModeratorResponseModel {
 	ingredient_id!: string;
 	amount!: number;
 	unit_id!: string;
+	price!: number;
 }
 
 export class NutritionRecipeModeratorResponseModel {

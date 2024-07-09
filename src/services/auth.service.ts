@@ -43,7 +43,7 @@ class AuthService {
 
 		const user = await userRepository.findOneBy(email ? { email } : { phone });
 
-		if (!user!.password) {
+		if (!user?.password) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
 			response.message = 'Account not exist';
 			return response.send();
@@ -121,7 +121,7 @@ class AuthService {
 		newUser.fullname = name;
 		newUser.role = Role.CUSTOMER;
 		newUser.email = email;
-		newUser.avatar = picture;
+		// newUser.avatar = picture;
 		await userRepository.create(newUser);
 
 		const newCustomer = new Customer();

@@ -16,6 +16,10 @@ import {
 	calDurationUntilTargetTime,
 	combineDateAndTimeFrame
 } from '~utils/date.util';
+import {
+	TIME_FRAME_INSTANT,
+	TIME_FRAME_STANDARD
+} from '~constants/timeframe.constant';
 import RabbitMQUtil from '~utils/rabbitmq.util';
 
 class OrderProcessWorker {
@@ -57,17 +61,27 @@ class OrderProcessWorker {
 		);
 	}
 
-	handleCreatedOrder(msg: ConsumeMessage | null) {
+	async handleCreatedOrder(msg: ConsumeMessage | null) {
 		// subscribe to the order queue
 		// get the order from the queue
 		// convert msg to order
 		// if order date is after 7pm, calculate the time to 7am the next day, send to delay queue
 
-		const order: Order = JSON.parse(msg!.content.toString());
-		if (order.datetime.getHours() >= 19) {
+		const orderObj: Order = JSON.parse(msg!.content.toString());
+		const order = await orderRepository.findOneBy({
+			id: orderObj.id
+		});
+
+		if (!order) {
+			return;
+		}
+
+		if (order.datetime.getHours() >= 19 || order.datetime.getHours() < 7) {
 			const timeRemainingUntil7am = calDurationUntilTargetTime(
 				new Date(),
-				new Date(7, 0, 0)
+				7,
+				0,
+				0
 			);
 
 			this.rabbitmqInstance.publishMessageToDelayQueue(
@@ -85,10 +99,18 @@ class OrderProcessWorker {
 		}
 	}
 
-	handleProcessOrder(msg: ConsumeMessage | null) {
+	async handleProcessOrder(msg: ConsumeMessage | null) {
 		// get the order from the queue
 		// check priority and area of the order, assign to the appropriate queue
-		const order: Order = JSON.parse(msg!.content.toString());
+		const orderObj: Order = JSON.parse(msg!.content.toString());
+		const order = await orderRepository.findOneBy({
+			id: orderObj.id
+		});
+
+		if (!order) {
+			return;
+		}
+
 		const priority = order.isPriority;
 
 		const { timeUntilNextTimeFrame } = priority

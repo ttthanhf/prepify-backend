@@ -1,19 +1,29 @@
 import { FastifyRequest } from 'fastify';
+import { In } from 'typeorm';
+import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { DeliveryMethod } from '~constants/deliverymethod.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { ImageType } from '~constants/image.constant';
+import { OrderStatus } from '~constants/orderstatus.constant';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
 import { OrderDetail } from '~models/entities/order-detail.entity';
 import { Order } from '~models/entities/order.entity';
 import { ItemResponse } from '~models/responses/checkout.response.model';
+import {
+	OrderItemResponse,
+	OrderResponse
+} from '~models/responses/order.response.model';
 import ResponseModel from '~models/responses/response.model';
 import { OrderCreateRequest } from '~models/schemas/order.schemas.model';
 import areaRepository from '~repositories/area.repository';
+import imageRepository from '~repositories/image.repository';
 import mealKitRepository from '~repositories/mealKit.repository';
 import orderRepository from '~repositories/order.repository';
 import orderDetailRepository from '~repositories/orderDetail.repository';
 import paymentRepository from '~repositories/payment.repository';
 import userRepository from '~repositories/user.repository';
 import { FastifyResponse } from '~types/fastify.type';
+import mapperUtil from '~utils/mapper.util';
 import RabbitMQUtil from '~utils/rabbitmq.util';
 import redisUtil from '~utils/redis.util';
 import userUtil from '~utils/user.util';
@@ -118,12 +128,104 @@ class OrderService {
 
 		const rabbitmqInstance = await RabbitMQUtil.getInstance();
 		// if the order is not paid during 1 hour, cancel the order
-		await rabbitmqInstance.publishMessageToDelayQueue(
-			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,
-			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CANCEL,
-			JSON.stringify(order),
-			2 * 60 * 1000 // 1 hour
+		// await rabbitmqInstance.publishMessageToDelayQueue(
+		// 	RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,
+		// 	RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CANCEL,
+		// 	JSON.stringify(order),
+		// 	2 * 60 * 1000 // 1 hour
+		// );
+		await rabbitmqInstance.publishMessage(
+			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CREATE,
+			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CREATE,
+			JSON.stringify(order)
 		);
+		return response.send();
+	}
+
+	async getAllOrderHandle(req: FastifyRequest, res: FastifyResponse) {
+		const query: any = req.query;
+		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
+		const orders = await orderRepository.find({
+			where: {
+				customer: {
+					id: customer!.id
+				},
+				status:
+					query.tab == OrderStatus.DELAYED ||
+					query.tab == OrderStatus.DELIVERING
+						? In([OrderStatus.DELIVERING, OrderStatus.DELAYED])
+						: query.tab
+			},
+			order: {
+				datetime: 'DESC'
+			},
+			relations: ['customer']
+		});
+
+		const orderResponseList: Array<OrderResponse> = [];
+		for (const order of orders) {
+			const orderResponse = mapperUtil.mapEntityToClass(order, OrderResponse);
+			orderResponse.orderDate = order.datetime;
+
+			const orderItemResponseList: Array<OrderItemResponse> = [];
+			const mealKits = await mealKitRepository.find({
+				where: {
+					orderDetails: {
+						order: {
+							id: order.id
+						}
+					}
+				},
+				relations: [
+					'orderDetails',
+					'orderDetails.order',
+					'recipe',
+					'extraSpice'
+				]
+			});
+
+			for (const mealKit of mealKits) {
+				const orderItemResponse = mapperUtil.mapEntityToClass(
+					mealKit,
+					OrderItemResponse
+				);
+
+				orderItemResponse.name = mealKit.recipe.name;
+				orderItemResponse.slug = mealKit.recipe.slug;
+
+				const image = await imageRepository.findOneBy({
+					type: ImageType.RECIPE,
+					entityId: mealKit.recipe.id
+				});
+
+				if (image) {
+					orderItemResponse.image = image.url;
+				} else {
+					orderItemResponse.image = DEFAULT_IMAGE;
+				}
+
+				if (mealKit.extraSpice && orderItemResponse.extraSpice) {
+					const image = await imageRepository.findOneBy({
+						type: ImageType.EXTRASPICE,
+						entityId: mealKit.extraSpice.id
+					});
+
+					if (image) {
+						orderItemResponse.extraSpice.image = image.url;
+					} else {
+						orderItemResponse.extraSpice.image = DEFAULT_IMAGE;
+					}
+				}
+
+				orderItemResponseList.push(orderItemResponse);
+			}
+
+			orderResponse.orderItems = orderItemResponseList;
+			orderResponseList.push(orderResponse);
+		}
+
+		const response = new ResponseModel(res);
+		response.data = orderResponseList;
 		return response.send();
 	}
 }

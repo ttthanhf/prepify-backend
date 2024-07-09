@@ -18,6 +18,8 @@ export class RecipeIngredient {
 	@ManyToOne(() => Unit, (unit) => unit.recipeIngredients)
 	unit!: Relation<Unit>;
 
-	@Column()
+	@Column({
+		type: 'float'
+	})
 	amount!: number;
 }

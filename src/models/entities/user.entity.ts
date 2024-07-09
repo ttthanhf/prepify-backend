@@ -45,8 +45,8 @@ export class User {
 	})
 	role!: Role;
 
-	@Column()
-	avatar!: string;
+	// @Column()
+	// avatar!: string;
 
 	@Column()
 	identityCard?: string;

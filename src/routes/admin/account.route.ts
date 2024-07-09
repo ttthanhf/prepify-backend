@@ -2,7 +2,10 @@ import authMiddleware from '~middlewares/auth.middleware';
 import { Role } from '~constants/role.constant';
 import { Fastify } from '~types/fastify.type';
 import accountController from '~controllers/admin/admin.controller';
-import { accountAdminQueryGetRequestSchema } from '~models/schemas/admin/account.schemas.model';
+import {
+	accountAdminQueryCreateRequestSchema,
+	accountAdminQueryGetRequestSchema
+} from '~models/schemas/admin/account.schemas.model';
 
 export default async function route(
 	app: Fastify,
@@ -21,5 +24,19 @@ export default async function route(
 			}
 		},
 		accountController.getAllAccount
+	);
+
+	app.post(
+		'/accounts',
+		{
+			schema: {
+				body: accountAdminQueryCreateRequestSchema
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.ADMIN]
+			}
+		},
+		accountController.createAccount
 	);
 }

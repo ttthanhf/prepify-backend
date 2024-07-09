@@ -1,4 +1,9 @@
-import moment from 'moment';
+// import moment from 'moment';
+import { TimeFrame } from '~constants/timeframe.constant';
+import moment from 'moment-timezone';
+
+// Set the default time zone to Vietnam
+moment.tz.setDefault('Asia/Ho_Chi_Minh');
 
 function formatDateToYYYYMMDDHHMMSS(date: Date) {
 	const year = date.getFullYear();
@@ -12,13 +17,26 @@ function formatDateToYYYYMMDDHHMMSS(date: Date) {
 
 export const calDurationUntilTargetTime = (
 	initTime: Date,
-	targetTime: Date
+	targetTimeHour: number,
+	targetTimeMinute: number,
+	targetTimeSecond: number
 ): moment.Duration => {
 	const now = moment(initTime);
-	const end = moment(targetTime);
 
-	const duration = moment.duration(end.diff(now));
+	// Set targetTime to 7 AM today in the Vietnam time zone
+	let targetTime = moment(initTime).set({
+		hour: targetTimeHour,
+		minute: targetTimeMinute,
+		second: targetTimeSecond,
+		millisecond: 0
+	});
 
+	// If now is after the target time, set target time to 7 AM the next day
+	if (now.isAfter(targetTime)) {
+		targetTime.add(1, 'day');
+	}
+
+	const duration = moment.duration(targetTime.diff(now));
 	return duration;
 };
 
