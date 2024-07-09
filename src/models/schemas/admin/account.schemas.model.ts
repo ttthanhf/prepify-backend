@@ -1,4 +1,5 @@
 import { Static, Type } from '@sinclair/typebox';
+import { Role } from '~constants/role.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 
 export const accountAdminQueryGetRequestSchema = Type.Object({
@@ -13,4 +14,18 @@ export const accountAdminQueryGetRequestSchema = Type.Object({
 
 export type AccountAdminQueryGetRequest = Static<
 	typeof accountAdminQueryGetRequestSchema
+>;
+
+export const accountAdminQueryCreateRequestSchema = Type.Object({
+	email: Type.String(),
+	phone: Type.String(),
+	fullname: Type.String(),
+	identityCard: Type.String(),
+	areaId: Type.String(),
+	address: Type.String(),
+	role: Type.Enum(Role)
+});
+
+export type AccountAdminQueryCreateRequest = Static<
+	typeof accountAdminQueryCreateRequestSchema
 >;

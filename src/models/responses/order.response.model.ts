@@ -20,4 +20,5 @@ export class OrderResponse {
 	status!: string;
 	orderDate!: Date;
 	totalPrice!: number;
+	trackingNumber?: string | null;
 }

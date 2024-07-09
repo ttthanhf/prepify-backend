@@ -1,9 +1,11 @@
 import { or } from 'ajv/dist/compile/codegen';
 import { FastifyRequest } from 'fastify';
+import { In } from 'typeorm';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { DeliveryMethod } from '~constants/deliverymethod.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { ImageType } from '~constants/image.constant';
+import { OrderStatus } from '~constants/orderstatus.constant';
 import { OrderDetail } from '~models/entities/order-detail.entity';
 import { Order } from '~models/entities/order.entity';
 import { ItemResponse } from '~models/responses/checkout.response.model';
@@ -132,7 +134,11 @@ class OrderService {
 				customer: {
 					id: customer!.id
 				},
-				status: query.tab
+				status:
+					query.tab == OrderStatus.DELAYED ||
+					query.tab == OrderStatus.DELIVERING
+						? In([OrderStatus.DELIVERING, OrderStatus.DELAYED])
+						: query.tab
 			},
 			order: {
 				datetime: 'DESC'

@@ -5,6 +5,10 @@ class AccountAdminController {
 	async getAllAccount(req: FastifyRequest, res: FastifyResponse) {
 		return accountService.getAllAccount(req, res);
 	}
+
+	async createAccount(req: FastifyRequest, res: FastifyResponse) {
+		return accountService.createAccount(req, res);
+	}
 }
 
 export default new AccountAdminController();
