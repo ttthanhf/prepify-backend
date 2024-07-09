@@ -36,6 +36,9 @@ export class Recipe {
 	})
 	createdAt: Date = new Date();
 
+	@Column()
+	videoUrl!: string;
+
 	@ManyToOne(() => Category, (category) => category.id)
 	category!: Relation<Category>;
 

@@ -48,6 +48,9 @@ export class User {
 	@Column()
 	avatar!: string;
 
+	@Column()
+	identityCard?: string;
+
 	@OneToOne(() => Customer, (customer) => customer.user)
 	customer?: Relation<Customer>;
 

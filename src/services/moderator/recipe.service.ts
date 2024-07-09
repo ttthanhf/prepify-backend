@@ -21,15 +21,19 @@ import {
 	RecipeModeratorResponseModel
 } from '~models/responses/moderator/recipe.response';
 import ResponseModel from '~models/responses/response.model';
-import { recipeModeratorQueryGetRequest } from '~models/schemas/moderator/recipe.schemas.model';
 import {
-	recipeCreateRequestSchema,
-	recipeUpdateRequestSchema
-} from '~models/schemas/recipe.schemas.model';
+	IngredientRecipeUpdateRequestSchema,
+	MealkitsRecipeUpdateRequestSchema,
+	NutritionRecipeUpdateRequestSchema,
+	recipeModeratorQueryGetRequest,
+	RecipeUpdateRequest
+} from '~models/schemas/moderator/recipe.schemas.model';
+import { recipeCreateRequestSchema } from '~models/schemas/moderator/recipe.schemas.model';
 import extraSpiceRepository from '~repositories/extraSpice.repository';
 import foodStyleRepository from '~repositories/foodStyle.repository';
 import imageRepository from '~repositories/image.repository';
 import mealKitRepository from '~repositories/mealKit.repository';
+import orderDetailRepository from '~repositories/orderDetail.repository';
 import recipeIngredientRepository from '~repositories/recipe-ingredient.repository';
 import recipeNutritionRepository from '~repositories/recipe-nutrition.repository';
 import recipeRepository from '~repositories/recipe.repository';
@@ -200,6 +204,7 @@ class RecipeModeratorService {
 
 		const ingredientRecipeModeratorResponseModelList: Array<IngredientRecipeModeratorResponseModel> =
 			recipe.recipeIngredients.map((item) => ({
+				id: item.id,
 				ingredient_id: item.ingredient.id,
 				unit_id: item.unit.id,
 				amount: item.amount
@@ -207,6 +212,7 @@ class RecipeModeratorService {
 
 		const nutritionRecipeModeratorResponseModelList: Array<NutritionRecipeModeratorResponseModel> =
 			recipe.recipeNutritions.map((item) => ({
+				id: item.id,
 				nutrition_id: item.nutrition.id,
 				amount: item.amount,
 				unit_id: item.unit.id
@@ -233,6 +239,32 @@ class RecipeModeratorService {
 			foodStylesRecipeModeratorResponseModelList;
 		recipeModeratorResponseModel.mealKits = recipe.mealKits;
 
+		const sold = await orderDetailRepository.count({
+			where: {
+				isCart: false,
+				mealKit: {
+					recipe: {
+						id: recipe.id
+					}
+				}
+			},
+			relations: ['mealKit', 'mealKit.recipe']
+		});
+		recipeModeratorResponseModel.sold = sold;
+		recipeModeratorResponseModel.star = 0;
+		recipeModeratorResponseModel.totalFeedbacks = 0;
+
+		const images = await imageRepository.findBy({
+			type: ImageType.RECIPE,
+			entityId: recipe.id
+		});
+
+		if (images) {
+			recipeModeratorResponseModel.images = images.map((image) => image.url);
+		} else {
+			recipeModeratorResponseModel.images = [DEFAULT_IMAGE];
+		}
+
 		for (const item of recipeModeratorResponseModel.mealKits) {
 			if (item.extraSpice) {
 				const images = await imageRepository.findBy({
@@ -249,40 +281,6 @@ class RecipeModeratorService {
 		}
 
 		response.data = recipeModeratorResponseModel;
-		return response.send();
-	}
-
-	async updateRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
-		const { recipe_id }: any = req.params as Object;
-		const recipeObj = {} as Recipe;
-
-		const recipe = await recipeRepository.findOneBy({
-			id: recipe_id
-		});
-
-		const response = new ResponseModel(res);
-		if (!recipe) {
-			response.message = 'Recipe not found';
-			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
-			return response.send();
-		}
-
-		for await (const part of req.parts()) {
-			if (part.type == 'field') {
-				objectUtil.setProperty(
-					recipeObj,
-					part.fieldname as keyof Recipe,
-					stringUtil.tryParseStringToJSON(String(part.value))
-				);
-			}
-		}
-
-		validateUtil.validate(res, recipeUpdateRequestSchema, recipeObj);
-
-		mapperUtil.mapObjToEntity(recipe, recipeObj);
-
-		await recipeRepository.update(recipe);
-
 		return response.send();
 	}
 
@@ -430,7 +428,6 @@ class RecipeModeratorService {
 
 		const response = new ResponseModel(res);
 		if (!recipe) {
-			response.message = 'Recipe not found';
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
 			return response.send();
 		}
@@ -451,6 +448,250 @@ class RecipeModeratorService {
 		}
 
 		await recipeRepository.removeOne(recipe);
+
+		return response.send();
+	}
+
+	async updateRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
+		const query: RecipeUpdateRequest = req.body as RecipeUpdateRequest;
+		const { id }: any = req.params;
+
+		const response = new ResponseModel(res);
+		const recipe = await recipeRepository.findOne({
+			where: {
+				id
+			},
+			relations: ['foodStyles']
+		});
+		if (!recipe) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			return response.send();
+		}
+
+		recipe.name = query.name;
+		recipe.category.id = query.category;
+		recipe.steps = query.steps;
+		recipe.time = query.time;
+		recipe.level = query.level;
+		recipe.videoUrl = query.videoUrl;
+		const foodStyles = await foodStyleRepository.findBy({
+			id: In(query.foodStyles)
+		});
+		recipe.foodStyles = foodStyles;
+
+		recipe.slug =
+			stringUtil
+				.removeVietnameseTones(recipe.name)
+				.toLocaleLowerCase('vi')
+				.replaceAll(' ', '-') +
+			'.' +
+			recipe.id;
+
+		await recipeRepository.update(recipe);
+
+		return response.send();
+	}
+
+	async updateRecipeIngredientHandle(
+		req: FastifyRequest,
+		res: FastifyResponse
+	) {
+		const query: IngredientRecipeUpdateRequestSchema =
+			req.body as IngredientRecipeUpdateRequestSchema;
+		const { recipe_id }: any = req.params;
+
+		const response = new ResponseModel(res);
+		const recipe = await recipeRepository.findOneBy({
+			id: recipe_id
+		});
+		if (!recipe) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			return response.send();
+		}
+
+		if (query.items?.length) {
+			query.items.forEach(async (item) => {
+				if (item.id) {
+					const ingredient = await recipeIngredientRepository.findOne({
+						where: {
+							recipe: {
+								id: recipe.id
+							},
+							id: item.id
+						},
+						relations: ['recipe']
+					});
+					if (ingredient) {
+						ingredient.amount = item.amount;
+						ingredient.ingredient = { id: item.ingredient_id } as Ingredient;
+						ingredient.unit = { id: item.unit_id } as Unit;
+						await recipeIngredientRepository.update(ingredient);
+					}
+				} else {
+					const recipeIngredient = new RecipeIngredient();
+					recipeIngredient.amount = item.amount;
+					recipeIngredient.ingredient = {
+						id: item.ingredient_id
+					} as Ingredient;
+					recipeIngredient.unit = { id: item.unit_id } as Unit;
+					recipeIngredient.recipe = recipe;
+					await recipeIngredientRepository.create(recipeIngredient);
+				}
+			});
+		}
+
+		if (query.removeIds?.length) {
+			const ingredients = await recipeIngredientRepository.find({
+				where: {
+					id: In(query.removeIds),
+					recipe: {
+						id: recipe.id
+					}
+				},
+				relations: ['recipe']
+			});
+			await recipeIngredientRepository.remove(ingredients);
+		}
+
+		return response.send();
+	}
+
+	async updateRecipeNutritionHandle(req: FastifyRequest, res: FastifyResponse) {
+		const query: NutritionRecipeUpdateRequestSchema =
+			req.body as NutritionRecipeUpdateRequestSchema;
+		const { recipe_id }: any = req.params;
+
+		const response = new ResponseModel(res);
+		const recipe = await recipeRepository.findOneBy({
+			id: recipe_id
+		});
+		if (!recipe) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			return response.send();
+		}
+
+		if (query.items?.length) {
+			query.items.forEach(async (item) => {
+				if (item.id) {
+					const nutrition = await recipeNutritionRepository.findOne({
+						where: {
+							recipe: {
+								id: recipe.id
+							},
+							id: item.id
+						},
+						relations: ['recipe']
+					});
+					if (nutrition) {
+						nutrition.amount = item.amount;
+						nutrition.nutrition = { id: item.nutrition_id } as Nutrition;
+						nutrition.unit = { id: item.unit_id } as Unit;
+						await recipeNutritionRepository.update(nutrition);
+					}
+				} else {
+					const recipeNutrition = new RecipeNutrition();
+					recipeNutrition.amount = item.amount;
+					recipeNutrition.nutrition = { id: item.nutrition_id } as Nutrition;
+					recipeNutrition.unit = { id: item.unit_id } as Unit;
+					recipeNutrition.recipe = recipe;
+					await recipeNutritionRepository.create(recipeNutrition);
+				}
+			});
+		}
+
+		if (query.removeIds?.length) {
+			const nutritions = await recipeNutritionRepository.find({
+				where: {
+					id: In(query.removeIds),
+					recipe: {
+						id: recipe.id
+					}
+				},
+				relations: ['recipe']
+			});
+			await recipeNutritionRepository.remove(nutritions);
+		}
+
+		return response.send();
+	}
+
+	async updateRecipeMealkitHandle(req: FastifyRequest, res: FastifyResponse) {
+		const query: MealkitsRecipeUpdateRequestSchema =
+			req.body as MealkitsRecipeUpdateRequestSchema;
+		const { recipe_id }: any = req.params;
+
+		const response = new ResponseModel(res);
+		const recipe = await recipeRepository.findOneBy({
+			id: recipe_id
+		});
+		if (!recipe) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			return response.send();
+		}
+
+		if (query.items?.length) {
+			query.items.forEach(async (item) => {
+				if (item.mealKit.id) {
+					const mealKit = await mealKitRepository.findOne({
+						where: {
+							id: item.mealKit.id,
+							recipe: {
+								id: recipe.id
+							}
+						},
+						relations: ['recipe', 'extraSpice']
+					});
+					if (mealKit) {
+						mealKit.recipe = recipe;
+						mealKit.serving = item.mealKit.serving;
+						mealKit.price = item.mealKit.price;
+						mealKit.status = true;
+						await mealKitRepository.update(mealKit);
+						if (item.extraSpice) {
+							if (mealKit.extraSpice) {
+								const extraSpice = mealKit.extraSpice;
+								extraSpice.name = item.extraSpice.name;
+								extraSpice.price = item.extraSpice.price;
+								await extraSpiceRepository.update(extraSpice);
+							} else {
+								const extraSpice = new ExtraSpice();
+								extraSpice.mealKit = mealKit;
+								extraSpice.name = item.extraSpice.name;
+								extraSpice.price = item.extraSpice.price;
+								await extraSpiceRepository.create(extraSpice);
+							}
+						}
+					}
+				} else {
+					const mealKit = new MealKit();
+					mealKit.recipe = recipe;
+					mealKit.serving = item.mealKit.serving;
+					mealKit.price = item.mealKit.price;
+					mealKit.status = true;
+					await mealKitRepository.create(mealKit);
+					if (item.extraSpice) {
+						const extraSpice = new ExtraSpice();
+						extraSpice.mealKit = mealKit;
+						extraSpice.name = item.extraSpice.name;
+						extraSpice.price = item.extraSpice.price;
+						await extraSpiceRepository.create(extraSpice);
+					}
+				}
+			});
+		}
+
+		if (query.removeIds?.length) {
+			const mealKits = await mealKitRepository.find({
+				where: {
+					id: In(query.removeIds),
+					recipe: {
+						id: recipe.id
+					}
+				},
+				relations: ['recipe']
+			});
+			await mealKitRepository.remove(mealKits);
+		}
 
 		return response.send();
 	}

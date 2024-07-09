@@ -47,4 +47,6 @@ export class Ingredient {
 
 	@ManyToOne(() => Unit, (unit) => unit.ingredients)
 	unit!: Relation<Unit>;
+
+	image?: string;
 }

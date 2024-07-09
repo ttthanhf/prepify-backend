@@ -13,9 +13,6 @@ export class Area {
 	name!: string;
 
 	@Column()
-	slug!: string;
-
-	@Column()
 	instantPrice!: number;
 
 	@Column()

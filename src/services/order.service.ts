@@ -116,7 +116,7 @@ class OrderService {
 			await orderDetailRepository.update(checkoutItem!);
 		});
 
-		const rabbitmqInstance = RabbitMQUtil.getInstance();
+		const rabbitmqInstance = await RabbitMQUtil.getInstance();
 		// if the order is not paid during 1 hour, cancel the order
 		await rabbitmqInstance.publishMessageToDelayQueue(
 			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,

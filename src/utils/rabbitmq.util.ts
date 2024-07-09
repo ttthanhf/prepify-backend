@@ -28,7 +28,7 @@ class RabbitMQUtil {
 		this.exchanges = new Map<string, Exchange>();
 		this.queues = new Map<string, QueueBinding>();
 		this.queueOptions = new Map<string, amqp.Options.AssertQueue>();
-		this.initRabbitMQ();
+		// this.initRabbitMQ();
 	}
 
 	public async connect(
@@ -216,9 +216,19 @@ class RabbitMQUtil {
 		return this.rabbitmq !== undefined;
 	}
 
-	public static getInstance(): RabbitMQUtil {
+	// public static getInstance(): RabbitMQUtil {
+	// 	if (!RabbitMQUtil.instance) {
+	// 		RabbitMQUtil.instance = new RabbitMQUtil();
+	// 	}
+	// 	return RabbitMQUtil.instance;
+	// }
+
+	public static async getInstance(): Promise<RabbitMQUtil> {
 		if (!RabbitMQUtil.instance) {
 			RabbitMQUtil.instance = new RabbitMQUtil();
+			await RabbitMQUtil.instance.initRabbitMQ();
+		} else if (!RabbitMQUtil.instance.isConnected()) {
+			await RabbitMQUtil.instance.initRabbitMQ();
 		}
 		return RabbitMQUtil.instance;
 	}

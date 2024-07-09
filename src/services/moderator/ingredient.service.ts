@@ -119,9 +119,16 @@ class IngredientModeratorService {
 		});
 		if (!ingredient) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Item not found';
 			return response.send();
 		}
+
+		const images = await imageRepository.findBy({
+			type: ImageType.RECIPE,
+			entityId: ingredient.id
+		});
+
+		ingredient.image = images[0] ? images[0].url : DEFAULT_IMAGE;
+
 		response.data = ingredient;
 		return response.send();
 	}
@@ -173,7 +180,6 @@ class IngredientModeratorService {
 		});
 		if (!ingredient) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Item not found';
 			return response.send();
 		}
 

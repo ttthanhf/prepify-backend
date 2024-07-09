@@ -2,7 +2,13 @@ import { Fastify } from '~types/fastify.type';
 import recipeModeratorController from '~controllers/moderator/recipe.controller';
 import authMiddleware from '~middlewares/auth.middleware';
 import { Role } from '~constants/role.constant';
-import { recipeModeratorQueryGetRequestSchema } from '~models/schemas/moderator/recipe.schemas.model';
+import {
+	ingredientRecipeUpdateRequestSchema,
+	mealkitsRecipeUpdateRequestSchema,
+	nutritionRecipeUpdateRequestSchema,
+	recipeModeratorQueryGetRequestSchema,
+	recipeUpdateRequestSchema
+} from '~models/schemas/moderator/recipe.schemas.model';
 
 export default async function recipeRoute(
 	app: Fastify,
@@ -49,7 +55,7 @@ export default async function recipeRoute(
 		'/recipes/:recipe_id',
 		{
 			schema: {
-				consumes: ['multipart/form-data']
+				body: recipeUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
@@ -67,5 +73,45 @@ export default async function recipeRoute(
 			}
 		},
 		recipeModeratorController.deleteRecipe
+	);
+
+	app.put(
+		'/recipes/:recipe_id/ingredients',
+		{
+			schema: {
+				body: ingredientRecipeUpdateRequestSchema
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		recipeModeratorController.updateRecipeIngredient
+	);
+	app.put(
+		'/recipes/:recipe_id/nutritions',
+		{
+			schema: {
+				body: nutritionRecipeUpdateRequestSchema
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		recipeModeratorController.updateRecipeNutrition
+	);
+	app.put(
+		'/recipes/:recipe_id/mealKits',
+		{
+			schema: {
+				body: mealkitsRecipeUpdateRequestSchema
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.MODERATOR]
+			}
+		},
+		recipeModeratorController.updateRecipeMealKit
 	);
 }

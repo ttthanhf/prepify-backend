@@ -151,7 +151,6 @@ class MealKitModeratorService {
 		const response = new ResponseModel(res);
 		if (!mealKit) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Item not exist';
 			return response.send();
 		}
 		const getAllMealKitModeratorResponse = mapperUtil.mapEntityToClass(
@@ -176,7 +175,6 @@ class MealKitModeratorService {
 		const response = new ResponseModel(res);
 		if (!mealKit) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Item not exist';
 			return response.send();
 		}
 		const getAllMealKitModeratorResponse = mapperUtil.mapEntityToClass(
@@ -198,7 +196,6 @@ class MealKitModeratorService {
 		const response = new ResponseModel(res);
 		if (!mealKit) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Item not exist';
 			return response.send();
 		}
 
