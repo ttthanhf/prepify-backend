@@ -42,4 +42,7 @@ export class RecipeModeratorResponseModel {
 	time!: number;
 	videoUrl!: string;
 	level!: LevelCook;
+	star!: number;
+	sold!: number;
+	totalFeedbacks!: number;
 }
