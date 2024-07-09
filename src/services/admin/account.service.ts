@@ -1,9 +1,16 @@
+import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
+import { User } from '~models/entities/user.entity';
 import { AccountAdminGetResponse } from '~models/responses/admin/account.response';
 import ResponseModel from '~models/responses/response.model';
-import { AccountAdminQueryGetRequest } from '~models/schemas/admin/account.schemas.model';
+import {
+	AccountAdminQueryCreateRequest,
+	AccountAdminQueryGetRequest
+} from '~models/schemas/admin/account.schemas.model';
+import areaRepository from '~repositories/area.repository';
 import userRepository from '~repositories/user.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import bcryptUtil from '~utils/bcrypt.util';
 import mapperUtil from '~utils/mapper.util';
 
 class AccountAdminService {
@@ -92,6 +99,26 @@ class AccountAdminService {
 			pageIndex,
 			pageSize
 		};
+		return response.send();
+	}
+
+	async createAccount(req: FastifyRequest, res: FastifyResponse) {
+		const query: AccountAdminQueryCreateRequest =
+			req.body as AccountAdminQueryCreateRequest;
+
+		const area = await areaRepository.findOneBy({
+			id: query.areaId
+		});
+		const response = new ResponseModel(res);
+		if (!area) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			return response.send();
+		}
+		const user = mapperUtil.mapEntityToClass(query, User);
+		user.area = area;
+		user.password = await bcryptUtil.hash('123');
+		await userRepository.create(user);
+
 		return response.send();
 	}
 }
