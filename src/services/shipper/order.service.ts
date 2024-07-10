@@ -1,5 +1,7 @@
+import { FindOptionsWhere, In } from 'typeorm';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderStatus } from '~constants/orderstatus.constant';
+import { OrderBatch } from '~models/entities/order-batch.entity';
 import ResponseModel from '~models/responses/response.model';
 import {
 	OrderShipperGetRequest,
@@ -11,29 +13,35 @@ import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 import userUtil from '~utils/user.util';
 
 class OrderService {
-	async getOrdersHandle(req: FastifyRequest, res: FastifyResponse) {
+	async getOrdersInBatchHandle(req: FastifyRequest, res: FastifyResponse) {
 		const response = new ResponseModel(res);
 		const shipper = await userUtil.getUserByTokenInHeader(req.headers);
 		const query: OrderShipperGetRequest = req.query as OrderShipperGetRequest;
 
-		let orderQuery = await orderRepository
-			.getRepository()
-			.createQueryBuilder('order')
-			.leftJoinAndSelect('order.customer', 'customer')
-			.leftJoinAndSelect('customer.user', 'user')
-			.leftJoinAndSelect('order.area', 'area');
+		const { id } = req.params as { id: string };
+		const whereConditions: FindOptionsWhere<OrderBatch> = {
+			batch: {
+				id,
+				user: {
+					id: shipper!.id
+				}
+			}
+		};
 
-		if (query.status) {
-			const statuses = query.status.split(',');
-			orderQuery = orderQuery.andWhere('order.status IN (:...statuses)', {
-				statuses
-			});
+		if (query.status && query.status.split(',').length > 0) {
+			const statusList = query.status.split(',');
+			whereConditions.status = In(statusList);
 		}
 
-		const orders = await orderQuery.getMany();
+		const orderBatches = await orderBatchRepository.find({
+			where: whereConditions,
+			relations: ['batch', 'batch.user', 'order']
+		});
 
 		response.data = {
-			orders
+			orders: orderBatches.map((orderBatch) => {
+				return orderBatch.order;
+			})
 		};
 		return response.send();
 	}

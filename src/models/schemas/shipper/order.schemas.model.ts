@@ -2,7 +2,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { OrderStatus } from '~constants/orderstatus.constant';
 
 export const orderShipperGetRequestSchema = Type.Object({
-	status: Type.Optional(Type.Enum(OrderStatus))
+	status: Type.Optional(Type.String())
 });
 
 export type OrderShipperGetRequest = Static<
