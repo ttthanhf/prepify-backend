@@ -21,6 +21,11 @@ import redisUtil from '~utils/redis.util';
 import { Token } from '~constants/token.constant';
 import { Customer } from '~models/entities/customer.entity';
 import customerRepository from '~repositories/customer.repository';
+import { ChangePassword } from '~models/schemas/auth.schemas.model';
+import userUtil from '~utils/user.util';
+import { Image } from '~models/entities/image.entity';
+import { ImageType } from '~constants/image.constant';
+import imageRepository from '~repositories/image.repository';
 
 class AuthService {
 	private getAccessToken(user: User) {
@@ -41,23 +46,23 @@ class AuthService {
 			return response.send();
 		}
 
-		const user = await userRepository.findOneBy(email ? { email } : { phone });
+		const user = await userRepository.findOne({
+			where: [{ email }, { phone }]
+		});
 
-		if (!user?.password) {
-			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'Account not exist';
-			return response.send();
-		}
-
-		if (user && (await bcryptUtil.compare(password, user.password!))) {
+		if (
+			user &&
+			user!.password &&
+			(await bcryptUtil.compare(password, user.password!))
+		) {
 			response.message = 'Login success';
 			response.data = this.getAccessToken(user);
 			return response.send();
+		} else {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'Account or password not correct';
+			return response.send();
 		}
-
-		response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-		response.message = 'Account not exist';
-		return response.send();
 	}
 	async registerHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { phone, password, email, fullname }: RegisterRequest =
@@ -121,8 +126,13 @@ class AuthService {
 		newUser.fullname = name;
 		newUser.role = Role.CUSTOMER;
 		newUser.email = email;
-		// newUser.avatar = picture;
 		await userRepository.create(newUser);
+
+		const image = new Image();
+		image.entityId = newUser.id;
+		image.type = ImageType.USER;
+		image.url = picture;
+		await imageRepository.create(image);
 
 		const newCustomer = new Customer();
 		newCustomer.user = newUser;
@@ -233,6 +243,23 @@ class AuthService {
 		userRepository.update(user);
 		redisUtil.removeTokenRecoveryPasswordWhiteList(token);
 		return response.send();
+	}
+
+	async changePasswordHandle(req: FastifyRequest, res: FastifyResponse) {
+		const user = await userUtil.getUserByTokenInHeader(req.headers);
+		const query: ChangePassword = req.body as ChangePassword;
+
+		const response = new ResponseModel(res);
+
+		if (user && (await bcryptUtil.compare(query.oldPassword, user.password))) {
+			user.password = await bcryptUtil.hash(query.newPassword);
+			await userRepository.update(user);
+			return response.send();
+		} else {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Password not correct';
+			return response.send();
+		}
 	}
 }
 

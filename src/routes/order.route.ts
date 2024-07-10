@@ -27,4 +27,12 @@ export default async function route(
 		},
 		orderController.getAllOrder
 	);
+
+	app.get(
+		'/orders/:id',
+		{
+			onRequest: [authMiddleware.requireToken]
+		},
+		orderController.getOrder
+	);
 }
