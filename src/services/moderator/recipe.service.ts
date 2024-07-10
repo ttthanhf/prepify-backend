@@ -287,8 +287,8 @@ class RecipeModeratorService {
 
 	async createRecipeHandle(req: FastifyRequest, res: FastifyResponse) {
 		const recipeObj = {} as Recipe;
-		const files: Array<MultipartFile> = [];
-		const imagesExtraSpice: Array<MultipartFile> = [];
+		const files: Array<any> = [];
+		const imagesExtraSpice: Array<any> = [];
 		const response = new ResponseModel(res);
 
 		let foodStylesRequest = [];
@@ -321,7 +321,7 @@ class RecipeModeratorService {
 			} else if (part.type == 'file') {
 				if (part.fieldname == 'images') {
 					if (part.mimetype.startsWith('image/')) {
-						files.push(part);
+						files.push(await part.toBuffer());
 					} else {
 						response.message = 'Images have some file not image';
 						response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
@@ -329,7 +329,7 @@ class RecipeModeratorService {
 					}
 				} else if (part.fieldname == 'imagesExtraSpice') {
 					if (part.mimetype.startsWith('image/')) {
-						imagesExtraSpice.push(part);
+						imagesExtraSpice.push(await part.toBuffer());
 					} else {
 						response.message = 'Images have some file not image';
 						response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
@@ -396,7 +396,7 @@ class RecipeModeratorService {
 				for (const image of imagesExtraSpice) {
 					if (image.filename.includes(item.extraSpice.imageName)) {
 						await s3Util.uploadImage({
-							data: await image.toBuffer(),
+							data: image,
 							name: extraSpice.id,
 							type: ImageType.EXTRASPICE
 						});
@@ -412,7 +412,7 @@ class RecipeModeratorService {
 
 		for (const file of files) {
 			await s3Util.uploadImage({
-				data: await file.toBuffer(),
+				data: file,
 				name: newRecipe.id,
 				type: ImageType.RECIPE
 			});

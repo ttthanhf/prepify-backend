@@ -21,8 +21,8 @@ export const accountAdminQueryCreateRequestSchema = Type.Object({
 	phone: Type.String(),
 	fullname: Type.String(),
 	identityCard: Type.String(),
-	areaId: Type.String(),
-	address: Type.String(),
+	areaId: Type.Optional(Type.String()),
+	address: Type.Optional(Type.String()),
 	role: Type.Enum(Role)
 });
 

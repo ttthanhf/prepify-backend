@@ -1,3 +1,5 @@
+import { OrderStatus } from '~constants/orderstatus.constant';
+
 export class OrderItemResponse {
 	id!: string;
 	name!: string;
@@ -21,4 +23,19 @@ export class OrderResponse {
 	orderDate!: Date;
 	totalPrice!: number;
 	trackingNumber?: string | null;
+}
+
+export class OrderDetailResponse {
+	id!: string;
+	orderItems!: OrderItemResponse[];
+	status!: OrderStatus;
+	orderDate!: Date;
+	deliveryPrice!: number;
+	totalPrice!: number;
+	trackingNumber!: string;
+	payment!: {
+		id: string;
+		icon: string;
+		name: string;
+	};
 }
