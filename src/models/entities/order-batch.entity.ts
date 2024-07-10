@@ -32,4 +32,9 @@ export class OrderBatch {
 		type: 'datetime'
 	})
 	datetime?: Date;
+
+	@Column({
+		type: 'text'
+	})
+	note?: string;
 }

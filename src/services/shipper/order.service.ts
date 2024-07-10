@@ -1,15 +1,19 @@
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { OrderStatus } from '~constants/orderstatus.constant';
 import ResponseModel from '~models/responses/response.model';
 import {
 	OrderShipperGetRequest,
 	OrderShipperUpdateRequest
 } from '~models/schemas/shipper/order.schemas.model';
 import orderRepository from '~repositories/order.repository';
+import orderBatchRepository from '~repositories/orderBatch.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import userUtil from '~utils/user.util';
 
 class OrderService {
 	async getOrdersHandle(req: FastifyRequest, res: FastifyResponse) {
 		const response = new ResponseModel(res);
+		const shipper = await userUtil.getUserByTokenInHeader(req.headers);
 		const query: OrderShipperGetRequest = req.query as OrderShipperGetRequest;
 
 		let orderQuery = await orderRepository
@@ -38,22 +42,43 @@ class OrderService {
 		const { id } = req.params as { id: string };
 		const response = new ResponseModel(res);
 
-		const order = await orderRepository.findOneBy({
-			id
+		const orderUpdateRequest: OrderShipperUpdateRequest =
+			req.body as OrderShipperUpdateRequest;
+
+		const orderBatch = await orderBatchRepository.findOne({
+			where: {
+				order: {
+					id
+				},
+				batch: {
+					id: orderUpdateRequest.batchId
+				}
+			}
 		});
 
-		if (!order) {
+		if (!orderBatch) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
 			response.message = 'Order not found';
 			return response.send();
 		}
 
-		const orderUpdateRequest: OrderShipperUpdateRequest =
-			req.body as OrderShipperUpdateRequest;
+		orderBatch.status = orderUpdateRequest.status;
+		if (orderUpdateRequest.note) {
+			orderBatch.note = orderUpdateRequest.note;
+		}
 
-		order.status = orderUpdateRequest.status;
+		await orderBatchRepository.update(orderBatch);
 
-		await orderRepository.update(order);
+		if (
+			orderUpdateRequest.status === OrderStatus.DELIVERED ||
+			orderUpdateRequest.status === OrderStatus.CANCELED
+		) {
+			const order = await orderRepository.findOneBy({
+				id
+			});
+			order!.status = orderUpdateRequest.status;
+			await orderRepository.update(order!);
+		}
 
 		return response.send();
 	}
