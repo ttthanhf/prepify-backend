@@ -79,6 +79,25 @@ class ExpoPushTokenService {
 			return response.send();
 		}
 	}
+
+	async getExpoPushTokensByArea(areaId: string): Promise<ExpoPushToken[]> {
+		try {
+			const tokens = await expoPushTokenRepository.find({
+				where: {
+					user: {
+						area: {
+							id: areaId
+						}
+					}
+				},
+				relations: ['user', 'user.area']
+			});
+
+			return tokens;
+		} catch (error) {
+			return [];
+		}
+	}
 }
 
 export default new ExpoPushTokenService();

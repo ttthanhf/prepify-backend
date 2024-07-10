@@ -4,6 +4,10 @@ import { ConsumeMessage } from 'amqplib';
 import moment from 'moment';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
+import {
+	TIME_FRAME_INSTANT,
+	TIME_FRAME_STANDARD
+} from '~constants/timeframe.constant';
 import { Area } from '~models/entities/area.entity';
 import { Batch } from '~models/entities/batch.entity';
 import { OrderBatch } from '~models/entities/order-batch.entity';
@@ -11,15 +15,13 @@ import { Order } from '~models/entities/order.entity';
 import batchRepository from '~repositories/batch.repository';
 import orderRepository from '~repositories/order.repository';
 import orderBatchRepository from '~repositories/orderBatch.repository';
+import expoPushTokenService from '~services/expoPushToken.service';
 import {
 	calDurationUntilNextTimeFrame,
 	calDurationUntilTargetTime,
 	combineDateAndTimeFrame
 } from '~utils/date.util';
-import {
-	TIME_FRAME_INSTANT,
-	TIME_FRAME_STANDARD
-} from '~constants/timeframe.constant';
+import { Notification } from '~utils/expo.util';
 import RabbitMQUtil from '~utils/rabbitmq.util';
 
 class OrderProcessWorker {
@@ -184,7 +186,9 @@ class OrderProcessWorker {
 		orderBatch.datetime = datetime.toDate();
 
 		await orderBatchRepository.create(orderBatch);
+
 		// notify the shipper to deliver the order (send to the shipper queue)
+		await this.sendNotificationToShippersByArea(order.area.id);
 	}
 
 	private async findCurrentAvailableBatch(
@@ -205,6 +209,27 @@ class OrderProcessWorker {
 		}
 
 		return batch;
+	}
+
+	private async sendNotificationToShippersByArea(areaId: string) {
+		const pushTokens =
+			await expoPushTokenService.getExpoPushTokensByArea(areaId);
+
+		const notificationPromises = pushTokens.map((pushToken) => {
+			const notification: Notification = {
+				pushToken: pushToken.pushToken,
+				title: 'Đã có đơn hàng mới',
+				body: 'Nhận ngay ->'
+			};
+
+			return this.rabbitmqInstance.publishMessage(
+				RABBITMQ_CONSTANT.EXCHANGE.NOTIFICATION,
+				RABBITMQ_CONSTANT.ROUTING_KEY.NOTIFICATION,
+				JSON.stringify(notification)
+			);
+		});
+
+		await Promise.all(notificationPromises);
 	}
 }
 

@@ -7,6 +7,7 @@ import exceptionsHandle from './exceptions/exceptions';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import OrderProcessWorker from '~workers/orderProcess.worker';
 import RabbitMQUtil from '~utils/rabbitmq.util';
+import NotificationWorker from '~workers/notification.worker';
 require('dotenv').config();
 
 const app = fastify(
@@ -30,6 +31,9 @@ app.ready(async () => {
 		const rabbitmqInstance = await RabbitMQUtil.getInstance();
 		OrderProcessWorker.getInstance(rabbitmqInstance);
 		console.log('OrderProcessWorker has started.');
+		
+		NotificationWorker.getInstance(rabbitmqInstance);
+		console.log('NotificationWorker has started.');
 	} catch (err) {
 		console.error('Failed to start OrderProcessWorker:', err);
 		process.exit(1); // Exit the process if the worker fails to start
