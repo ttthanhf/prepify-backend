@@ -1,15 +1,15 @@
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import ResponseModel from '~models/responses/response.model';
-import { orderModeratorQueryGetRequest } from '~models/schemas/moderator/order.schemas.model';
+import { OrderModeratorQueryGetRequest } from '~models/schemas/moderator/order.schemas.model';
 import mealKitRepository from '~repositories/mealKit.repository';
 import orderRepository from '~repositories/order.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 
 class OrderModeratorService {
 	async getOrdersHandle(req: FastifyRequest, res: FastifyResponse) {
-		const query: orderModeratorQueryGetRequest =
-			req.query as orderModeratorQueryGetRequest;
+		const query: OrderModeratorQueryGetRequest =
+			req.query as OrderModeratorQueryGetRequest;
 
 		const pageSize =
 			query.pageSize && query.pageSize <= 50 && query.pageSize > 0

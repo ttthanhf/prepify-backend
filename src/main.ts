@@ -5,6 +5,8 @@ import path from 'path';
 import swaggerConfig from '~configs/swagger.config';
 import exceptionsHandle from './exceptions/exceptions';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
+import OrderProcessWorker from '~workers/orderProcess.worker';
+import RabbitMQUtil from '~utils/rabbitmq.util';
 require('dotenv').config();
 
 const app = fastify(
@@ -21,8 +23,17 @@ pathRegisters.forEach((pathRegister: string) => {
 	});
 });
 
-app.ready(() => {
+app.ready(async () => {
 	app.swagger();
+
+	try {
+		const rabbitmqInstance = await RabbitMQUtil.getInstance();
+		OrderProcessWorker.getInstance(rabbitmqInstance);
+		console.log('OrderProcessWorker has started.');
+	} catch (err) {
+		console.error('Failed to start OrderProcessWorker:', err);
+		process.exit(1); // Exit the process if the worker fails to start
+	}
 });
 
 app.listen(fastifyConfig.fastifyListenConfig, (err, address) => {

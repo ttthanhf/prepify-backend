@@ -5,6 +5,7 @@ import { DeliveryMethod } from '~constants/deliverymethod.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { ImageType } from '~constants/image.constant';
 import { OrderStatus } from '~constants/orderstatus.constant';
+import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
 import { OrderDetail } from '~models/entities/order-detail.entity';
 import { Order } from '~models/entities/order.entity';
 import { ItemResponse } from '~models/responses/checkout.response.model';
@@ -24,6 +25,7 @@ import paymentRepository from '~repositories/payment.repository';
 import userRepository from '~repositories/user.repository';
 import { FastifyResponse } from '~types/fastify.type';
 import mapperUtil from '~utils/mapper.util';
+import RabbitMQUtil from '~utils/rabbitmq.util';
 import redisUtil from '~utils/redis.util';
 import userUtil from '~utils/user.util';
 
@@ -111,11 +113,13 @@ class OrderService {
 		order.customer = customer!;
 		order.area = area!;
 		order.address = orderCreateRequest.address;
-		order.datetime = new Date();
+		// order.datetime = getCurrentDatetime();
 		order.totalPrice = totalPrice;
 		order.phone = user!.phone;
 		order.payment = payment!;
 		order.note = orderCreateRequest.note ?? undefined;
+		order.isPriority =
+			orderCreateRequest.deliveryMethod == DeliveryMethod.INSTANT;
 
 		await orderRepository.create(order);
 		await redisUtil.removeCheckout(customer!);
@@ -123,6 +127,19 @@ class OrderService {
 			await orderDetailRepository.update(checkoutItem!);
 		});
 
+		const rabbitmqInstance = await RabbitMQUtil.getInstance();
+		// if the order is not paid during 1 hour, cancel the order
+		await rabbitmqInstance.publishMessageToDelayQueue(
+			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,
+			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CANCEL,
+			JSON.stringify(order),
+			60 * 60 * 1000 // 1 hour
+		);
+		await rabbitmqInstance.publishMessage(
+			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CREATE,
+			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CREATE,
+			JSON.stringify(order)
+		);
 		return response.send();
 	}
 
