@@ -5,7 +5,7 @@ import { Category } from '~models/entities/category.entity';
 import { User } from '~models/entities/user.entity';
 import { Area } from '~models/entities/area.entity';
 import { Customer } from '~models/entities/customer.entity';
-import { CustomerIngredient } from '~models/entities/customer-ingredient.entity';
+import { RestrictIngredient } from '~models/entities/restrict-ingredient.entity';
 import { Order } from '~models/entities/order.entity';
 import { FoodStyle } from '~models/entities/food-style.entity';
 import { Ingredient } from '~models/entities/ingredient.entity';
@@ -38,7 +38,6 @@ const TYPEORM_CONFIG: DataSourceOptions = {
 		Area,
 		Batch,
 		Customer,
-		CustomerIngredient,
 		Order,
 		OrderBatch,
 		Category,
@@ -56,7 +55,8 @@ const TYPEORM_CONFIG: DataSourceOptions = {
 		ExtraSpice,
 		Config,
 		ExpoPushToken,
-		Image
+		Image,
+		RestrictIngredient
 	],
 	synchronize: false, //warning its will - with db - if y delete entity - db will delete it
 	logging: envConfig.ENVIROMENT == ENVIROMENT.DEVELOPMENT,

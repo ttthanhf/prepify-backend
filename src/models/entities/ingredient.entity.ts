@@ -1,6 +1,9 @@
 import { RecipeIngredient } from './recipe-ingredient.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { CustomerIngredient } from './customer-ingredient.entity';
+import {
+	CustomerIngredient,
+	RestrictIngredient
+} from './restrict-ingredient.entity';
 import {
 	Column,
 	Entity,
@@ -40,10 +43,10 @@ export class Ingredient {
 	recipeIngredients!: RecipeIngredient[];
 
 	@OneToMany(
-		() => CustomerIngredient,
-		(customerIngredient) => customerIngredient.ingredient
+		() => RestrictIngredient,
+		(restrictIngredient) => restrictIngredient.ingredient
 	)
-	customerIngredients!: CustomerIngredient[];
+	restrictIngredients!: RestrictIngredient[];
 
 	@ManyToOne(() => Unit, (unit) => unit.ingredients)
 	unit!: Relation<Unit>;

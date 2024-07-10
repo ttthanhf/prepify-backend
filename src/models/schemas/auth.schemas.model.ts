@@ -55,3 +55,10 @@ export const resetPasswordSchema = Type.Object({
 });
 
 export type ResetPassword = Static<typeof resetPasswordSchema>;
+
+export const changePasswordSchema = Type.Object({
+	oldPassword: Type.String(),
+	newPassword: Type.String()
+});
+
+export type ChangePassword = Static<typeof changePasswordSchema>;
