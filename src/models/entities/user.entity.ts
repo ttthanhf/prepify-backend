@@ -13,6 +13,7 @@ import {
 	Relation
 } from 'typeorm';
 import { ExpoPushToken } from './expo-push-token.entity';
+import { DEFAULT_IMAGE } from '~constants/default.constant';
 
 @Entity({ name: 'user' })
 export class User {
@@ -46,9 +47,6 @@ export class User {
 	role!: Role;
 
 	@Column()
-	avatar!: string;
-
-	@Column()
 	identityCard?: string;
 
 	@OneToOne(() => Customer, (customer) => customer.user)
@@ -62,4 +60,8 @@ export class User {
 
 	@OneToMany(() => ExpoPushToken, (expoPushToken) => expoPushToken.user)
 	expoPushTokens!: ExpoPushToken[];
+
+	hasPassword!: boolean;
+
+	image: string = DEFAULT_IMAGE;
 }

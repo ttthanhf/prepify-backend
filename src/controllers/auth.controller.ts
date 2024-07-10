@@ -27,6 +27,9 @@ class AuthController {
 	async resetPassword(req: FastifyRequest, res: FastifyResponse) {
 		return authService.resetPasswordHandle(req, res);
 	}
+	async changePassword(req: FastifyRequest, res: FastifyResponse) {
+		return authService.changePasswordHandle(req, res);
+	}
 }
 
 export default new AuthController();

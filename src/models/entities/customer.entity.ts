@@ -1,5 +1,5 @@
 import { User } from './user.entity';
-import { CustomerIngredient } from './customer-ingredient.entity';
+import { RestrictIngredient } from './restrict-ingredient.entity';
 import { Order } from './order.entity';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -22,10 +22,10 @@ export class Customer {
 	user!: Relation<User>;
 
 	@OneToMany(
-		() => CustomerIngredient,
-		(customerIngredient) => customerIngredient.customer
+		() => RestrictIngredient,
+		(restrictIngredient) => restrictIngredient.customer
 	)
-	customerIngredients!: CustomerIngredient[];
+	restrictIngredients!: RestrictIngredient[];
 
 	@OneToMany(() => Order, (order) => order.customer)
 	orders!: Order[];

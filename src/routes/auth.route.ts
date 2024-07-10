@@ -1,5 +1,7 @@
 import authController from '~controllers/auth.controller';
+import authMiddleware from '~middlewares/auth.middleware';
 import {
+	changePasswordSchema,
 	forgotPasswordSchema,
 	googleOauth2Schema,
 	loginRequestSchema,
@@ -41,22 +43,38 @@ export default async function authRoute(
 	app.post(
 		'/forgot-password',
 		{
-			schema: forgotPasswordSchema
+			schema: {
+				body: forgotPasswordSchema
+			}
 		},
 		authController.forgotPassword
 	);
 	app.post(
 		'/verify-token-forgot-password',
 		{
-			schema: verifyForgotPasswordSchema
+			schema: {
+				body: verifyForgotPasswordSchema
+			}
 		},
 		authController.verifyForgotPassword
 	);
 	app.post(
 		'/reset-password',
 		{
-			schema: resetPasswordSchema
+			schema: {
+				body: resetPasswordSchema
+			}
 		},
 		authController.resetPassword
+	);
+	app.put(
+		'/change-password',
+		{
+			schema: {
+				body: changePasswordSchema
+			},
+			onRequest: [authMiddleware.requireToken]
+		},
+		authController.changePassword
 	);
 }
