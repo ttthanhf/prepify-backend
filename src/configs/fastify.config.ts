@@ -9,7 +9,10 @@ const fastifyInitConfig: any = {
 			target: '@fastify/one-line-logger'
 		}
 	},
-	disableRequestLogging: envConfig.ENVIROMENT == ENVIROMENT.PRODUCTION
+	disableRequestLogging: envConfig.ENVIROMENT == ENVIROMENT.PRODUCTION,
+	bodyLimit: 100 * 1024 * 1024,
+	connectionTimeout: 0,
+	keepAliveTimeout: 5000
 };
 
 const fastifyListenConfig: FastifyListenOptions = {

@@ -106,10 +106,28 @@ class AccountAdminService {
 		const query: AccountAdminQueryCreateRequest =
 			req.body as AccountAdminQueryCreateRequest;
 
+		const response = new ResponseModel(res);
+		const existUserAccount = await userRepository.find({
+			where: [
+				{
+					phone: query.phone
+				},
+				{
+					email: query.email
+				}
+			]
+		});
+
+		if (existUserAccount.length) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Email or Phone existed';
+			return response.send();
+		}
+
 		const area = await areaRepository.findOneBy({
 			id: query.areaId
 		});
-		const response = new ResponseModel(res);
+
 		if (!area) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
 			return response.send();
@@ -119,6 +137,9 @@ class AccountAdminService {
 		user.password = await bcryptUtil.hash('123');
 		await userRepository.create(user);
 
+		response.data = {
+			id: user.id
+		};
 		return response.send();
 	}
 }

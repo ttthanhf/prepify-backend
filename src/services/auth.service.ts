@@ -46,23 +46,23 @@ class AuthService {
 			return response.send();
 		}
 
-		const user = await userRepository.findOneBy(email ? { email } : { phone });
+		const user = await userRepository.findOne({
+			where: [{ email }, { phone }]
+		});
 
-		if (!user!.password) {
+		if (
+			user &&
+			user!.password &&
+			(await bcryptUtil.compare(password, user.password!))
+		) {
+			response.message = 'Login success';
+			response.data = this.getAccessToken(user);
+			return response.send();
+		} else {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
 			response.message = 'Account or password not correct';
 			return response.send();
 		}
-
-		if (user && (await bcryptUtil.compare(password, user.password!))) {
-			response.message = 'Login success';
-			response.data = this.getAccessToken(user);
-			return response.send();
-		}
-
-		response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-		response.message = 'Account or password not correct';
-		return response.send();
 	}
 	async registerHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { phone, password, email, fullname }: RegisterRequest =

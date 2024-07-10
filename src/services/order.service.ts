@@ -1,4 +1,3 @@
-import { or } from 'ajv/dist/compile/codegen';
 import { FastifyRequest } from 'fastify';
 import { In } from 'typeorm';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
@@ -10,6 +9,7 @@ import { OrderDetail } from '~models/entities/order-detail.entity';
 import { Order } from '~models/entities/order.entity';
 import { ItemResponse } from '~models/responses/checkout.response.model';
 import {
+	OrderDetailResponse,
 	OrderItemResponse,
 	OrderResponse
 } from '~models/responses/order.response.model';
@@ -143,7 +143,13 @@ class OrderService {
 			order: {
 				datetime: 'DESC'
 			},
-			relations: ['customer']
+			relations: [
+				'customer',
+				'orderDetails',
+				'orderDetails.mealKit',
+				'orderDetails.mealKit.extraSpice',
+				'orderDetails.mealKit.recipe'
+			]
 		});
 
 		const orderResponseList: Array<OrderResponse> = [];
@@ -152,34 +158,19 @@ class OrderService {
 			orderResponse.orderDate = order.datetime;
 
 			const orderItemResponseList: Array<OrderItemResponse> = [];
-			const mealKits = await mealKitRepository.find({
-				where: {
-					orderDetails: {
-						order: {
-							id: order.id
-						}
-					}
-				},
-				relations: [
-					'orderDetails',
-					'orderDetails.order',
-					'recipe',
-					'extraSpice'
-				]
-			});
-
-			for (const mealKit of mealKits) {
+			for (const orderDetail of order.orderDetails) {
 				const orderItemResponse = mapperUtil.mapEntityToClass(
-					mealKit,
+					orderDetail.mealKit,
 					OrderItemResponse
 				);
 
-				orderItemResponse.name = mealKit.recipe.name;
-				orderItemResponse.slug = mealKit.recipe.slug;
+				orderItemResponse.name = orderDetail.mealKit.recipe.name;
+				orderItemResponse.slug = orderDetail.mealKit.recipe.slug;
+				orderItemResponse.quantity = orderDetail.quantity;
 
 				const image = await imageRepository.findOneBy({
 					type: ImageType.RECIPE,
-					entityId: mealKit.recipe.id
+					entityId: orderDetail.mealKit.recipe.id
 				});
 
 				if (image) {
@@ -188,10 +179,10 @@ class OrderService {
 					orderItemResponse.image = DEFAULT_IMAGE;
 				}
 
-				if (mealKit.extraSpice && orderItemResponse.extraSpice) {
+				if (orderDetail.mealKit.extraSpice && orderItemResponse.extraSpice) {
 					const image = await imageRepository.findOneBy({
 						type: ImageType.EXTRASPICE,
-						entityId: mealKit.extraSpice.id
+						entityId: orderDetail.mealKit.extraSpice.id
 					});
 
 					if (image) {
@@ -210,6 +201,86 @@ class OrderService {
 
 		const response = new ResponseModel(res);
 		response.data = orderResponseList;
+		return response.send();
+	}
+
+	async getOrderHandle(req: FastifyRequest, res: FastifyResponse) {
+		const { id }: any = req.params;
+		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
+		const order = await orderRepository.findOne({
+			where: {
+				customer: {
+					id: customer!.id
+				},
+				id
+			},
+			relations: [
+				'customer',
+				'orderDetails',
+				'payment',
+				'area',
+				'orderDetails.order',
+				'orderDetails.mealKit',
+				'orderDetails.mealKit.extraSpice',
+				'orderDetails.mealKit.recipe'
+			]
+		});
+
+		const response = new ResponseModel(res);
+
+		if (!order) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			return response.send();
+		}
+		const orderDetailResponse = mapperUtil.mapEntityToClass(
+			order,
+			OrderDetailResponse
+		);
+		orderDetailResponse.orderDate = order.datetime;
+		orderDetailResponse.deliveryPrice = order.isPriority
+			? order.area.instantPrice
+			: order.area.standardPrice;
+
+		const orderItemResponseList: Array<OrderItemResponse> = [];
+		for (const orderDetail of order.orderDetails) {
+			const orderItemResponse = mapperUtil.mapEntityToClass(
+				orderDetail.mealKit,
+				OrderItemResponse
+			);
+
+			orderItemResponse.name = orderDetail.mealKit.recipe.name;
+			orderItemResponse.slug = orderDetail.mealKit.recipe.slug;
+			orderItemResponse.quantity = orderDetail.quantity;
+
+			const image = await imageRepository.findOneBy({
+				type: ImageType.RECIPE,
+				entityId: orderDetail.mealKit.recipe.id
+			});
+
+			if (image) {
+				orderItemResponse.image = image.url;
+			} else {
+				orderItemResponse.image = DEFAULT_IMAGE;
+			}
+
+			if (orderDetail.mealKit.extraSpice && orderItemResponse.extraSpice) {
+				const image = await imageRepository.findOneBy({
+					type: ImageType.EXTRASPICE,
+					entityId: orderDetail.mealKit.extraSpice.id
+				});
+
+				if (image) {
+					orderItemResponse.extraSpice.image = image.url;
+				} else {
+					orderItemResponse.extraSpice.image = DEFAULT_IMAGE;
+				}
+			}
+
+			orderItemResponseList.push(orderItemResponse);
+		}
+		orderDetailResponse.orderItems = orderItemResponseList;
+
+		response.data = orderDetailResponse;
 		return response.send();
 	}
 }

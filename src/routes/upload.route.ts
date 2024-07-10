@@ -1,8 +1,7 @@
-import { Role } from '~constants/role.constant';
 import authMiddleware from '~middlewares/auth.middleware';
 import { Fastify } from '~types/fastify.type';
 import { uploadDeleteRequestSchema } from '~models/schemas/moderator/upload.schemas.model';
-import uploadController from '~controllers/moderator/upload.controller';
+import uploadController from '~controllers/upload.controller';
 
 export default async function route(
 	app: Fastify,
@@ -15,10 +14,7 @@ export default async function route(
 			schema: {
 				consumes: ['multipart/form-data']
 			},
-			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
-			config: {
-				allowedRoles: [Role.MODERATOR]
-			}
+			onRequest: [authMiddleware.requireToken]
 		},
 		uploadController.uploadImage
 	);
@@ -29,10 +25,7 @@ export default async function route(
 			schema: {
 				body: uploadDeleteRequestSchema
 			},
-			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
-			config: {
-				allowedRoles: [Role.MODERATOR]
-			}
+			onRequest: [authMiddleware.requireToken]
 		},
 		uploadController.deleteImage
 	);
