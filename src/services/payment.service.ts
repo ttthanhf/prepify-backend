@@ -126,7 +126,7 @@ class PaymentService {
 				order.status = OrderStatus.CREATED;
 				await orderRepository.update(order);
 				const rabbitmqInstance = await RabbitMQUtil.getInstance();
-				// if the order is not paid during 1 hour, cancel the order
+				// if the order is paid successfully, publish a message to the order create exchange
 				await rabbitmqInstance.publishMessage(
 					RABBITMQ_CONSTANT.EXCHANGE.ORDER_CREATE,
 					RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CREATE,

@@ -61,6 +61,11 @@ export const calDurationUntilNextTimeFrame = (
 		}
 	});
 
+	if (!closestTimeFrame) {
+		closestTimeFrame = timeFrames[0];
+		minTimeUntilNext = 24 - currentHour + closestTimeFrame.startTime;
+	}
+
 	const timeUntilNextTimeFrame = moment.duration(
 		minTimeUntilNext * 60,
 		'minutes'

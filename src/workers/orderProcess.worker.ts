@@ -149,22 +149,31 @@ class OrderProcessWorker {
 	async handleAssignOrderToBatch(msg: ConsumeMessage | null) {
 		// get the order from the queue
 		// assign the order to the shipper with the least order, base on area, and time
-		const order: Order = JSON.parse(msg!.content.toString());
-		const { area, isPriority } = order;
+		const data: Order = JSON.parse(msg!.content.toString());
+		const order = await orderRepository.findOne({
+			where: {
+				id: data.id
+			},
+			relations: ['area']
+		});
 
-		const { nextTimeFrame } = isPriority
+		if (!order) {
+			return;
+		}
+
+		const { nextTimeFrame } = order.isPriority
 			? calDurationUntilNextTimeFrame(order.datetime, TIME_FRAME_INSTANT)
 			: calDurationUntilNextTimeFrame(order.datetime, TIME_FRAME_STANDARD);
 
 		// Combine current date and time frame to get datetime
 		const datetime = combineDateAndTimeFrame(moment(), nextTimeFrame!.time);
 		// Find or create a batch for that area
-		let batch = await this.findCurrentAvailableBatch(area, datetime);
+		let batch = await this.findCurrentAvailableBatch(order.area, datetime);
 		if (!batch) {
 			batch = new Batch();
-			batch.area = area;
+			batch.area = order.area;
 			batch.datetime = datetime.toDate();
-			await batchRepository.create(batch);
+			batch = await batchRepository.create(batch);
 		}
 
 		// assign the order to the batch
@@ -172,16 +181,9 @@ class OrderProcessWorker {
 		orderBatch.batch = batch;
 		orderBatch.order = order;
 		orderBatch.status = OrderStatus.CREATED;
-
 		orderBatch.datetime = datetime.toDate();
 
-		batch.orderBatches.push(orderBatch);
-		order.orderBatches.push(orderBatch);
-
 		await orderBatchRepository.create(orderBatch);
-		await batchRepository.update(batch);
-		await orderRepository.update(order);
-
 		// notify the shipper to deliver the order (send to the shipper queue)
 	}
 
@@ -189,13 +191,16 @@ class OrderProcessWorker {
 		area: Area,
 		datetime: moment.Moment
 	): Promise<Batch | null> {
-		const batch = await batchRepository.findOneBy({
-			area,
-			datetime: datetime.toDate()
+		const batch = await batchRepository.findOne({
+			where: {
+				area,
+				datetime: datetime.toDate()
+			},
+			relations: ['orderBatches']
 		});
 
-		// if batch is full of orders, return null to create another batch
-		if (batch && batch?.orderBatches.length >= 10) {
+		// If no batch found or batch is full, return null
+		if (!batch || (batch && batch.orderBatches.length >= 10)) {
 			return null;
 		}
 

@@ -17,11 +17,11 @@ export class Batch {
 	id: string = uuidv4();
 
 	@Column({
-		type: 'date'
+		type: 'datetime'
 	})
 	datetime!: Date;
 
-	@ManyToOne(() => User, (user) => user.batches)
+	@ManyToOne(() => User, (user) => user.batches, { nullable: true })
 	user!: Relation<User>;
 
 	@ManyToOne(() => Area, (area) => area.batches)

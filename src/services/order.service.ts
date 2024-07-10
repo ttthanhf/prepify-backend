@@ -129,12 +129,12 @@ class OrderService {
 
 		const rabbitmqInstance = await RabbitMQUtil.getInstance();
 		// if the order is not paid during 1 hour, cancel the order
-		// await rabbitmqInstance.publishMessageToDelayQueue(
-		// 	RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,
-		// 	RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CANCEL,
-		// 	JSON.stringify(order),
-		// 	2 * 60 * 1000 // 1 hour
-		// );
+		await rabbitmqInstance.publishMessageToDelayQueue(
+			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,
+			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CANCEL,
+			JSON.stringify(order),
+			60 * 60 * 1000 // 1 hour
+		);
 		await rabbitmqInstance.publishMessage(
 			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CREATE,
 			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CREATE,

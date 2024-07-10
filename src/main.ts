@@ -28,7 +28,7 @@ app.ready(async () => {
 
 	try {
 		const rabbitmqInstance = await RabbitMQUtil.getInstance();
-		const orderProcessWorker = OrderProcessWorker.getInstance(rabbitmqInstance);
+		OrderProcessWorker.getInstance(rabbitmqInstance);
 		console.log('OrderProcessWorker has started.');
 	} catch (err) {
 		console.error('Failed to start OrderProcessWorker:', err);
