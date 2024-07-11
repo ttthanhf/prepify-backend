@@ -10,7 +10,6 @@ export type OrderShipperGetRequest = Static<
 >;
 
 export const orderShipperUpdateRequestSchema = Type.Object({
-	batchId: Type.String(),
 	status: Type.Enum(OrderStatus),
 	note: Type.Optional(Type.String())
 });

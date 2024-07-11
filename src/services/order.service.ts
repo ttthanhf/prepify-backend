@@ -135,11 +135,7 @@ class OrderService {
 			JSON.stringify(order),
 			60 * 60 * 1000 // 1 hour
 		);
-		await rabbitmqInstance.publishMessage(
-			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CREATE,
-			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CREATE,
-			JSON.stringify(order)
-		);
+
 		return response.send();
 	}
 
