@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['20.15.0']
+        node-version: ['20.x']
 
     steps:
       - name: Checkout repository
@@ -20,11 +20,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-
-      - name: Install build dependencies
-        run: |
-          apt-get update
-          apt-get install -y build-essential python3
 
       - name: Install package
         run: npm install
