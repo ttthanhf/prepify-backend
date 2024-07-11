@@ -113,16 +113,14 @@ class OrderService {
 			return response.send();
 		}
 
-		const orderBatch = await orderBatchRepository.findOne({
-			where: {
-				order: {
-					id
-				},
-				batch: {
-					id: currentBatch.id
-				}
-			}
-		});
+		const orderBatch = await orderBatchRepository
+			.getRepository()
+			.createQueryBuilder('orderBatch')
+			.leftJoinAndSelect('orderBatch.order', 'order')
+			.leftJoinAndSelect('orderBatch.batch', 'batch')
+			.where('order.id = :orderId', { orderId: id })
+			.andWhere('batch.id = :batchId', { batchId: currentBatch.id })
+			.getOne();
 
 		if (!orderBatch) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
