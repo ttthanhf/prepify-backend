@@ -7,7 +7,7 @@ class BatchController {
 	}
 
 	async getBatchesByShipperArea(req: FastifyRequest, res: FastifyResponse) {
-		return batchService.getBatchesByShipperAreaHandle(req, res);
+		return batchService.getBatchesByShipperHandle(req, res);
 	}
 }
 

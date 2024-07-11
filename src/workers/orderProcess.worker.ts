@@ -22,6 +22,9 @@ import {
 } from '~constants/timeframe.constant';
 import RabbitMQUtil from '~utils/rabbitmq.util';
 import { BatchStatus } from '~constants/batchstatus.constant';
+import { User } from '~models/entities/user.entity';
+import userRepository from '~repositories/user.repository';
+import { Role } from '~constants/role.constant';
 
 class OrderProcessWorker {
 	static instance: OrderProcessWorker;
@@ -175,6 +178,10 @@ class OrderProcessWorker {
 			batch.area = order.area;
 			batch.datetime = datetime.toDate();
 			batch.status = BatchStatus.CREATED;
+			const shipper = await this.findAvailableShipper(order.area);
+			if (shipper) {
+				batch.user = shipper;
+			}
 			batch = await batchRepository.create(batch);
 		}
 
@@ -186,6 +193,7 @@ class OrderProcessWorker {
 		orderBatch.datetime = datetime.toDate();
 
 		await orderBatchRepository.create(orderBatch);
+
 		// notify the shipper to deliver the order (send to the shipper queue)
 	}
 
@@ -207,6 +215,29 @@ class OrderProcessWorker {
 		}
 
 		return batch;
+	}
+
+	private async findAvailableShipper(area: Area): Promise<User | null> {
+		const shipper = await userRepository
+			.getRepository()
+			.createQueryBuilder('user')
+			.leftJoinAndSelect('user.batches', 'batch')
+			.leftJoinAndSelect('batch.orderBatches', 'orderBatch')
+			.leftJoinAndSelect('user.area', 'area')
+			.where('area.id = :areaId', { areaId: area.id })
+			.andWhere('user.role = :role', { role: Role.SHIPPER })
+			.groupBy('user.id')
+			.addGroupBy('batch.id')
+			.addGroupBy('orderBatch.order_id')
+			.orderBy(
+				'COUNT(CASE WHEN orderBatch.status IN (:...statuses) THEN 1 ELSE NULL END)',
+				'ASC'
+			)
+			.setParameter('statuses', [OrderStatus.DELIVERING, OrderStatus.PICKED_UP])
+			.limit(1)
+			.getOne();
+
+		return shipper;
 	}
 }
 
