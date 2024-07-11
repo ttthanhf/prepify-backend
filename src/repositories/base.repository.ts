@@ -48,6 +48,16 @@ export class BaseRepository<T extends ObjectLiteral> {
 		return await this.db.findOneBy(opts);
 	}
 
+	async findAndCount(options?: FindManyOptions<T>): Promise<[T[], number]> {
+		return await this.db.findAndCount(options);
+	}
+
+	async findAndCountBy(
+		where: FindOptionsWhere<T> | FindOptionsWhere<T>[]
+	): Promise<[T[], number]> {
+		return await this.db.findAndCountBy(where);
+	}
+
 	async remove(entities: T[], options?: RemoveOptions): Promise<T[]> {
 		return await this.db.remove(entities, options);
 	}

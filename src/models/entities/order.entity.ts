@@ -66,6 +66,9 @@ export class Order {
 	@Column()
 	deliveryCount!: number;
 
+	@Column()
+	hasFeedback!: boolean;
+
 	@Column({
 		type: 'boolean'
 	})

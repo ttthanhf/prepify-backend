@@ -14,7 +14,7 @@ function fastifyPlugin(app: Fastify, opts: Object, next: CallableFunction) {
 			fieldSize: 100 * 1024 * 1024,
 			fields: 10,
 			fileSize: 100 * 1024 * 1024,
-			files: 1,
+			files: 10,
 			headerPairs: 2000
 		}
 	});

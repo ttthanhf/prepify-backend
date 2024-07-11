@@ -134,11 +134,11 @@ class AccountAdminService {
 		}
 		const user = mapperUtil.mapEntityToClass(query, User);
 		user.area = area;
-		user.password = await bcryptUtil.hash('123');
-		await userRepository.create(user);
+		user.password = await bcryptUtil.hash('Password123!');
+		const newUser = await userRepository.create(user);
 
 		response.data = {
-			id: user.id
+			id: newUser.id
 		};
 		return response.send();
 	}
