@@ -21,6 +21,7 @@ import {
 	TIME_FRAME_STANDARD
 } from '~constants/timeframe.constant';
 import RabbitMQUtil from '~utils/rabbitmq.util';
+import { BatchStatus } from '~constants/batchstatus.constant';
 
 class OrderProcessWorker {
 	static instance: OrderProcessWorker;
@@ -173,6 +174,7 @@ class OrderProcessWorker {
 			batch = new Batch();
 			batch.area = order.area;
 			batch.datetime = datetime.toDate();
+			batch.status = BatchStatus.CREATED;
 			batch = await batchRepository.create(batch);
 		}
 

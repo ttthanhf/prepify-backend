@@ -1,14 +1,20 @@
+import { BatchStatus } from '~constants/batchstatus.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { ImageType } from '~constants/image.constant';
 import { OrderStatus } from '~constants/orderstatus.constant';
+import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
 import ResponseModel from '~models/responses/response.model';
 import {
 	OrderShipperGetRequest,
 	OrderShipperUpdateRequest
 } from '~models/schemas/shipper/order.schemas.model';
 import batchRepository from '~repositories/batch.repository';
+import imageRepository from '~repositories/image.repository';
 import orderRepository from '~repositories/order.repository';
 import orderBatchRepository from '~repositories/orderBatch.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import { calDurationUntilTargetTime } from '~utils/date.util';
+import RabbitMQUtil from '~utils/rabbitmq.util';
 import userUtil from '~utils/user.util';
 
 class OrderService {
@@ -24,7 +30,8 @@ class OrderService {
 			where: {
 				user: {
 					id: shipper!.id
-				}
+				},
+				status: BatchStatus.PICKED_UP
 			},
 			order: {
 				datetime: 'DESC'
@@ -43,10 +50,15 @@ class OrderService {
 			.createQueryBuilder('orderBatch')
 			.leftJoinAndSelect('orderBatch.order', 'order')
 			.leftJoinAndSelect('orderBatch.batch', 'batch')
+			.leftJoinAndSelect('order.customer', 'customer')
+			.leftJoinAndSelect('order.area', 'area')
+			.leftJoinAndSelect('customer.user', 'user')
 			.where('batch.id = :batchId', { batchId: currentBatch.id });
 
+		let statusList: string[] = [];
 		if (query.status && query.status.split(',').length > 0) {
-			const statusList = query.status.split(',');
+			statusList = query.status.split(',');
+			console.log('🚀 ~ OrderService ~ statusList:', statusList);
 			queryBuilder.andWhere('orderBatch.status IN (:...statusList)', {
 				statusList
 			});
@@ -55,19 +67,51 @@ class OrderService {
 		const orderBatches = await queryBuilder.getMany();
 
 		response.data = {
-			orders: orderBatches.map((orderBatch) => {
-				return orderBatch.order;
-			})
+			orders: await Promise.all(
+				orderBatches.map(async (orderBatch) => {
+					if (orderBatch.status !== OrderStatus.DELIVERED) {
+						return orderBatch.order;
+					}
+					const images = await imageRepository.findBy({
+						type: ImageType.REPORT,
+						entityId: orderBatch.order.id
+					});
+					return {
+						...orderBatch.order,
+						images
+					};
+				})
+			)
 		};
 		return response.send();
 	}
 
 	async updateOrderHandle(req: FastifyRequest, res: FastifyResponse) {
 		const { id } = req.params as { id: string };
+		const shipper = await userUtil.getUserByTokenInHeader(req.headers);
 		const response = new ResponseModel(res);
 
 		const orderUpdateRequest: OrderShipperUpdateRequest =
 			req.body as OrderShipperUpdateRequest;
+
+		const currentBatch = await batchRepository.findOne({
+			where: {
+				user: {
+					id: shipper!.id
+				},
+				status: BatchStatus.PICKED_UP
+			},
+			order: {
+				datetime: 'DESC'
+			},
+			relations: ['user']
+		});
+
+		if (!currentBatch) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'No batch found';
+			return response.send();
+		}
 
 		const orderBatch = await orderBatchRepository.findOne({
 			where: {
@@ -75,7 +119,7 @@ class OrderService {
 					id
 				},
 				batch: {
-					id: orderUpdateRequest.batchId
+					id: currentBatch.id
 				}
 			}
 		});
@@ -93,16 +137,50 @@ class OrderService {
 
 		await orderBatchRepository.update(orderBatch);
 
+		const order = await orderRepository.findOneBy({
+			id
+		});
+
+		// if status is delivered or cannceled, update status order
 		if (
 			orderUpdateRequest.status === OrderStatus.DELIVERED ||
 			orderUpdateRequest.status === OrderStatus.CANCELED
 		) {
-			const order = await orderRepository.findOneBy({
-				id
-			});
 			order!.status = orderUpdateRequest.status;
-			await orderRepository.update(order!);
 		}
+
+		// if status is delivering, update deliveryCount
+		if (orderUpdateRequest.status === OrderStatus.DELIVERING) {
+			order!.status = OrderStatus.DELIVERING;
+			order!.deliveryCount += 1;
+		}
+
+		// if status is delayed, order will be pushed to delayed queue if deliveryCount <= 1
+		if (orderUpdateRequest.status === OrderStatus.DELAYED) {
+			if (order?.deliveryCount === 2) {
+				order.status = OrderStatus.CANCELED;
+			} else if (order?.deliveryCount === 1) {
+				order.status = OrderStatus.DELAYED;
+
+				// push to delayed queue
+				const rabbitmqInstance = await RabbitMQUtil.getInstance();
+
+				const timeRemainingUntil7am = calDurationUntilTargetTime(
+					new Date(),
+					7,
+					0,
+					0
+				);
+
+				rabbitmqInstance.publishMessageToDelayQueue(
+					RABBITMQ_CONSTANT.EXCHANGE.ORDER_PROCESS,
+					RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_PROCESS,
+					JSON.stringify(order),
+					timeRemainingUntil7am.asMilliseconds()
+				);
+			}
+		}
+		await orderRepository.update(order!);
 
 		return response.send();
 	}
