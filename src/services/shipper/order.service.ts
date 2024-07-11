@@ -1,5 +1,6 @@
 import { BatchStatus } from '~constants/batchstatus.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { ImageType } from '~constants/image.constant';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
 import ResponseModel from '~models/responses/response.model';
@@ -8,6 +9,7 @@ import {
 	OrderShipperUpdateRequest
 } from '~models/schemas/shipper/order.schemas.model';
 import batchRepository from '~repositories/batch.repository';
+import imageRepository from '~repositories/image.repository';
 import orderRepository from '~repositories/order.repository';
 import orderBatchRepository from '~repositories/orderBatch.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
@@ -50,10 +52,13 @@ class OrderService {
 			.leftJoinAndSelect('orderBatch.batch', 'batch')
 			.leftJoinAndSelect('order.customer', 'customer')
 			.leftJoinAndSelect('order.area', 'area')
+			.leftJoinAndSelect('customer.user', 'user')
 			.where('batch.id = :batchId', { batchId: currentBatch.id });
 
+		let statusList: string[] = [];
 		if (query.status && query.status.split(',').length > 0) {
-			const statusList = query.status.split(',');
+			statusList = query.status.split(',');
+			console.log('🚀 ~ OrderService ~ statusList:', statusList);
 			queryBuilder.andWhere('orderBatch.status IN (:...statusList)', {
 				statusList
 			});
@@ -62,9 +67,21 @@ class OrderService {
 		const orderBatches = await queryBuilder.getMany();
 
 		response.data = {
-			orders: orderBatches.map((orderBatch) => {
-				return orderBatch.order;
-			})
+			orders: await Promise.all(
+				orderBatches.map(async (orderBatch) => {
+					if (orderBatch.status !== OrderStatus.DELIVERED) {
+						return orderBatch.order;
+					}
+					const images = await imageRepository.findBy({
+						type: ImageType.REPORT,
+						entityId: orderBatch.order.id
+					});
+					return {
+						...orderBatch.order,
+						images
+					};
+				})
+			)
 		};
 		return response.send();
 	}
