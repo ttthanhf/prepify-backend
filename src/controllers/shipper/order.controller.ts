@@ -2,8 +2,8 @@ import orderService from '~services/shipper/order.service';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 
 class OrderController {
-	async getOrdersInBatch(req: FastifyRequest, res: FastifyResponse) {
-		return orderService.getOrdersInBatchHandle(req, res);
+	async getOrdersInCurrentBatch(req: FastifyRequest, res: FastifyResponse) {
+		return orderService.getOrdersInCurrentBatchHandle(req, res);
 	}
 
 	async updateOrder(req: FastifyRequest, res: FastifyResponse) {
