@@ -45,6 +45,7 @@ function traverseDirectory(currentDir) {
 }
 
 traverseDirectory(buildDir);
+console.log('PREPARING');
 
 minifyJsonFile('./package.json', path.join(distDir, 'package.json'));
 // minifyJsonFile('./package-lock.json', path.join(distDir, 'package-lock.json'));

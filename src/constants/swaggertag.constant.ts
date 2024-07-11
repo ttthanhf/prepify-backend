@@ -16,8 +16,11 @@ export enum SwaggerTag {
 	ACCOUNT = 'Account',
 	UNIT = 'Unit',
 	NUTRITION = 'Nutrition',
+	CONFIG = 'Config',
 	BATCH = 'Batch',
+	AREA = 'Area',
 	ADMIN = 'Admin',
 	MODERATOR = 'Moderator',
-	SHIPPER = 'Shipper'
+	SHIPPER = 'Shipper',
+	ACHIEVE = 'Achieve'
 }

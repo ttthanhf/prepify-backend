@@ -160,26 +160,35 @@ class UploadService {
 	async deleteImage(req: FastifyRequest, res: FastifyResponse) {
 		const query: UploadDeleteRequestSchema =
 			req.body as UploadDeleteRequestSchema;
+
 		const response = new ResponseModel(res);
+		let data = 'No file deleted';
 
 		for (const item of query) {
-			const image = await imageRepository.findOne({
-				where: [
-					{
+			let image = null;
+			if (item.entityId) {
+				image = await imageRepository.findOne({
+					where: {
 						entityId: item.entityId,
 						type: item.type
-					},
-					{
+					}
+				});
+			} else if (item.url) {
+				image = await imageRepository.findOne({
+					where: {
 						url: item.url,
 						type: item.type
 					}
-				]
-			});
+				});
+			}
+
 			if (image) {
+				data = 'Already delete image';
 				await imageRepository.removeOne(image);
 			}
 		}
 
+		response.data = data;
 		return response.send();
 	}
 }
