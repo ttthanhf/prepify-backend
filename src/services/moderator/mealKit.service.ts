@@ -120,6 +120,7 @@ class MealKitModeratorService {
 				GetMealKitModeratorResponse
 			);
 			getAllMealKitModeratorResponse.recipeName = item.recipe.name;
+			getAllMealKitModeratorResponse.recipeId = item.recipe.id;
 			getAllMealKitModeratorResponse.image = DEFAULT_IMAGE;
 			if (getAllMealKitModeratorResponse.extraSpice) {
 				getAllMealKitModeratorResponse.extraSpice.image = DEFAULT_IMAGE;
