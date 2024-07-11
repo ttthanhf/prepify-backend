@@ -99,31 +99,31 @@ class CheckoutService {
 			areaResponseList.push(areaResponse);
 		}
 
-		const currentDate = new Date();
-		const config = await configRepository.find({
-			select: {
-				workEndHour: true,
-				maxShippingHour: true
+		const configs = await configRepository.findAll();
+		let workEndHour = 0;
+		let maxShippingHour = 0;
+		configs.forEach((config) => {
+			if (config.type == 'workEndHour') {
+				workEndHour = config.value;
+			} else if (config.type == 'maxShippingHour') {
+				maxShippingHour = config.value;
 			}
 		});
-
+		const currentDate = new Date();
 		const instantDate = new ShippingDate();
 		const instantCurrentDate = new Date();
-		if (
-			config[0].workEndHour - currentDate.getHours() <=
-			config[0].maxShippingHour
-		) {
+		if (workEndHour - currentDate.getHours() <= maxShippingHour) {
 			instantCurrentDate.setDate(currentDate.getDate() + 1);
 		}
 		instantDate.day = instantCurrentDate.getDate();
-		instantDate.month = instantCurrentDate.getMonth();
+		instantDate.month = instantCurrentDate.getMonth() + 1;
 		instantDate.year = instantCurrentDate.getFullYear();
 
 		const standardCurrentDate = new Date();
 		standardCurrentDate.setDate(currentDate.getDate() + 1);
 		const standardDate = new ShippingDate();
 		standardDate.day = standardCurrentDate.getDate();
-		standardDate.month = standardCurrentDate.getMonth();
+		standardDate.month = standardCurrentDate.getMonth() + 1;
 		standardDate.year = standardCurrentDate.getFullYear();
 
 		const payments = await paymentRepository.findAll();

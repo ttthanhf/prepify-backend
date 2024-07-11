@@ -1,3 +1,4 @@
+import { SwaggerTag } from '~constants/swaggertag.constant';
 import tempController from '~controllers/temp.controller';
 
 import { Fastify } from '~types/fastify.type';
@@ -7,7 +8,22 @@ export default async function route(
 	options: unknown,
 	next: unknown
 ) {
-	app.get('/area', tempController.getArea);
-	app.get('/shipping-date', tempController.getShippingDate);
-	app.get('/cooking-level', tempController.getCookingLevel);
+	app.get(
+		'/shipping-date',
+		{
+			schema: {
+				tags: [SwaggerTag.ACHIEVE]
+			}
+		},
+		tempController.getShippingDate
+	);
+	app.get(
+		'/cooking-level',
+		{
+			schema: {
+				tags: [SwaggerTag.ACHIEVE]
+			}
+		},
+		tempController.getCookingLevel
+	);
 }

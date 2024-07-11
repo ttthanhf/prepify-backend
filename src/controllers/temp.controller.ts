@@ -2,10 +2,6 @@ import tempService from '~services/temp.service';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 
 class TempController {
-	async getArea(req: FastifyRequest, res: FastifyResponse) {
-		return tempService.getAreaHandle(req, res);
-	}
-
 	async getShippingDate(req: FastifyRequest, res: FastifyResponse) {
 		return tempService.getShippingDateHandle(req, res);
 	}
