@@ -4,6 +4,10 @@ import { ConsumeMessage } from 'amqplib';
 import moment from 'moment';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
+import {
+	TIME_FRAME_INSTANT,
+	TIME_FRAME_STANDARD
+} from '~constants/timeframe.constant';
 import { Area } from '~models/entities/area.entity';
 import { Batch } from '~models/entities/batch.entity';
 import { OrderBatch } from '~models/entities/order-batch.entity';
@@ -11,15 +15,13 @@ import { Order } from '~models/entities/order.entity';
 import batchRepository from '~repositories/batch.repository';
 import orderRepository from '~repositories/order.repository';
 import orderBatchRepository from '~repositories/orderBatch.repository';
+import expoPushTokenService from '~services/expoPushToken.service';
 import {
 	calDurationUntilNextTimeFrame,
 	calDurationUntilTargetTime,
 	combineDateAndTimeFrame
 } from '~utils/date.util';
-import {
-	TIME_FRAME_INSTANT,
-	TIME_FRAME_STANDARD
-} from '~constants/timeframe.constant';
+import { Notification } from '~utils/expo.util';
 import RabbitMQUtil from '~utils/rabbitmq.util';
 import { BatchStatus } from '~constants/batchstatus.constant';
 import { User } from '~models/entities/user.entity';
@@ -154,6 +156,7 @@ class OrderProcessWorker {
 		// get the order from the queue
 		// assign the order to the shipper with the least order, base on area, and time
 		const data: Order = JSON.parse(msg!.content.toString());
+		let availableShipper: User | null = null;
 		const order = await orderRepository.findOne({
 			where: {
 				id: data.id
@@ -178,9 +181,9 @@ class OrderProcessWorker {
 			batch.area = order.area;
 			batch.datetime = datetime.toDate();
 			batch.status = BatchStatus.CREATED;
-			const shipper = await this.findAvailableShipper(order.area);
-			if (shipper) {
-				batch.user = shipper;
+			availableShipper = await this.findAvailableShipper(order.area);
+			if (availableShipper) {
+				batch.user = availableShipper;
 			}
 			batch = await batchRepository.create(batch);
 		}
@@ -195,6 +198,9 @@ class OrderProcessWorker {
 		await orderBatchRepository.create(orderBatch);
 
 		// notify the shipper to deliver the order (send to the shipper queue)
+		if (availableShipper) {
+			await this.sendNotificationToShipper(availableShipper.id);
+		}
 	}
 
 	private async findCurrentAvailableBatch(
@@ -215,6 +221,27 @@ class OrderProcessWorker {
 		}
 
 		return batch;
+	}
+
+	private async sendNotificationToShipper(shipperId: string) {
+		const pushTokens =
+			await expoPushTokenService.getExpoPushTokensByShipper(shipperId);
+
+		const notificationPromises = pushTokens.map((pushToken) => {
+			const notification: Notification = {
+				pushToken: pushToken.pushToken,
+				title: 'Đã có đơn hàng mới',
+				body: 'Nhận ngay ->'
+			};
+
+			return this.rabbitmqInstance.publishMessage(
+				RABBITMQ_CONSTANT.EXCHANGE.NOTIFICATION,
+				RABBITMQ_CONSTANT.ROUTING_KEY.NOTIFICATION,
+				JSON.stringify(notification)
+			);
+		});
+
+		await Promise.all(notificationPromises);
 	}
 
 	private async findAvailableShipper(area: Area): Promise<User | null> {

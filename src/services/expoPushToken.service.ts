@@ -79,6 +79,25 @@ class ExpoPushTokenService {
 			return response.send();
 		}
 	}
+
+	async getExpoPushTokensByShipper(
+		shipperId: string
+	): Promise<ExpoPushToken[]> {
+		try {
+			const tokens = await expoPushTokenRepository.find({
+				where: {
+					user: {
+						id: shipperId
+					}
+				},
+				relations: ['user']
+			});
+
+			return tokens;
+		} catch (error) {
+			return [];
+		}
+	}
 }
 
 export default new ExpoPushTokenService();

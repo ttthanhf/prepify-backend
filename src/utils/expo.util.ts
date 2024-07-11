@@ -1,14 +1,16 @@
 import { Expo, ExpoPushMessage } from 'expo-server-sdk';
 
+export interface Notification {
+	pushToken: string;
+	title: string;
+	body: string;
+	data?: Record<string, unknown>;
+}
+
 class ExpoUtil {
 	private expo = new Expo();
 
-	async sendPushNotification(
-		pushToken: string,
-		title: string,
-		body: string,
-		data: Record<string, unknown>
-	) {
+	async sendPushNotification({ pushToken, title, body, data }: Notification) {
 		if (!Expo.isExpoPushToken(pushToken)) {
 			throw new Error(`Push token ${pushToken} is not a valid Expo push token`);
 		}
