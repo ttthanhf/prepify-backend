@@ -5,6 +5,7 @@ export class FeedbackType {
 	rating!: number;
 	content!: string;
 	createdAt!: string;
+	images!: string[];
 }
 
 export class RatingType {

@@ -3,6 +3,7 @@ import authMiddleware from '~middlewares/auth.middleware';
 import { Fastify } from '~types/fastify.type';
 import orderController from '~controllers/moderator/order.controller';
 import { orderModeratorQueryGetRequestSchema } from '~models/schemas/moderator/order.schemas.model';
+import { SwaggerTag } from '~constants/swaggertag.constant';
 
 export default async function orderRoute(
 	app: Fastify,
@@ -13,6 +14,7 @@ export default async function orderRoute(
 		'/orders',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.ORDER],
 				queryString: orderModeratorQueryGetRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -26,6 +28,9 @@ export default async function orderRoute(
 	app.get(
 		'/orders/:id',
 		{
+			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.ORDER]
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]

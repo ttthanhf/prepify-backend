@@ -7,6 +7,7 @@ import {
 } from '~models/schemas/moderator/unit.schemas.model';
 import { Fastify } from '~types/fastify.type';
 import unitController from '~controllers/moderator/unit.controller';
+import { SwaggerTag } from '~constants/swaggertag.constant';
 
 export default async function unitRoute(
 	app: Fastify,
@@ -17,6 +18,7 @@ export default async function unitRoute(
 		'/units',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.UNIT],
 				queryString: unitModeratorQueryGetRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -31,6 +33,7 @@ export default async function unitRoute(
 		'/units',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.UNIT],
 				body: unitModeratorQueryCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -45,6 +48,7 @@ export default async function unitRoute(
 		'/units/:id',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.UNIT],
 				body: unitModeratorQueryUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -58,6 +62,9 @@ export default async function unitRoute(
 	app.delete(
 		'/units/:id',
 		{
+			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.UNIT]
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]

@@ -7,6 +7,7 @@ import {
 	foodStyleModeratorQueryUpdateRequestSchema
 } from '~models/schemas/moderator/foodStyle.schemas.model';
 import foodStyleController from '~controllers/moderator/foodStyle.controller';
+import { SwaggerTag } from '~constants/swaggertag.constant';
 
 export default async function categoryRoute(
 	app: Fastify,
@@ -17,6 +18,7 @@ export default async function categoryRoute(
 		'/food-styles',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.FOODSTYLE],
 				queryString: foodStyleModeratorQueryGetRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -31,6 +33,7 @@ export default async function categoryRoute(
 		'/food-styles',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.FOODSTYLE],
 				queryString: foodStyleModeratorQueryCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -45,6 +48,7 @@ export default async function categoryRoute(
 		'/food-styles/:id',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.FOODSTYLE],
 				queryString: foodStyleModeratorQueryUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -58,6 +62,9 @@ export default async function categoryRoute(
 	app.delete(
 		'/food-styles/:id',
 		{
+			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.FOODSTYLE]
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]

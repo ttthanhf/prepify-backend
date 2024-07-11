@@ -1,3 +1,4 @@
+import { SwaggerTag } from '~constants/swaggertag.constant';
 import feedbackController from '~controllers/feedback.controller';
 import authMiddleware from '~middlewares/auth.middleware';
 import {
@@ -15,6 +16,7 @@ export default async function route(
 		'/feedback',
 		{
 			schema: {
+				tags: [SwaggerTag.FEEDBACK],
 				body: feedbackCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken]
@@ -26,6 +28,7 @@ export default async function route(
 		'/feedback/:recipe_slug',
 		{
 			schema: {
+				tags: [SwaggerTag.FEEDBACK],
 				querystring: feedbackGetRequestSchema
 			}
 		},

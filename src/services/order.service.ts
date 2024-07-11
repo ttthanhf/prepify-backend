@@ -138,6 +138,12 @@ class OrderService {
 		return response.send();
 	}
 
+	async getOrderStatusHandle(req: FastifyRequest, res: FastifyResponse) {
+		const response = new ResponseModel(res);
+		response.data = OrderStatus;
+		return response.send();
+	}
+
 	async getAllOrderHandle(req: FastifyRequest, res: FastifyResponse) {
 		const query: any = req.query;
 		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
