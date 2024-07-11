@@ -10,5 +10,9 @@ class PaymentController {
 	async verifyPayment(req: FastifyRequest, res: FastifyResponse) {
 		await paymentService.verifyPaymentHandle(req, res);
 	}
+
+	async getPayment(req: FastifyRequest, res: FastifyResponse) {
+		return paymentService.getPaymentHandle(req, res);
+	}
 }
 export default new PaymentController();

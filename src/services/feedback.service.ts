@@ -142,6 +142,16 @@ class FeedbackService {
 			relations: ['mealKits']
 		});
 
+		const [allfeedbacks, _] = await feedbackRepository.findAndCount({
+			where: {
+				orderDetail: {
+					mealKit: {
+						id: In(recipe!.mealKits.map((item) => item.id))
+					}
+				}
+			}
+		});
+
 		const [feedbacks, itemTotal] = await feedbackRepository.findAndCount({
 			where: {
 				orderDetail: {
@@ -182,21 +192,49 @@ class FeedbackService {
 				feedbackType.image = DEFAULT_IMAGE;
 			}
 
+			const images = await imageRepository.find({
+				where: {
+					entityId: feedback.orderDetail.id,
+					type: ImageType.FEEDBACK
+				}
+			});
+			if (images[0]) {
+				feedbackType.images = images.map((item) => item.url);
+			} else {
+				feedbackType.images = [DEFAULT_IMAGE];
+			}
+
 			feedbackTypeList.push(feedbackType);
 		}
 
-		const ratingTypeList: Array<RatingType> = [];
-		for (const feedback of feedbacks) {
+		const ratingTypeList: Array<RatingType> = [
+			{
+				rating: 5,
+				total: 0
+			},
+			{
+				rating: 4,
+				total: 0
+			},
+			{
+				rating: 3,
+				total: 0
+			},
+			{
+				rating: 2,
+				total: 0
+			},
+			{
+				rating: 1,
+				total: 0
+			}
+		];
+		for (const feedback of allfeedbacks) {
 			const existingRatingType = ratingTypeList.find(
 				(rt) => rt.rating === feedback.rating
 			);
 			if (existingRatingType) {
 				existingRatingType.total += 1;
-			} else {
-				const ratingType = new RatingType();
-				ratingType.rating = feedback.rating;
-				ratingType.total = 1;
-				ratingTypeList.push(ratingType);
 			}
 		}
 

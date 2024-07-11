@@ -56,19 +56,6 @@ class TempService {
 		response.data = LevelCook;
 		return response.send();
 	}
-
-	async getOrderStatusHandle(req: FastifyRequest, res: FastifyResponse) {
-		const response = new ResponseModel(res);
-		response.data = OrderStatus;
-		return response.send();
-	}
-
-	async getPaymentHandle(req: FastifyRequest, res: FastifyResponse) {
-		const payment = await paymentRepository.findAll();
-		const response = new ResponseModel(res);
-		response.data = payment;
-		return response.send();
-	}
 }
 
 export default new TempService();

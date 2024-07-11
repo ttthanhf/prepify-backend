@@ -1,9 +1,11 @@
 import { Role } from '~constants/role.constant';
+import { SwaggerTag } from '~constants/swaggertag.constant';
 import mealkitController from '~controllers/moderator/mealkit.controller';
 import authMiddleware from '~middlewares/auth.middleware';
 import {
 	mealKitModeratorCreateRequestSchema,
-	mealKitModeratorGetRequestSchema
+	mealKitModeratorGetRequestSchema,
+	mealKitModeratorUpdateRequestSchema
 } from '~models/schemas/moderator/mealkit.schemas.model';
 import { Fastify } from '~types/fastify.type';
 
@@ -16,6 +18,7 @@ export default async function route(
 		'/mealkits',
 		{
 			schema: {
+				tags: [SwaggerTag.MEALKIT, SwaggerTag.MODERATOR],
 				querystring: mealKitModeratorGetRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -28,6 +31,9 @@ export default async function route(
 	app.get(
 		'/mealkits/:id',
 		{
+			schema: {
+				tags: [SwaggerTag.MEALKIT, SwaggerTag.MODERATOR]
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]
@@ -39,6 +45,7 @@ export default async function route(
 		'/mealkits',
 		{
 			schema: {
+				tags: [SwaggerTag.MEALKIT, SwaggerTag.MODERATOR],
 				body: mealKitModeratorCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -51,20 +58,24 @@ export default async function route(
 	app.put(
 		'/mealkits/:id',
 		{
-			// schema: {
-			// 	body: mealKitModeratorCreateRequestSchema
-			// },
+			schema: {
+				tags: [SwaggerTag.MEALKIT, SwaggerTag.MODERATOR],
+				body: mealKitModeratorUpdateRequestSchema
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]
 			}
 		},
-		mealkitController.createMealkit
+		mealkitController.updateMealKit
 	);
 
 	app.put(
 		'/mealkits/:id/status/toggle',
 		{
+			schema: {
+				tags: [SwaggerTag.MEALKIT, SwaggerTag.MODERATOR]
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]

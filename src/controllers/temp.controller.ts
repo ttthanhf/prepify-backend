@@ -13,14 +13,6 @@ class TempController {
 	async getCookingLevel(req: FastifyRequest, res: FastifyResponse) {
 		return tempService.getCookingLevelHandle(req, res);
 	}
-
-	async getOrderStatus(req: FastifyRequest, res: FastifyResponse) {
-		return tempService.getOrderStatusHandle(req, res);
-	}
-
-	async getPayment(req: FastifyRequest, res: FastifyResponse) {
-		return tempService.getPaymentHandle(req, res);
-	}
 }
 
 export default new TempController();

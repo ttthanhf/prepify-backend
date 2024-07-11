@@ -6,6 +6,7 @@ import {
 	accountAdminQueryCreateRequestSchema,
 	accountAdminQueryGetRequestSchema
 } from '~models/schemas/admin/account.schemas.model';
+import { SwaggerTag } from '~constants/swaggertag.constant';
 
 export default async function route(
 	app: Fastify,
@@ -16,6 +17,7 @@ export default async function route(
 		'/accounts',
 		{
 			schema: {
+				tags: [SwaggerTag.ADMIN, SwaggerTag.ACCOUNT],
 				queryString: accountAdminQueryGetRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -30,6 +32,7 @@ export default async function route(
 		'/accounts',
 		{
 			schema: {
+				tags: [SwaggerTag.ADMIN, SwaggerTag.ACCOUNT],
 				body: accountAdminQueryCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],

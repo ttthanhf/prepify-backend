@@ -7,6 +7,7 @@ import authMiddleware from '~middlewares/auth.middleware';
 import { Role } from '~constants/role.constant';
 import { Fastify } from '~types/fastify.type';
 import categoryController from '~controllers/moderator/category.controller';
+import { SwaggerTag } from '~constants/swaggertag.constant';
 
 export default async function categoryRoute(
 	app: Fastify,
@@ -17,6 +18,7 @@ export default async function categoryRoute(
 		'/categories',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.CATEGORY],
 				queryString: categoryModeratorQueryGetRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -31,6 +33,7 @@ export default async function categoryRoute(
 		'/categories',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.CATEGORY],
 				body: categoryModeratorQueryCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -45,6 +48,7 @@ export default async function categoryRoute(
 		'/categories/:id',
 		{
 			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.CATEGORY],
 				body: categoryModeratorQueryUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -58,6 +62,9 @@ export default async function categoryRoute(
 	app.delete(
 		'/categories/:id',
 		{
+			schema: {
+				tags: [SwaggerTag.MODERATOR, SwaggerTag.CATEGORY]
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]

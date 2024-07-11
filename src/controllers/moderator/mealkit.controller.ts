@@ -14,7 +14,7 @@ class MealKitModeratorController {
 		return mealKitService.createMealKitHandle(req, res);
 	}
 
-	async updateCategory(req: FastifyRequest, res: FastifyResponse) {
+	async updateMealKit(req: FastifyRequest, res: FastifyResponse) {
 		return mealKitService.updateMealKitHandle(req, res);
 	}
 
