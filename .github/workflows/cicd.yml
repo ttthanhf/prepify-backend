@@ -21,7 +21,7 @@ jobs:
           cache: 'npm'
 
       - name: Add .env
-        run: echo "${{ secret.DELOYMENT_ENV }}" >> ./deloyment.env
+        run: echo "${{ secrets.DELOYMENT_ENV }}" >> ./deloyment.env
 
       - name: Build
         run: npm run build:deloy
