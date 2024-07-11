@@ -58,7 +58,6 @@ class OrderService {
 		let statusList: string[] = [];
 		if (query.status && query.status.split(',').length > 0) {
 			statusList = query.status.split(',');
-			console.log('🚀 ~ OrderService ~ statusList:', statusList);
 			queryBuilder.andWhere('orderBatch.status IN (:...statusList)', {
 				statusList
 			});
