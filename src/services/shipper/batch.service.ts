@@ -30,9 +30,18 @@ class BatchService {
 
 		// update picked up status for all order in batch
 		await Promise.all(
-			batch.orderBatches.map(async (orderBatch) => {
-				orderBatch.status = BatchStatus.PICKED_UP as unknown as OrderStatus;
-				await orderBatchRepository.update(orderBatch);
+			batch.orderBatches.map(async (orderBatchData) => {
+				const orderBatch = await orderBatchRepository
+					.getRepository()
+					.createQueryBuilder('orderBatch')
+					.leftJoinAndSelect('orderBatch.order', 'order')
+					.leftJoinAndSelect('orderBatch.batch', 'batch')
+					.where('order.id = :orderId', { orderId: orderBatchData.order })
+					.andWhere('batch.id = :batchId', { batchId: batch.id })
+					.getOne();
+
+				orderBatch!.status = BatchStatus.PICKED_UP as unknown as OrderStatus;
+				await orderBatchRepository.update(orderBatch!);
 			})
 		);
 
