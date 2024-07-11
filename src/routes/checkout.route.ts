@@ -1,3 +1,4 @@
+import { SwaggerTag } from '~constants/swaggertag.constant';
 import checkoutController from '~controllers/checkout.controller';
 import authMiddleware from '~middlewares/auth.middleware';
 
@@ -12,6 +13,9 @@ export default async function route(
 	app.get(
 		'/checkout',
 		{
+			schema: {
+				tags: [SwaggerTag.CHECKOUT]
+			},
 			onRequest: [authMiddleware.requireToken]
 		},
 		checkoutController.getCheckout
@@ -20,6 +24,7 @@ export default async function route(
 		'/checkout',
 		{
 			schema: {
+				tags: [SwaggerTag.CHECKOUT],
 				body: checkoutCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken]

@@ -19,8 +19,7 @@ swaggerConfig(app);
 const pathRegisters = ['plugins', 'routes'];
 pathRegisters.forEach((pathRegister: string) => {
 	app.register(AutoLoad, {
-		dir: path.join(__dirname, pathRegister),
-		prefix: '/moderator'
+		dir: path.join(__dirname, pathRegister)
 	});
 });
 

@@ -28,6 +28,17 @@ export class MealKit {
 	})
 	status!: boolean;
 
+	@Column({
+		type: 'float',
+		default: 0
+	})
+	rating: number = 0;
+
+	@Column({
+		default: 0
+	})
+	sold: number = 0;
+
 	@ManyToOne(() => Recipe, (recipe) => recipe.mealKits)
 	recipe!: Relation<Recipe>;
 

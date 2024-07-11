@@ -10,6 +10,7 @@ import {
 	PrimaryColumn,
 	Relation
 } from 'typeorm';
+import { BatchStatus } from '~constants/batchstatus.constant';
 
 @Entity({ name: 'batch' })
 export class Batch {
@@ -29,4 +30,10 @@ export class Batch {
 
 	@OneToMany(() => OrderBatch, (orderBatch) => orderBatch.batch)
 	orderBatches!: OrderBatch[];
+
+	@Column({
+		type: 'enum',
+		enum: BatchStatus
+	})
+	status!: BatchStatus;
 }

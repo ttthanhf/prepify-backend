@@ -1,3 +1,4 @@
+import { _Object } from '@aws-sdk/client-s3';
 import { FastifyRequest } from 'fastify';
 import { In } from 'typeorm';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
@@ -27,11 +28,12 @@ import {
 	recipeModeratorQueryGetRequest,
 	RecipeUpdateRequest
 } from '~models/schemas/moderator/recipe.schemas.model';
+import categoryRepository from '~repositories/category,repository';
 import extraSpiceRepository from '~repositories/extraSpice.repository';
+import feedbackRepository from '~repositories/feedback.repository';
 import foodStyleRepository from '~repositories/foodStyle.repository';
 import imageRepository from '~repositories/image.repository';
 import mealKitRepository from '~repositories/mealKit.repository';
-import orderDetailRepository from '~repositories/orderDetail.repository';
 import recipeIngredientRepository from '~repositories/recipe-ingredient.repository';
 import recipeNutritionRepository from '~repositories/recipe-nutrition.repository';
 import recipeRepository from '~repositories/recipe.repository';
@@ -238,20 +240,30 @@ class RecipeModeratorService {
 			foodStylesRecipeModeratorResponseModelList;
 		recipeModeratorResponseModel.mealKits = recipe.mealKits;
 
-		const sold = await orderDetailRepository.count({
-			where: {
-				isCart: false,
-				mealKit: {
-					recipe: {
-						id: recipe.id
+		let totalSold = 0;
+		let totalStar = 0;
+		let totalFeedback = 0;
+		for (const mealKit of recipe.mealKits) {
+			totalSold += mealKit.sold;
+			const feedbacks = await feedbackRepository.find({
+				where: {
+					orderDetail: {
+						mealKit: {
+							id: mealKit.id
+						}
 					}
 				}
-			},
-			relations: ['mealKit', 'mealKit.recipe']
-		});
-		recipeModeratorResponseModel.sold = sold;
-		recipeModeratorResponseModel.star = 0;
-		recipeModeratorResponseModel.totalFeedbacks = 0;
+			});
+
+			totalFeedback += feedbacks.length;
+			feedbacks.forEach((feedback) => {
+				totalStar += feedback.rating;
+			});
+		}
+
+		recipeModeratorResponseModel.sold = totalSold;
+		recipeModeratorResponseModel.star = totalStar;
+		recipeModeratorResponseModel.totalFeedbacks = totalFeedback;
 
 		const images = await imageRepository.findBy({
 			type: ImageType.RECIPE,
@@ -468,11 +480,22 @@ class RecipeModeratorService {
 		}
 
 		recipe.name = query.name;
-		recipe.category.id = query.category;
+
 		recipe.steps = query.steps;
 		recipe.time = query.time;
 		recipe.level = query.level;
 		recipe.videoUrl = query.videoUrl;
+
+		const category = await categoryRepository.findOneBy({
+			id: query.category
+		});
+		if (!category) {
+			response.message = 'Category not found';
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			return response.send();
+		}
+		recipe.category = category;
+
 		const foodStyles = await foodStyleRepository.findBy({
 			id: In(query.foodStyles)
 		});
@@ -508,8 +531,8 @@ class RecipeModeratorService {
 			return response.send();
 		}
 
-		if (query.items?.length) {
-			query.items.forEach(async (item) => {
+		if (query.ingredients?.length) {
+			for (const item of query.ingredients) {
 				if (item.id) {
 					const ingredient = await recipeIngredientRepository.findOne({
 						where: {
@@ -536,7 +559,7 @@ class RecipeModeratorService {
 					recipeIngredient.recipe = recipe;
 					await recipeIngredientRepository.create(recipeIngredient);
 				}
-			});
+			}
 		}
 
 		if (query.removeIds?.length) {
@@ -569,8 +592,8 @@ class RecipeModeratorService {
 			return response.send();
 		}
 
-		if (query.items?.length) {
-			query.items.forEach(async (item) => {
+		if (query.nutrition?.length) {
+			for (const item of query.nutrition) {
 				if (item.id) {
 					const nutrition = await recipeNutritionRepository.findOne({
 						where: {
@@ -595,7 +618,7 @@ class RecipeModeratorService {
 					recipeNutrition.recipe = recipe;
 					await recipeNutritionRepository.create(recipeNutrition);
 				}
-			});
+			}
 		}
 
 		if (query.removeIds?.length) {
@@ -628,8 +651,8 @@ class RecipeModeratorService {
 			return response.send();
 		}
 
-		if (query.items?.length) {
-			query.items.forEach(async (item) => {
+		if (query.mealKits?.length) {
+			for (const item of query.mealKits) {
 				if (item.mealKit.id) {
 					const mealKit = await mealKitRepository.findOne({
 						where: {
@@ -676,7 +699,7 @@ class RecipeModeratorService {
 						await extraSpiceRepository.create(extraSpice);
 					}
 				}
-			});
+			}
 		}
 
 		if (query.removeIds?.length) {

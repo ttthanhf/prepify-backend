@@ -80,17 +80,17 @@ class ExpoPushTokenService {
 		}
 	}
 
-	async getExpoPushTokensByArea(areaId: string): Promise<ExpoPushToken[]> {
+	async getExpoPushTokensByShipper(
+		shipperId: string
+	): Promise<ExpoPushToken[]> {
 		try {
 			const tokens = await expoPushTokenRepository.find({
 				where: {
 					user: {
-						area: {
-							id: areaId
-						}
+						id: shipperId
 					}
 				},
-				relations: ['user', 'user.area']
+				relations: ['user']
 			});
 
 			return tokens;

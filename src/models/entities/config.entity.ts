@@ -7,8 +7,8 @@ export class Config {
 	id: string = uuidv4();
 
 	@Column()
-	workEndHour!: number;
+	type!: string;
 
 	@Column()
-	maxShippingHour!: number;
+	value!: number;
 }

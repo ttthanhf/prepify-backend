@@ -23,6 +23,10 @@ import {
 } from '~utils/date.util';
 import { Notification } from '~utils/expo.util';
 import RabbitMQUtil from '~utils/rabbitmq.util';
+import { BatchStatus } from '~constants/batchstatus.constant';
+import { User } from '~models/entities/user.entity';
+import userRepository from '~repositories/user.repository';
+import { Role } from '~constants/role.constant';
 
 class OrderProcessWorker {
 	static instance: OrderProcessWorker;
@@ -152,6 +156,7 @@ class OrderProcessWorker {
 		// get the order from the queue
 		// assign the order to the shipper with the least order, base on area, and time
 		const data: Order = JSON.parse(msg!.content.toString());
+		let availableShipper: User | null = null;
 		const order = await orderRepository.findOne({
 			where: {
 				id: data.id
@@ -175,6 +180,11 @@ class OrderProcessWorker {
 			batch = new Batch();
 			batch.area = order.area;
 			batch.datetime = datetime.toDate();
+			batch.status = BatchStatus.CREATED;
+			availableShipper = await this.findAvailableShipper(order.area);
+			if (availableShipper) {
+				batch.user = availableShipper;
+			}
 			batch = await batchRepository.create(batch);
 		}
 
@@ -188,7 +198,9 @@ class OrderProcessWorker {
 		await orderBatchRepository.create(orderBatch);
 
 		// notify the shipper to deliver the order (send to the shipper queue)
-		await this.sendNotificationToShippersByArea(order.area.id);
+		if (availableShipper) {
+			await this.sendNotificationToShipper(availableShipper.id);
+		}
 	}
 
 	private async findCurrentAvailableBatch(
@@ -211,9 +223,9 @@ class OrderProcessWorker {
 		return batch;
 	}
 
-	private async sendNotificationToShippersByArea(areaId: string) {
+	private async sendNotificationToShipper(shipperId: string) {
 		const pushTokens =
-			await expoPushTokenService.getExpoPushTokensByArea(areaId);
+			await expoPushTokenService.getExpoPushTokensByShipper(shipperId);
 
 		const notificationPromises = pushTokens.map((pushToken) => {
 			const notification: Notification = {
@@ -230,6 +242,29 @@ class OrderProcessWorker {
 		});
 
 		await Promise.all(notificationPromises);
+	}
+
+	private async findAvailableShipper(area: Area): Promise<User | null> {
+		const shipper = await userRepository
+			.getRepository()
+			.createQueryBuilder('user')
+			.leftJoinAndSelect('user.batches', 'batch')
+			.leftJoinAndSelect('batch.orderBatches', 'orderBatch')
+			.leftJoinAndSelect('user.area', 'area')
+			.where('area.id = :areaId', { areaId: area.id })
+			.andWhere('user.role = :role', { role: Role.SHIPPER })
+			.groupBy('user.id')
+			.addGroupBy('batch.id')
+			.addGroupBy('orderBatch.order_id')
+			.orderBy(
+				'COUNT(CASE WHEN orderBatch.status IN (:...statuses) THEN 1 ELSE NULL END)',
+				'ASC'
+			)
+			.setParameter('statuses', [OrderStatus.DELIVERING, OrderStatus.PICKED_UP])
+			.limit(1)
+			.getOne();
+
+		return shipper;
 	}
 }
 

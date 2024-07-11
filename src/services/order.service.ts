@@ -8,7 +8,6 @@ import { OrderStatus } from '~constants/orderstatus.constant';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
 import { OrderDetail } from '~models/entities/order-detail.entity';
 import { Order } from '~models/entities/order.entity';
-import { ItemResponse } from '~models/responses/checkout.response.model';
 import {
 	OrderDetailResponse,
 	OrderItemResponse,
@@ -58,7 +57,7 @@ class OrderService {
 
 		const order = new Order();
 
-		await checkout.items.forEach(async (item: ItemResponse) => {
+		for (const item of checkout.items) {
 			const checkoutItem = await orderDetailRepository.findOne({
 				where: {
 					id: item.id,
@@ -91,7 +90,7 @@ class OrderService {
 
 				totalPrice += mealKit!.extraSpice!.price * checkoutItem!.quantity;
 			}
-		});
+		}
 
 		const area = await areaRepository.findOneBy({
 			id: orderCreateRequest.areaId
@@ -135,11 +134,13 @@ class OrderService {
 			JSON.stringify(order),
 			60 * 60 * 1000 // 1 hour
 		);
-		await rabbitmqInstance.publishMessage(
-			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CREATE,
-			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CREATE,
-			JSON.stringify(order)
-		);
+
+		return response.send();
+	}
+
+	async getOrderStatusHandle(req: FastifyRequest, res: FastifyResponse) {
+		const response = new ResponseModel(res);
+		response.data = OrderStatus;
 		return response.send();
 	}
 
@@ -181,6 +182,11 @@ class OrderService {
 					OrderItemResponse
 				);
 
+				if (!orderDetail.has_extra_spice) {
+					orderItemResponse.extraSpice = undefined;
+				}
+
+				orderItemResponse.id = orderDetail.id;
 				orderItemResponse.name = orderDetail.mealKit.recipe.name;
 				orderItemResponse.slug = orderDetail.mealKit.recipe.slug;
 				orderItemResponse.quantity = orderDetail.quantity;
@@ -253,6 +259,7 @@ class OrderService {
 			order,
 			OrderDetailResponse
 		);
+
 		orderDetailResponse.orderDate = order.datetime;
 		orderDetailResponse.deliveryPrice = order.isPriority
 			? order.area.instantPrice
@@ -264,6 +271,10 @@ class OrderService {
 				orderDetail.mealKit,
 				OrderItemResponse
 			);
+
+			if (!orderDetail.has_extra_spice) {
+				orderItemResponse.extraSpice = undefined;
+			}
 
 			orderItemResponse.name = orderDetail.mealKit.recipe.name;
 			orderItemResponse.slug = orderDetail.mealKit.recipe.slug;

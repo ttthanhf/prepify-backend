@@ -2,6 +2,7 @@ import authMiddleware from '~middlewares/auth.middleware';
 import { Fastify } from '~types/fastify.type';
 import { uploadDeleteRequestSchema } from '~models/schemas/moderator/upload.schemas.model';
 import uploadController from '~controllers/upload.controller';
+import { SwaggerTag } from '~constants/swaggertag.constant';
 
 export default async function route(
 	app: Fastify,
@@ -12,6 +13,7 @@ export default async function route(
 		'/upload/create',
 		{
 			schema: {
+				tags: [SwaggerTag.UPLOAD],
 				consumes: ['multipart/form-data']
 			},
 			onRequest: [authMiddleware.requireToken]
@@ -23,6 +25,7 @@ export default async function route(
 		'/upload/delete',
 		{
 			schema: {
+				tags: [SwaggerTag.UPLOAD],
 				body: uploadDeleteRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken]

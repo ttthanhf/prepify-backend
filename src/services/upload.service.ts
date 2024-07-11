@@ -6,8 +6,10 @@ import { Image } from '~models/entities/image.entity';
 import ResponseModel from '~models/responses/response.model';
 import { UploadDeleteRequestSchema } from '~models/schemas/moderator/upload.schemas.model';
 import extraSpiceRepository from '~repositories/extraSpice.repository';
+import feedbackRepository from '~repositories/feedback.repository';
 import imageRepository from '~repositories/image.repository';
 import ingredientRepository from '~repositories/ingredient.repository';
+import orderRepository from '~repositories/order.repository';
 import recipeRepository from '~repositories/recipe.repository';
 import userRepository from '~repositories/user.repository';
 import { FastifyResponse } from '~types/fastify.type';
@@ -16,7 +18,7 @@ import s3Util from '~utils/s3.util';
 import stringUtil from '~utils/string.util';
 import userUtil from '~utils/user.util';
 
-class UploadModeratorService {
+class UploadService {
 	async uploadImage(req: FastifyRequest, res: FastifyResponse) {
 		const user = await userUtil.getUserByTokenInHeader(req.headers);
 		const imageObj = {} as Image;
@@ -50,7 +52,12 @@ class UploadModeratorService {
 			return response.send();
 		}
 
-		if (imageObj.type != ImageType.USER && user!.role == Role.CUSTOMER) {
+		if (
+			!(
+				imageObj.type === ImageType.USER || imageObj.type === ImageType.FEEDBACK
+			) &&
+			user!.role === Role.CUSTOMER
+		) {
 			response.message = 'Not Permission';
 			response.statusCode = HTTP_STATUS_CODE.FORBIDDEN;
 			return response.send();
@@ -82,8 +89,26 @@ class UploadModeratorService {
 					}
 				});
 				break;
+			case ImageType.FEEDBACK:
+				item = await feedbackRepository.findOne({
+					where: {
+						id: imageObj.entityId
+					}
+				});
+
+				maxImage = -1;
+				break;
+			case ImageType.REPORT:
+				item = await orderRepository.findOne({
+					where: {
+						id: imageObj.entityId
+					}
+				});
+
+				maxImage = -1;
+				break;
 			case ImageType.USER:
-				if (imageObj.entityId != user!.id) {
+				if (imageObj.entityId != user!.id && user!.role == Role.CUSTOMER) {
 					response.message = 'Not your id';
 					response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
 					return response.send();
@@ -135,19 +160,36 @@ class UploadModeratorService {
 	async deleteImage(req: FastifyRequest, res: FastifyResponse) {
 		const query: UploadDeleteRequestSchema =
 			req.body as UploadDeleteRequestSchema;
-		const response = new ResponseModel(res);
 
-		query.forEach(async (item) => {
-			const image = await imageRepository.findOneBy({
-				entityId: item.entityId,
-				type: item.type
-			});
+		const response = new ResponseModel(res);
+		let data = 'No file deleted';
+
+		for (const item of query) {
+			let image = null;
+			if (item.entityId) {
+				image = await imageRepository.findOne({
+					where: {
+						entityId: item.entityId,
+						type: item.type
+					}
+				});
+			} else if (item.url) {
+				image = await imageRepository.findOne({
+					where: {
+						url: item.url,
+						type: item.type
+					}
+				});
+			}
+
 			if (image) {
+				data = 'Already delete image';
 				await imageRepository.removeOne(image);
 			}
-		});
+		}
 
+		response.data = data;
 		return response.send();
 	}
 }
-export default new UploadModeratorService();
+export default new UploadService();

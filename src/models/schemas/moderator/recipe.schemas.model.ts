@@ -11,7 +11,7 @@ export const ingredientRecipeRequestSchema = Type.Object({
 });
 
 export const ingredientRecipeUpdateRequestSchema = Type.Object({
-	items: Type.Optional(Type.Array(ingredientRecipeRequestSchema)),
+	ingredients: Type.Optional(Type.Array(ingredientRecipeRequestSchema)),
 	removeIds: Type.Optional(Type.Array(Type.String()))
 });
 
@@ -29,7 +29,7 @@ export const nutritionRecipeRequestSchema = Type.Object({
 });
 
 export const nutritionRecipeUpdateRequestSchema = Type.Object({
-	items: Type.Optional(Type.Array(nutritionRecipeRequestSchema)),
+	nutrition: Type.Optional(Type.Array(nutritionRecipeRequestSchema)),
 	removeIds: Type.Optional(Type.Array(Type.String()))
 });
 
@@ -55,7 +55,7 @@ export const mealkitsRecipeRequestSchema = Type.Object({
 });
 
 export const mealkitsRecipeUpdateRequestSchema = Type.Object({
-	items: Type.Optional(Type.Array(mealkitsRecipeRequestSchema)),
+	mealKits: Type.Optional(Type.Array(mealkitsRecipeRequestSchema)),
 	removeIds: Type.Optional(Type.Array(Type.String()))
 });
 

@@ -9,6 +9,7 @@ import {
 	recipeModeratorQueryGetRequestSchema,
 	recipeUpdateRequestSchema
 } from '~models/schemas/moderator/recipe.schemas.model';
+import { SwaggerTag } from '~constants/swaggertag.constant';
 
 export default async function recipeRoute(
 	app: Fastify,
@@ -19,6 +20,7 @@ export default async function recipeRoute(
 		'/recipes',
 		{
 			schema: {
+				tags: [SwaggerTag.RECIPE, SwaggerTag.MODERATOR],
 				querystring: recipeModeratorQueryGetRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -31,6 +33,9 @@ export default async function recipeRoute(
 	app.get(
 		'/recipes/:recipe_id',
 		{
+			schema: {
+				tags: [SwaggerTag.RECIPE, SwaggerTag.MODERATOR]
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]
@@ -42,6 +47,7 @@ export default async function recipeRoute(
 		'/recipes',
 		{
 			schema: {
+				tags: [SwaggerTag.RECIPE, SwaggerTag.MODERATOR],
 				consumes: ['multipart/form-data']
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -52,9 +58,10 @@ export default async function recipeRoute(
 		recipeModeratorController.createRecipe
 	);
 	app.put(
-		'/recipes/:recipe_id',
+		'/recipes/:id',
 		{
 			schema: {
+				tags: [SwaggerTag.RECIPE, SwaggerTag.MODERATOR],
 				body: recipeUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -67,6 +74,9 @@ export default async function recipeRoute(
 	app.delete(
 		'/recipes/:recipe_id',
 		{
+			schema: {
+				tags: [SwaggerTag.RECIPE, SwaggerTag.MODERATOR]
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]
@@ -79,6 +89,7 @@ export default async function recipeRoute(
 		'/recipes/:recipe_id/ingredients',
 		{
 			schema: {
+				tags: [SwaggerTag.RECIPE, SwaggerTag.MODERATOR],
 				body: ingredientRecipeUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -92,6 +103,7 @@ export default async function recipeRoute(
 		'/recipes/:recipe_id/nutritions',
 		{
 			schema: {
+				tags: [SwaggerTag.RECIPE, SwaggerTag.MODERATOR],
 				body: nutritionRecipeUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -105,6 +117,7 @@ export default async function recipeRoute(
 		'/recipes/:recipe_id/mealKits',
 		{
 			schema: {
+				tags: [SwaggerTag.RECIPE, SwaggerTag.MODERATOR],
 				body: mealkitsRecipeUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
