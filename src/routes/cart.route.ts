@@ -19,6 +19,13 @@ export default async function route(
 		},
 		cartController.getCart
 	);
+	app.get(
+		'/cart/length',
+		{
+			onRequest: [authMiddleware.requireToken]
+		},
+		cartController.getCartLength
+	);
 	app.post(
 		'/cart/add',
 		{

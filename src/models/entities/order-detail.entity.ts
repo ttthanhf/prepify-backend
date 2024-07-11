@@ -1,8 +1,16 @@
 import { Order } from './order.entity';
 import { MealKit } from './meal-kit.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import {
+	Column,
+	Entity,
+	ManyToOne,
+	OneToOne,
+	PrimaryColumn,
+	Relation
+} from 'typeorm';
 import { Customer } from './customer.entity';
+import { Feedback } from './feedback.entity';
 
 @Entity({ name: 'order_detail' })
 export class OrderDetail {
@@ -34,4 +42,7 @@ export class OrderDetail {
 
 	@ManyToOne(() => Customer, (customer) => customer.orderDetails)
 	customer!: Relation<Customer>;
+
+	@OneToOne(() => Feedback, (feedback) => feedback.orderDetail)
+	feedback!: Relation<Feedback>;
 }

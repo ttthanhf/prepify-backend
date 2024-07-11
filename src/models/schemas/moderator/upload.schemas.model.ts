@@ -2,7 +2,8 @@ import { Static, Type } from '@sinclair/typebox';
 
 export const uploadDeleteRequestSchema = Type.Array(
 	Type.Object({
-		entityId: Type.String(),
+		url: Type.Optional(Type.String()),
+		entityId: Type.Optional(Type.String()),
 		type: Type.String()
 	})
 );

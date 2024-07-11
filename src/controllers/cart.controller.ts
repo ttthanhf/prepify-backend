@@ -6,6 +6,10 @@ class CartController {
 		return cartService.getCartHandle(req, res);
 	}
 
+	async getCartLength(req: FastifyRequest, res: FastifyResponse) {
+		return cartService.getCartLengthHandle(req, res);
+	}
+
 	async createCart(req: FastifyRequest, res: FastifyResponse) {
 		return cartService.createCartHandle(req, res);
 	}
