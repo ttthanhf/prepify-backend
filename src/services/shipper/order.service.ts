@@ -1,35 +1,63 @@
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { OrderStatus } from '~constants/orderstatus.constant';
 import ResponseModel from '~models/responses/response.model';
 import {
 	OrderShipperGetRequest,
 	OrderShipperUpdateRequest
 } from '~models/schemas/shipper/order.schemas.model';
+import batchRepository from '~repositories/batch.repository';
 import orderRepository from '~repositories/order.repository';
+import orderBatchRepository from '~repositories/orderBatch.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import userUtil from '~utils/user.util';
 
 class OrderService {
-	async getOrdersHandle(req: FastifyRequest, res: FastifyResponse) {
+	async getOrdersInCurrentBatchHandle(
+		req: FastifyRequest,
+		res: FastifyResponse
+	) {
 		const response = new ResponseModel(res);
+		const shipper = await userUtil.getUserByTokenInHeader(req.headers);
 		const query: OrderShipperGetRequest = req.query as OrderShipperGetRequest;
 
-		let orderQuery = await orderRepository
-			.getRepository()
-			.createQueryBuilder('order')
-			.leftJoinAndSelect('order.customer', 'customer')
-			.leftJoinAndSelect('customer.user', 'user')
-			.leftJoinAndSelect('order.area', 'area');
+		const currentBatch = await batchRepository.findOne({
+			where: {
+				user: {
+					id: shipper!.id
+				}
+			},
+			order: {
+				datetime: 'DESC'
+			},
+			relations: ['user']
+		});
 
-		if (query.status) {
-			const statuses = query.status.split(',');
-			orderQuery = orderQuery.andWhere('order.status IN (:...statuses)', {
-				statuses
+		if (!currentBatch) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'No batch found';
+			return response.send();
+		}
+
+		const queryBuilder = orderBatchRepository
+			.getRepository()
+			.createQueryBuilder('orderBatch')
+			.leftJoinAndSelect('orderBatch.order', 'order')
+			.leftJoinAndSelect('orderBatch.batch', 'batch')
+			.where('batch.id = :batchId', { batchId: currentBatch.id });
+
+		if (query.status && query.status.split(',').length > 0) {
+			const statusList = query.status.split(',');
+			queryBuilder.andWhere('orderBatch.status IN (:...statusList)', {
+				statusList
 			});
 		}
 
-		const orders = await orderQuery.getMany();
+		const orderBatches = await queryBuilder.getMany();
 
 		response.data = {
-			orders
+			orders: orderBatches.map((orderBatch) => {
+				return orderBatch.order;
+			})
 		};
 		return response.send();
 	}
@@ -38,22 +66,43 @@ class OrderService {
 		const { id } = req.params as { id: string };
 		const response = new ResponseModel(res);
 
-		const order = await orderRepository.findOneBy({
-			id
+		const orderUpdateRequest: OrderShipperUpdateRequest =
+			req.body as OrderShipperUpdateRequest;
+
+		const orderBatch = await orderBatchRepository.findOne({
+			where: {
+				order: {
+					id
+				},
+				batch: {
+					id: orderUpdateRequest.batchId
+				}
+			}
 		});
 
-		if (!order) {
+		if (!orderBatch) {
 			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
 			response.message = 'Order not found';
 			return response.send();
 		}
 
-		const orderUpdateRequest: OrderShipperUpdateRequest =
-			req.body as OrderShipperUpdateRequest;
+		orderBatch.status = orderUpdateRequest.status;
+		if (orderUpdateRequest.note) {
+			orderBatch.note = orderUpdateRequest.note;
+		}
 
-		order.status = orderUpdateRequest.status;
+		await orderBatchRepository.update(orderBatch);
 
-		await orderRepository.update(order);
+		if (
+			orderUpdateRequest.status === OrderStatus.DELIVERED ||
+			orderUpdateRequest.status === OrderStatus.CANCELED
+		) {
+			const order = await orderRepository.findOneBy({
+				id
+			});
+			order!.status = orderUpdateRequest.status;
+			await orderRepository.update(order!);
+		}
 
 		return response.send();
 	}

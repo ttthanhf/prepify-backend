@@ -13,7 +13,7 @@ export default async function route(
 	next: unknown
 ) {
 	app.get(
-		'/orders',
+		'/orders/current-batch',
 		{
 			schema: {
 				queryString: orderShipperGetRequestSchema
@@ -23,7 +23,7 @@ export default async function route(
 				allowedRoles: [Role.SHIPPER]
 			}
 		},
-		orderController.getOrders
+		orderController.getOrdersInCurrentBatch
 	);
 
 	app.put(
