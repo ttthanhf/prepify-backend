@@ -52,7 +52,7 @@ export default async function recipeRoute(
 		recipeModeratorController.createRecipe
 	);
 	app.put(
-		'/recipes/:recipe_id',
+		'/recipes/:id',
 		{
 			schema: {
 				body: recipeUpdateRequestSchema

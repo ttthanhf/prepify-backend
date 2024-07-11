@@ -134,6 +134,24 @@ class CartService {
 		return response.send();
 	}
 
+	async getCartLengthHandle(req: FastifyRequest, res: FastifyResponse) {
+		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
+		const length = await orderDetailRepository.count({
+			where: {
+				customer: {
+					id: customer!.id
+				},
+				isCart: true
+			}
+		});
+
+		const response = new ResponseModel(res);
+		response.data = {
+			length
+		};
+		return response.send();
+	}
+
 	async createCartHandle(req: FastifyRequest, res: FastifyResponse) {
 		const customer = await userUtil.getCustomerByTokenInHeader(req.headers);
 		const { mealkitId, quantity, has_extra_spice }: CartCreateRequest =

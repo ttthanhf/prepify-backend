@@ -23,6 +23,7 @@ export class OrderResponse {
 	orderDate!: Date;
 	totalPrice!: number;
 	trackingNumber?: string | null;
+	hasFeedback!: boolean;
 }
 
 export class OrderDetailResponse {
@@ -33,6 +34,7 @@ export class OrderDetailResponse {
 	deliveryPrice!: number;
 	totalPrice!: number;
 	trackingNumber!: string;
+	hasFeedback!: boolean;
 	payment!: {
 		id: string;
 		icon: string;

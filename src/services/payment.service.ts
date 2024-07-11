@@ -13,6 +13,7 @@ import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { VNPayGet } from '~models/schemas/payment.schemas.model';
 import RabbitMQUtil from '~utils/rabbitmq.util';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
+import mealKitRepository from '~repositories/mealKit.repository';
 
 class PaymentService {
 	async getPaymentUrlHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -122,6 +123,7 @@ class PaymentService {
 				return response.send();
 			}
 
+			// ORDER SUCCESS
 			if (order.status == OrderStatus.WAITING) {
 				order.status = OrderStatus.CREATED;
 				await orderRepository.update(order);
@@ -136,6 +138,22 @@ class PaymentService {
 					success: true,
 					error: false
 				};
+
+				const mealKits = await mealKitRepository.find({
+					where: {
+						orderDetails: {
+							order: {
+								id: order.id
+							}
+						}
+					}
+				});
+
+				for (const mealKit of mealKits) {
+					mealKit.sold = mealKit.sold + 1;
+					await mealKitRepository.update(mealKit);
+				}
+
 				return response.send();
 			} else if (order.status == OrderStatus.CREATED) {
 				response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;

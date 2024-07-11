@@ -70,7 +70,7 @@ class RecipeService {
 				'recipe.time',
 				'recipe.createdAt',
 				'mealKit.price',
-				'mealKit.rating',
+				'recipe.rating',
 				'foodStyle.name'
 			])
 			.where('mealKit.status = true');
@@ -105,7 +105,7 @@ class RecipeService {
 
 		if (query.minRating || query.maxRating) {
 			recipeQuery = recipeQuery.andWhere(
-				'mealKit.rating BETWEEN :minRating AND :maxRating',
+				'recipe.rating BETWEEN :minRating AND :maxRating',
 				{
 					minRating,
 					maxRating
@@ -138,7 +138,9 @@ class RecipeService {
 		}
 
 		const recipeShopResponseModelList: Array<RecipeShopResponseModel> = [];
-		recipes.forEach((recipe) => {
+		for (const recipe of recipes) {
+			let totalSold = 0;
+
 			const recipeShopResponseModel = new RecipeShopResponseModel();
 			recipeShopResponseModel.id = recipe.id;
 			recipeShopResponseModel.name = recipe.name;
@@ -155,13 +157,16 @@ class RecipeService {
 					if (recipe.mealKits[i].price < lowestPriceMealKit.price) {
 						lowestPriceMealKit = recipe.mealKits[i];
 					}
+					totalSold += recipe.mealKits[i].sold;
 				}
 				recipeShopResponseModel.price = lowestPriceMealKit.price;
-				recipeShopResponseModel.star = lowestPriceMealKit.rating;
 			}
 
+			recipeShopResponseModel.star = recipe.rating;
+			recipeShopResponseModel.sold = totalSold;
+
 			recipeShopResponseModelList.push(recipeShopResponseModel);
-		});
+		}
 
 		const response = new ResponseModel(res);
 		response.data = {
@@ -200,7 +205,10 @@ class RecipeService {
 			return response.send();
 		}
 
+		let totalSold = 0;
 		for (const item of recipe.mealKits) {
+			totalSold += item.sold;
+
 			if (item.extraSpice) {
 				const images = await imageRepository.findBy({
 					type: ImageType.EXTRASPICE,
@@ -227,8 +235,9 @@ class RecipeService {
 			itemRecipeDetailShopResponse.images = [DEFAULT_IMAGE];
 		}
 
-		itemRecipeDetailShopResponse.totalFeedback = 0;
-		itemRecipeDetailShopResponse.star = 0;
+		itemRecipeDetailShopResponse.sold = totalSold;
+		itemRecipeDetailShopResponse.totalFeedback = recipe.totalFeedback;
+		itemRecipeDetailShopResponse.star = recipe.rating;
 
 		const sold = await orderDetailRepository.count({
 			where: {

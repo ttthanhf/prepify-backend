@@ -11,13 +11,13 @@ class RecipeModeratorController {
 	async createRecipe(req: FastifyRequest, res: FastifyResponse) {
 		return recipeModeratorService.createRecipeHandle(req, res);
 	}
-	async updateRecipe(req: FastifyRequest, res: FastifyResponse) {
-		return recipeModeratorService.updateRecipeHandle(req, res);
-	}
 	async deleteRecipe(req: FastifyRequest, res: FastifyResponse) {
 		return recipeModeratorService.deleteRecipeHandle(req, res);
 	}
 
+	async updateRecipe(req: FastifyRequest, res: FastifyResponse) {
+		return recipeModeratorService.updateRecipeHandle(req, res);
+	}
 	async updateRecipeIngredient(req: FastifyRequest, res: FastifyResponse) {
 		return recipeModeratorService.updateRecipeIngredientHandle(req, res);
 	}

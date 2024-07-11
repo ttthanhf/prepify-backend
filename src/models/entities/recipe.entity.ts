@@ -51,6 +51,17 @@ export class Recipe {
 	@OneToMany(() => MealKit, (mealKit) => mealKit.recipe)
 	mealKits!: MealKit[];
 
+	@Column({
+		type: 'float',
+		default: 0
+	})
+	rating: number = 0;
+
+	@Column({
+		default: 0
+	})
+	totalFeedback: number = 0;
+
 	@OneToMany(
 		() => RecipeIngredient,
 		(recipeIngredient) => recipeIngredient.recipe
