@@ -1,3 +1,4 @@
+import { SwaggerTag } from '~constants/swaggertag.constant';
 import authController from '~controllers/auth.controller';
 import authMiddleware from '~middlewares/auth.middleware';
 import {
@@ -16,16 +17,30 @@ export default async function authRoute(
 	options: unknown,
 	next: unknown
 ) {
-	app.get('/login/google', authController.getUrlGoogle);
+	app.get(
+		'/login/google',
+		{
+			schema: {
+				tags: [SwaggerTag.AUTHENTICATION]
+			}
+		},
+		authController.getUrlGoogle
+	);
 	app.post(
 		'/login/google',
-		{ schema: googleOauth2Schema },
+		{
+			schema: {
+				tags: [SwaggerTag.AUTHENTICATION],
+				body: googleOauth2Schema
+			}
+		},
 		authController.loginWithGoogle
 	);
 	app.post(
 		'/login',
 		{
 			schema: {
+				tags: [SwaggerTag.AUTHENTICATION],
 				body: loginRequestSchema
 			}
 		},
@@ -35,6 +50,7 @@ export default async function authRoute(
 		'/register',
 		{
 			schema: {
+				tags: [SwaggerTag.AUTHENTICATION],
 				body: registerRequestSchema
 			}
 		},
@@ -44,6 +60,7 @@ export default async function authRoute(
 		'/forgot-password',
 		{
 			schema: {
+				tags: [SwaggerTag.AUTHENTICATION],
 				body: forgotPasswordSchema
 			}
 		},
@@ -53,6 +70,7 @@ export default async function authRoute(
 		'/verify-token-forgot-password',
 		{
 			schema: {
+				tags: [SwaggerTag.AUTHENTICATION],
 				body: verifyForgotPasswordSchema
 			}
 		},
@@ -62,6 +80,7 @@ export default async function authRoute(
 		'/reset-password',
 		{
 			schema: {
+				tags: [SwaggerTag.AUTHENTICATION],
 				body: resetPasswordSchema
 			}
 		},
@@ -71,6 +90,7 @@ export default async function authRoute(
 		'/change-password',
 		{
 			schema: {
+				tags: [SwaggerTag.AUTHENTICATION],
 				body: changePasswordSchema
 			},
 			onRequest: [authMiddleware.requireToken]

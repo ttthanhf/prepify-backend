@@ -13,6 +13,10 @@ class OrderController {
 	async getOrder(req: FastifyRequest, res: FastifyResponse) {
 		return orderService.getOrderHandle(req, res);
 	}
+
+	async getOrderStatus(req: FastifyRequest, res: FastifyResponse) {
+		return orderService.getOrderStatusHandle(req, res);
+	}
 }
 
 export default new OrderController();

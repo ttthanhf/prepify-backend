@@ -14,6 +14,7 @@ import { VNPayGet } from '~models/schemas/payment.schemas.model';
 import RabbitMQUtil from '~utils/rabbitmq.util';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
 import mealKitRepository from '~repositories/mealKit.repository';
+import paymentRepository from '~repositories/payment.repository';
 
 class PaymentService {
 	async getPaymentUrlHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -80,6 +81,13 @@ class PaymentService {
 		response.data = {
 			url: paymentUrl
 		};
+		return response.send();
+	}
+
+	async getPaymentHandle(req: FastifyRequest, res: FastifyResponse) {
+		const payment = await paymentRepository.findAll();
+		const response = new ResponseModel(res);
+		response.data = payment;
 		return response.send();
 	}
 

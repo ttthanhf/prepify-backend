@@ -1,3 +1,4 @@
+import { SwaggerTag } from '~constants/swaggertag.constant';
 import cartController from '~controllers/cart.controller';
 import authMiddleware from '~middlewares/auth.middleware';
 import {
@@ -15,6 +16,9 @@ export default async function route(
 	app.get(
 		'/cart',
 		{
+			schema: {
+				tags: [SwaggerTag.CART]
+			},
 			onRequest: [authMiddleware.requireToken]
 		},
 		cartController.getCart
@@ -22,6 +26,9 @@ export default async function route(
 	app.get(
 		'/cart/length',
 		{
+			schema: {
+				tags: [SwaggerTag.CART]
+			},
 			onRequest: [authMiddleware.requireToken]
 		},
 		cartController.getCartLength
@@ -30,6 +37,7 @@ export default async function route(
 		'/cart/add',
 		{
 			schema: {
+				tags: [SwaggerTag.CART],
 				body: cartCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken]
@@ -40,6 +48,7 @@ export default async function route(
 		'/cart/update',
 		{
 			schema: {
+				tags: [SwaggerTag.CART],
 				body: cartUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken]
@@ -50,6 +59,7 @@ export default async function route(
 		'/cart/delete',
 		{
 			schema: {
+				tags: [SwaggerTag.CART],
 				body: cartDeleteRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken]

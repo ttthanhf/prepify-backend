@@ -7,6 +7,7 @@ import {
 	ingredientModeratorUpdateRequestSchema
 } from '~models/schemas/moderator/ingredient.schemas.model';
 import ingredientController from '~controllers/moderator/ingredient.controller';
+import { SwaggerTag } from '~constants/swaggertag.constant';
 
 export default async function categoryRoute(
 	app: Fastify,
@@ -17,6 +18,7 @@ export default async function categoryRoute(
 		'/ingredients',
 		{
 			schema: {
+				tags: [SwaggerTag.INGREDIENT, SwaggerTag.MODERATOR],
 				queryString: ingredientModeratorQueryGetRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -29,6 +31,9 @@ export default async function categoryRoute(
 	app.get(
 		'/ingredients/:id',
 		{
+			schema: {
+				tags: [SwaggerTag.INGREDIENT, SwaggerTag.MODERATOR]
+			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
 			config: {
 				allowedRoles: [Role.MODERATOR]
@@ -40,6 +45,7 @@ export default async function categoryRoute(
 		'/ingredients',
 		{
 			schema: {
+				tags: [SwaggerTag.INGREDIENT, SwaggerTag.MODERATOR],
 				body: ingredientModeratorCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
@@ -53,6 +59,7 @@ export default async function categoryRoute(
 		'/ingredients/:id',
 		{
 			schema: {
+				tags: [SwaggerTag.INGREDIENT, SwaggerTag.MODERATOR],
 				body: ingredientModeratorUpdateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],

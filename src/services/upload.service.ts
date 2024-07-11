@@ -162,7 +162,7 @@ class UploadService {
 			req.body as UploadDeleteRequestSchema;
 		const response = new ResponseModel(res);
 
-		query.forEach(async (item) => {
+		for (const item of query) {
 			const image = await imageRepository.findOne({
 				where: [
 					{
@@ -178,7 +178,7 @@ class UploadService {
 			if (image) {
 				await imageRepository.removeOne(image);
 			}
-		});
+		}
 
 		return response.send();
 	}

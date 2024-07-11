@@ -1,3 +1,4 @@
+import { SwaggerTag } from '~constants/swaggertag.constant';
 import orderController from '~controllers/order.controller';
 import authMiddleware from '~middlewares/auth.middleware';
 import { orderCreateRequestSchema } from '~models/schemas/order.schemas.model';
@@ -13,6 +14,7 @@ export default async function route(
 		'/order',
 		{
 			schema: {
+				tags: [SwaggerTag.ORDER],
 				body: orderCreateRequestSchema
 			},
 			onRequest: [authMiddleware.requireToken]
@@ -23,6 +25,9 @@ export default async function route(
 	app.get(
 		'/orders',
 		{
+			schema: {
+				tags: [SwaggerTag.ORDER]
+			},
 			onRequest: [authMiddleware.requireToken]
 		},
 		orderController.getAllOrder
@@ -31,8 +36,21 @@ export default async function route(
 	app.get(
 		'/orders/:id',
 		{
+			schema: {
+				tags: [SwaggerTag.ORDER]
+			},
 			onRequest: [authMiddleware.requireToken]
 		},
 		orderController.getOrder
+	);
+
+	app.get(
+		'/order-status',
+		{
+			schema: {
+				tags: [SwaggerTag.ORDER]
+			}
+		},
+		orderController.getOrderStatus
 	);
 }

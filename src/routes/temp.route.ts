@@ -10,6 +10,4 @@ export default async function route(
 	app.get('/area', tempController.getArea);
 	app.get('/shipping-date', tempController.getShippingDate);
 	app.get('/cooking-level', tempController.getCookingLevel);
-	app.get('/order-status', tempController.getOrderStatus);
-	app.get('/payments', tempController.getPayment);
 }
