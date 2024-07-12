@@ -4,10 +4,10 @@ import { ConsumeMessage } from 'amqplib';
 import moment from 'moment';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
-import {
-	TIME_FRAME_INSTANT,
-	TIME_FRAME_STANDARD
-} from '~constants/timeframe.constant';
+// import {
+// 	TIME_FRAME_INSTANT,
+// 	TIME_FRAME_STANDARD
+// } from '~constants/timeframe.constant';
 import { Area } from '~models/entities/area.entity';
 import { Batch } from '~models/entities/batch.entity';
 import { OrderBatch } from '~models/entities/order-batch.entity';
@@ -27,6 +27,11 @@ import { BatchStatus } from '~constants/batchstatus.constant';
 import { User } from '~models/entities/user.entity';
 import userRepository from '~repositories/user.repository';
 import { Role } from '~constants/role.constant';
+import {
+	generateTimeFrameConfigs,
+	getWorkEndHour,
+	getWorkStartHour
+} from '~constants/timeframe.constant';
 
 class OrderProcessWorker {
 	static instance: OrderProcessWorker;
@@ -82,10 +87,16 @@ class OrderProcessWorker {
 			return;
 		}
 
-		if (order.datetime.getHours() >= 19 || order.datetime.getHours() < 7) {
+		const workStartHour = await getWorkStartHour();
+		const workEndHour = await getWorkEndHour();
+
+		if (
+			order.datetime.getHours() >= workEndHour ||
+			order.datetime.getHours() < workStartHour
+		) {
 			const timeRemainingUntil7am = calDurationUntilTargetTime(
 				new Date(),
-				7,
+				workStartHour,
 				0,
 				0
 			);
@@ -112,6 +123,8 @@ class OrderProcessWorker {
 		const order = await orderRepository.findOneBy({
 			id: orderObj.id
 		});
+		const { TIME_FRAME_INSTANT, TIME_FRAME_STANDARD } =
+			await generateTimeFrameConfigs();
 
 		if (!order) {
 			return;
@@ -168,6 +181,8 @@ class OrderProcessWorker {
 			return;
 		}
 
+		const { TIME_FRAME_INSTANT, TIME_FRAME_STANDARD } =
+			await generateTimeFrameConfigs();
 		const { nextTimeFrame } = order.isPriority
 			? calDurationUntilNextTimeFrame(order.datetime, TIME_FRAME_INSTANT)
 			: calDurationUntilNextTimeFrame(order.datetime, TIME_FRAME_STANDARD);

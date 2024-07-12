@@ -4,8 +4,10 @@ import ResponseModel from '~models/responses/response.model';
 import { ExpoPushTokenSaveRequest } from '~models/schemas/expoPushToken.schemas.model';
 import expoPushTokenRepository from '~repositories/expoPushToken.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
+import expoUtil, { Notification } from '~utils/expo.util';
 import headerUtil from '~utils/header.util';
 import jwtUtil from '~utils/jwt.util';
+import userUtil from '~utils/user.util';
 
 class ExpoPushTokenService {
 	async saveExpoPushTokenHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -97,6 +99,33 @@ class ExpoPushTokenService {
 		} catch (error) {
 			return [];
 		}
+	}
+
+	async sendExpoPushNotificationToShipper(
+		req: FastifyRequest,
+		res: FastifyResponse
+	) {
+		const shipper = await userUtil.getUserByTokenInHeader(req.headers);
+
+		const response = new ResponseModel(res);
+		if (!shipper) {
+			response.statusCode = HTTP_STATUS_CODE.UNAUTHORIZED;
+			response.message = 'Shipper not found';
+			return response.send();
+		}
+
+		const pushTokens = await this.getExpoPushTokensByShipper(shipper!.id);
+
+		pushTokens.map((pushToken) => {
+			const notification: Notification = {
+				pushToken: pushToken.pushToken,
+				title: 'Đã có đơn hàng mới',
+				body: 'Nhận ngay ->'
+			};
+			expoUtil.sendPushNotification(notification);
+		});
+
+		return response.send();
 	}
 }
 

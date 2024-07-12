@@ -9,6 +9,10 @@ class ExpoPushTokenController {
 	async getPushTokenByDeviceId(req: FastifyRequest, res: FastifyResponse) {
 		return expoPushTokenService.getExpoPushTokenByDeviceIdHandle(req, res);
 	}
+
+	async sendPushNotification(req: FastifyRequest, res: FastifyResponse) {
+		return expoPushTokenService.sendExpoPushNotificationToShipper(req, res);
+	}
 }
 
 export default new ExpoPushTokenController();

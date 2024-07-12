@@ -3,6 +3,7 @@ import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import ResponseModel from '~models/responses/response.model';
 import batchRepository from '~repositories/batch.repository';
+import orderRepository from '~repositories/order.repository';
 import orderBatchRepository from '~repositories/orderBatch.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 import userUtil from '~utils/user.util';
@@ -26,11 +27,11 @@ class BatchService {
 
 		batch.status = BatchStatus.PICKED_UP;
 		batch.user = shipper!;
-		await batchRepository.update(batch);
 
 		// update picked up status for all order in batch
-		await Promise.all(
-			batch.orderBatches.map(async (orderBatchData) => {
+		await Promise.all([
+			batchRepository.update(batch),
+			...batch.orderBatches.map(async (orderBatchData) => {
 				const orderBatch = await orderBatchRepository
 					.getRepository()
 					.createQueryBuilder('orderBatch')
@@ -41,9 +42,22 @@ class BatchService {
 					.getOne();
 
 				orderBatch!.status = BatchStatus.PICKED_UP as unknown as OrderStatus;
+
+				const order = await orderRepository.findOne({
+					where: {
+						id: orderBatch!.order
+					}
+				});
+				console.log(
+					'🚀 ~ BatchService ~ ...batch.orderBatches.map ~ order:',
+					order
+				);
+
+				order!.status = OrderStatus.PICKED_UP;
+				await orderRepository.update(order!);
 				await orderBatchRepository.update(orderBatch!);
 			})
-		);
+		]);
 
 		response.data = {
 			batch

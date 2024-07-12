@@ -1,4 +1,6 @@
 import moment from 'moment';
+import configRepository from '~repositories/config.repository';
+import { generateTimeFrames } from '~utils/date.util';
 
 export interface TimeFrame {
 	name: string;
@@ -6,18 +8,70 @@ export interface TimeFrame {
 	time: moment.Moment;
 }
 
-export const TIME_FRAME_INSTANT: TimeFrame[] = [
-	{ name: '9:00 AM', startTime: 9.0, time: moment('09:00', 'HH:mm') },
-	{ name: '11:00 AM', startTime: 11.0, time: moment('11:00', 'HH:mm') },
-	{ name: '1:00 PM', startTime: 13.0, time: moment('13:00', 'HH:mm') },
-	{ name: '3:00 PM', startTime: 15.0, time: moment('15:00', 'HH:mm') },
-	{ name: '5:00 PM', startTime: 17.0, time: moment('17:00', 'HH:mm') },
-	{ name: '7:00 PM', startTime: 19.0, time: moment('19:00', 'HH:mm') }
-];
+export async function generateTimeFrameConfigs() {
+	const configs = await configRepository.findAll();
 
-export const TIME_FRAME_STANDARD: TimeFrame[] = [
-	{ name: '7:00 AM', startTime: 7.0, time: moment('07:00', 'HH:mm') },
-	{ name: '11:00 AM', startTime: 11.0, time: moment('11:00', 'HH:mm') },
-	{ name: '3:00 PM', startTime: 15.0, time: moment('15:00', 'HH:mm') },
-	{ name: '7:00 PM', startTime: 19.0, time: moment('19:00', 'HH:mm') }
-];
+	const timeframeInstantConfig = configs.find(
+		(config) => config.type === 'timeframeInstant'
+	);
+	const timeframeStandardConfig = configs.find(
+		(config) => config.type === 'timeframeStandard'
+	);
+	const workStartHourConfig = configs.find(
+		(config) => config.type === 'workStartHour'
+	);
+	const workEndHourConfig = configs.find(
+		(config) => config.type === 'workEndHour'
+	);
+
+	if (
+		!timeframeInstantConfig ||
+		!timeframeStandardConfig ||
+		!workStartHourConfig ||
+		!workEndHourConfig
+	) {
+		throw new Error('Missing configuration for timeframes');
+	}
+
+	const workStartHour = workStartHourConfig.value;
+	const workEndHour = workEndHourConfig.value;
+
+	const TIME_FRAME_INSTANT = generateTimeFrames(
+		workStartHour,
+		workEndHour,
+		timeframeInstantConfig.value
+	);
+	const TIME_FRAME_STANDARD = generateTimeFrames(
+		workStartHour,
+		workEndHour,
+		timeframeStandardConfig.value
+	);
+
+	return { TIME_FRAME_INSTANT, TIME_FRAME_STANDARD };
+}
+
+export const getWorkStartHour = async () => {
+	const config = await configRepository.findOneBy({ type: 'workStartHour' });
+	if (!config) {
+		throw new Error('Missing configuration for work start hour');
+	}
+	return config.value;
+};
+
+export const getWorkEndHour = async () => {
+	const config = await configRepository.findOneBy({ type: 'workEndHour' });
+	if (!config) {
+		throw new Error('Missing configuration for work end hour');
+	}
+	return config.value;
+};
+
+export const getCancelOrderDuration = async () => {
+	const config = await configRepository.findOneBy({
+		type: 'cancelOrderDuration'
+	});
+	if (!config) {
+		throw new Error('Missing configuration for cancel order duration');
+	}
+	return config.value;
+};
