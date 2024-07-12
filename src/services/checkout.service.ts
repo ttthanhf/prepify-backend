@@ -18,6 +18,8 @@ import paymentRepository from '~repositories/payment.repository';
 import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { ExtraSpiceResponse } from '~models/responses/cart.response.model';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import imageRepository from '~repositories/image.repository';
+import { ImageType } from '~constants/image.constant';
 
 class CheckoutService {
 	async getCheckoutHandle(req: FastifyRequest, res: FastifyResponse) {
@@ -53,7 +55,9 @@ class CheckoutService {
 					serving: true,
 					price: true,
 					recipe: {
-						name: true
+						name: true,
+						slug: true,
+						id: true
 					},
 					extraSpice: {
 						id: true,
@@ -78,16 +82,26 @@ class CheckoutService {
 					cart.mealKit.extraSpice,
 					ExtraSpiceResponse
 				);
-				extraSpice.image = DEFAULT_IMAGE;
+				const image = await imageRepository.findOneBy({
+					type: ImageType.EXTRASPICE,
+					entityId: cart.mealKit.extraSpice.id
+				});
+
+				extraSpice.image = image ? image.url : DEFAULT_IMAGE;
 			}
 
 			const itemResponse = mapperUtil.mapEntityToClass(cart, ItemResponse);
 			itemResponse.name = cart.mealKit.recipe.name;
 			itemResponse.price = cart.mealKit.price;
 			itemResponse.serving = cart.mealKit.serving;
-			itemResponse.slug =
-				cart.mealKit.recipe.name + '.' + cart.mealKit.recipe.id;
-			itemResponse.image = DEFAULT_IMAGE;
+			itemResponse.slug = cart.mealKit.recipe.slug;
+
+			const image = await imageRepository.findOneBy({
+				type: ImageType.RECIPE,
+				entityId: cart.mealKit.recipe.id
+			});
+
+			itemResponse.image = image ? image.url : DEFAULT_IMAGE;
 			itemResponse.extraSpice = extraSpice;
 			items.push(itemResponse);
 		}

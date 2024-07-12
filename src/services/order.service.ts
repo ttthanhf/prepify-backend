@@ -275,6 +275,15 @@ class OrderService {
 			if (!orderDetail.has_extra_spice) {
 				orderItemResponse.extraSpice = undefined;
 			}
+			if (orderDetail.mealKit.extraSpice && orderItemResponse.extraSpice) {
+				const image = await imageRepository.findOneBy({
+					type: ImageType.EXTRASPICE,
+					entityId: orderDetail.mealKit.extraSpice.id
+				});
+				if (image) {
+					orderItemResponse.extraSpice.image = image.url;
+				}
+			}
 
 			orderItemResponse.name = orderDetail.mealKit.recipe.name;
 			orderItemResponse.slug = orderDetail.mealKit.recipe.slug;

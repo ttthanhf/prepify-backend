@@ -123,7 +123,7 @@ class IngredientModeratorService {
 		}
 
 		const images = await imageRepository.findBy({
-			type: ImageType.RECIPE,
+			type: ImageType.INGREDIENT,
 			entityId: ingredient.id
 		});
 
