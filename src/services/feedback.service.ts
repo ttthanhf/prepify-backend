@@ -194,14 +194,12 @@ class FeedbackService {
 
 			const images = await imageRepository.find({
 				where: {
-					entityId: feedback.orderDetail.id,
+					entityId: feedback.id,
 					type: ImageType.FEEDBACK
 				}
 			});
 			if (images[0]) {
 				feedbackType.images = images.map((item) => item.url);
-			} else {
-				feedbackType.images = [DEFAULT_IMAGE];
 			}
 
 			feedbackTypeList.push(feedbackType);

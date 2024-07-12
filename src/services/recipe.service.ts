@@ -70,6 +70,7 @@ class RecipeService {
 				'recipe.time',
 				'recipe.createdAt',
 				'mealKit.price',
+				'mealKit.sold',
 				'recipe.rating',
 				'foodStyle.name'
 			])
@@ -124,7 +125,10 @@ class RecipeService {
 
 		const pageTotal = Math.ceil(itemTotal / pageSize);
 
+		const recipeShopResponseModelList: Array<RecipeShopResponseModel> = [];
 		for (const recipe of recipes) {
+			let totalSold = 0;
+
 			const images = await imageRepository.findBy({
 				type: ImageType.RECIPE,
 				entityId: recipe.id
@@ -135,11 +139,6 @@ class RecipeService {
 			} else {
 				recipe.images = [DEFAULT_IMAGE];
 			}
-		}
-
-		const recipeShopResponseModelList: Array<RecipeShopResponseModel> = [];
-		for (const recipe of recipes) {
-			let totalSold = 0;
 
 			const recipeShopResponseModel = new RecipeShopResponseModel();
 			recipeShopResponseModel.id = recipe.id;
@@ -153,6 +152,7 @@ class RecipeService {
 
 			if (recipe.mealKits.length != 0) {
 				let lowestPriceMealKit = recipe.mealKits[0];
+				totalSold += lowestPriceMealKit.sold;
 				for (let i = 1; i < recipe.mealKits.length; i++) {
 					if (recipe.mealKits[i].price < lowestPriceMealKit.price) {
 						lowestPriceMealKit = recipe.mealKits[i];
