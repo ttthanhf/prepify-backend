@@ -6,6 +6,7 @@ import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { ImageType } from '~constants/image.constant';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
+import { getCancelOrderDuration } from '~constants/timeframe.constant';
 import { OrderDetail } from '~models/entities/order-detail.entity';
 import { Order } from '~models/entities/order.entity';
 import {
@@ -127,12 +128,13 @@ class OrderService {
 		});
 
 		const rabbitmqInstance = await RabbitMQUtil.getInstance();
-		// if the order is not paid during 1 hour, cancel the order
+		// if the order is not paid during config time, cancel the order
+		const cancelOrderDuration = await getCancelOrderDuration();
 		await rabbitmqInstance.publishMessageToDelayQueue(
 			RABBITMQ_CONSTANT.EXCHANGE.ORDER_CANCEL,
 			RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_CANCEL,
 			JSON.stringify(order),
-			60 * 60 * 1000 // 1 hour
+			cancelOrderDuration * 60 * 1000
 		);
 
 		return response.send();

@@ -83,6 +83,28 @@ export const combineDateAndTimeFrame = (
 	);
 };
 
+export const generateTimeFrames = (
+	startHour: number,
+	endHour: number,
+	intervalMinutes: number
+): TimeFrame[] => {
+	const timeFrames: TimeFrame[] = [];
+	let startTime = moment().hour(startHour).minute(0).second(0);
+	const endTime = moment().hour(endHour).minute(0).second(0);
+
+	while (startTime.isBefore(endTime)) {
+		const timeFrame: TimeFrame = {
+			name: startTime.format('h:mm A'),
+			startTime: parseFloat(startTime.format('H.mm')),
+			time: moment(startTime)
+		};
+		timeFrames.push(timeFrame);
+		startTime.add(intervalMinutes, 'minutes');
+	}
+
+	return timeFrames;
+};
+
 export default {
 	formatDateToYYYYMMDDHHMMSS,
 	calDurationUntilTargetTime,

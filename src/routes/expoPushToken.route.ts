@@ -38,4 +38,18 @@ export default async function expoPushTokenRoute(
 		},
 		expoPushTokenController.getPushTokenByDeviceId
 	);
+
+	app.get(
+		'/expo-push-token',
+		{
+			schema: {
+				tags: [SwaggerTag.EXPO]
+			},
+			onRequest: [authMiddleware.requireToken, authMiddleware.verifyRole],
+			config: {
+				allowedRoles: [Role.ADMIN, Role.SHIPPER]
+			}
+		},
+		expoPushTokenController.sendPushNotification
+	);
 }
