@@ -14,9 +14,25 @@ class BatchService {
 		const shipper = await userUtil.getUserByTokenInHeader(req.headers);
 		const response = new ResponseModel(res);
 
+		// check if shipper picking up another batch
+		const currentBatch = await batchRepository.findOne({
+			where: {
+				user: {
+					id
+				},
+				status: BatchStatus.PICKED_UP
+			}
+		});
+
+		if (currentBatch) {
+			response.statusCode = HTTP_STATUS_CODE.BAD_REQUEST;
+			response.message = 'Shipper is picking up another batch';
+			return response.send();
+		}
+
 		const batch = await batchRepository.findOne({
-			where: { id },
-			relations: ['orderBatches']
+			where: { id, status: BatchStatus.CREATED },
+			relations: ['orderBatches', 'orderBatches.order']
 		});
 
 		if (!batch) {
@@ -25,37 +41,30 @@ class BatchService {
 			return response.send();
 		}
 
-		batch.status = BatchStatus.PICKED_UP;
-		batch.user = shipper!;
-
-		// update picked up status for all order in batch
 		await Promise.all([
-			batchRepository.update(batch),
+			batchRepository
+				.getRepository()
+				.createQueryBuilder('batch')
+				.update()
+				.set({ status: BatchStatus.PICKED_UP, user: shipper! })
+				.where('id = :id', { id })
+				.execute(),
 			...batch.orderBatches.map(async (orderBatchData) => {
-				const orderBatch = await orderBatchRepository
+				await orderBatchRepository
 					.getRepository()
 					.createQueryBuilder('orderBatch')
-					.leftJoinAndSelect('orderBatch.order', 'order')
-					.leftJoinAndSelect('orderBatch.batch', 'batch')
-					.where('order.id = :orderId', { orderId: orderBatchData.order })
-					.andWhere('batch.id = :batchId', { batchId: batch.id })
-					.getOne();
-
-				orderBatch!.status = BatchStatus.PICKED_UP as unknown as OrderStatus;
-
-				const order = await orderRepository.findOne({
-					where: {
-						id: orderBatch!.order
-					}
-				});
-				console.log(
-					'🚀 ~ BatchService ~ ...batch.orderBatches.map ~ order:',
-					order
-				);
-
-				order!.status = OrderStatus.PICKED_UP;
-				await orderRepository.update(order!);
-				await orderBatchRepository.update(orderBatch!);
+					.update()
+					.set({ status: OrderStatus.PICKED_UP })
+					.where('order_id = :orderId', { orderId: orderBatchData.order.id })
+					.andWhere('batch_id = :batchId', { batchId: batch.id })
+					.execute();
+				await orderRepository
+					.getRepository()
+					.createQueryBuilder('order')
+					.update()
+					.set({ status: OrderStatus.PICKED_UP })
+					.where('id = :orderId', { orderId: orderBatchData.order.id })
+					.execute();
 			})
 		]);
 
@@ -80,8 +89,21 @@ class BatchService {
 			relations: ['area', 'orderBatches', 'orderBatches.order']
 		});
 
+		// check if shipper has picked up a batch
+		const currentBatch = await batchRepository.findOne({
+			where: {
+				user: {
+					id: shipper!.id
+				},
+				status: BatchStatus.PICKED_UP
+			}
+		});
+
 		response.data = {
-			batch
+			batch: {
+				...batch,
+				isPickupable: !currentBatch
+			}
 		};
 		return response.send();
 	}

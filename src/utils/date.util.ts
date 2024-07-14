@@ -17,19 +17,9 @@ function formatDateToYYYYMMDDHHMMSS(date: Date) {
 
 export const calDurationUntilTargetTime = (
 	initTime: Date,
-	targetTimeHour: number,
-	targetTimeMinute: number,
-	targetTimeSecond: number
+	targetTime: moment.Moment
 ): moment.Duration => {
 	const now = moment(initTime);
-
-	// Set targetTime to 7 AM today in the Vietnam time zone
-	let targetTime = moment(initTime).set({
-		hour: targetTimeHour,
-		minute: targetTimeMinute,
-		second: targetTimeSecond,
-		millisecond: 0
-	});
 
 	// If now is after the target time, set target time to 7 AM the next day
 	if (now.isAfter(targetTime)) {
