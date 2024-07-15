@@ -91,3 +91,15 @@ export const getCancelOrderDuration = async () => {
 	}
 	return config.value;
 };
+
+export const getMaximumOrdersInBatch = async () => {
+	const config = await configRepository.findOneBy({
+		type: 'maxOrdersInBatch'
+	});
+
+	if (!config) {
+		throw new Error('Missing configuration for maximum orders in batch');
+	}
+
+	return config.value;
+};
