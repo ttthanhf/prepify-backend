@@ -29,8 +29,8 @@ import userRepository from '~repositories/user.repository';
 import { Role } from '~constants/role.constant';
 import {
 	generateTimeFrameConfigs,
-	getWorkEndHour,
-	getWorkStartHour
+	getWorkEndTime,
+	getWorkStartTime
 } from '~constants/timeframe.constant';
 
 class OrderProcessWorker {
@@ -87,25 +87,23 @@ class OrderProcessWorker {
 			return;
 		}
 
-		const workStartHour = await getWorkStartHour();
-		const workEndHour = await getWorkEndHour();
+		const workStartTime = await getWorkStartTime();
+		const workEndTime = await getWorkEndTime();
 
 		if (
-			order.datetime.getHours() >= workEndHour ||
-			order.datetime.getHours() < workStartHour
+			order.datetime.getHours() >= workEndTime.hour() ||
+			order.datetime.getHours() < workStartTime.hour()
 		) {
-			const timeRemainingUntil7am = calDurationUntilTargetTime(
+			const timeRemainingUntilWorkStartTime = calDurationUntilTargetTime(
 				new Date(),
-				workStartHour,
-				0,
-				0
+				workStartTime
 			);
 
 			this.rabbitmqInstance.publishMessageToDelayQueue(
 				RABBITMQ_CONSTANT.EXCHANGE.ORDER_PROCESS,
 				RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_PROCESS,
 				JSON.stringify(order),
-				timeRemainingUntil7am.asMilliseconds()
+				timeRemainingUntilWorkStartTime.asMilliseconds()
 			);
 		} else {
 			this.rabbitmqInstance.publishMessage(

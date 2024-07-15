@@ -1,8 +1,10 @@
+import { In, Not } from 'typeorm';
 import { BatchStatus } from '~constants/batchstatus.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
 import { ImageType } from '~constants/image.constant';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
+import { getWorkStartTime } from '~constants/timeframe.constant';
 import ResponseModel from '~models/responses/response.model';
 import {
 	OrderShipperGetRequest,
@@ -31,7 +33,7 @@ class OrderService {
 				user: {
 					id: shipper!.id
 				},
-				status: BatchStatus.PICKED_UP
+				status: Not(BatchStatus.CREATED)
 			},
 			order: {
 				datetime: 'DESC'
@@ -58,12 +60,14 @@ class OrderService {
 		let statusList: string[] = [];
 		if (query.status && query.status.split(',').length > 0) {
 			statusList = query.status.split(',');
+			console.log('🚀 ~ OrderService ~ statusList:', statusList);
 			queryBuilder.andWhere('orderBatch.status IN (:...statusList)', {
 				statusList
 			});
 		}
 
 		const orderBatches = await queryBuilder.getMany();
+		console.log('🚀 ~ OrderService ~  orderBatches :', orderBatches);
 
 		response.data = {
 			orders: await Promise.all(
@@ -97,8 +101,7 @@ class OrderService {
 			where: {
 				user: {
 					id: shipper!.id
-				},
-				status: BatchStatus.PICKED_UP
+				}
 			},
 			order: {
 				datetime: 'DESC'
@@ -138,7 +141,7 @@ class OrderService {
 			id
 		});
 
-		// if status is delivered or cannceled, update status order
+		// if status is delivered or canceled, update status order
 		if (
 			orderUpdateRequest.status === OrderStatus.DELIVERED ||
 			orderUpdateRequest.status === OrderStatus.CANCELED
@@ -161,24 +164,44 @@ class OrderService {
 
 				// push to delayed queue
 				const rabbitmqInstance = await RabbitMQUtil.getInstance();
+				const workStartTime = await getWorkStartTime();
 
-				const timeRemainingUntil7am = calDurationUntilTargetTime(
+				const timeRemainingUntilWorkStart = calDurationUntilTargetTime(
 					new Date(),
-					7,
-					0,
-					0
+					workStartTime
 				);
 
 				rabbitmqInstance.publishMessageToDelayQueue(
 					RABBITMQ_CONSTANT.EXCHANGE.ORDER_PROCESS,
 					RABBITMQ_CONSTANT.ROUTING_KEY.ORDER_PROCESS,
 					JSON.stringify(order),
-					timeRemainingUntil7am.asMilliseconds()
+					timeRemainingUntilWorkStart.asMilliseconds()
 				);
 			}
 		}
 		await orderRepository.update(order!);
 
+		// if no order in batch, update batch status to delivered
+		const orderBatches = await orderBatchRepository.find({
+			where: {
+				batch: {
+					id: currentBatch.id
+				},
+				status: In([OrderStatus.PICKED_UP, OrderStatus.DELIVERING])
+			},
+			relations: ['batch']
+		});
+		console.log(
+			'🚀 ~ OrderService ~ updateOrderHandle ~ orderBatches:',
+			orderBatches
+		);
+
+		if (orderBatches.length === 0) {
+			currentBatch.status = BatchStatus.DELIVERED;
+			await batchRepository.update(currentBatch);
+		}
+
+		response.message = "Order's status updated";
 		return response.send();
 	}
 
@@ -188,13 +211,32 @@ class OrderService {
 	) {
 		const response = new ResponseModel(res);
 
-		let orderQuery = await orderRepository
+		let batchQuery = batchRepository
 			.getRepository()
-			.createQueryBuilder('order')
-			.select('order.status, COUNT(order.id) as orderCount')
-			.groupBy('order.status');
+			.createQueryBuilder('batch')
+			.select('batch.id')
+			.where('batch.status IN (:...batchStatus)', {
+				batchStatus: [BatchStatus.PICKED_UP, BatchStatus.DELIVERED]
+			})
+			.orderBy('batch.datetime', 'DESC')
+			.limit(1);
 
-		const orderCounts = await orderQuery.getRawMany();
+		const batch = await batchQuery.getOne();
+
+		if (!batch) {
+			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
+			response.message = 'No batch found';
+			return response.send();
+		}
+
+		let orderBatchQuery = orderBatchRepository
+			.getRepository()
+			.createQueryBuilder('orderBatch')
+			.select('orderBatch.status, COUNT(*) as orderCount')
+			.where('orderBatch.batch = :batchId', { batchId: batch.id })
+			.groupBy('orderBatch.status');
+
+		const orderCounts = await orderBatchQuery.getRawMany();
 
 		response.data = {
 			orderCounts

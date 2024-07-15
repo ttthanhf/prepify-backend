@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { In } from 'typeorm';
 import configRepository from '~repositories/config.repository';
 import { generateTimeFrames } from '~utils/date.util';
 
@@ -50,20 +51,35 @@ export async function generateTimeFrameConfigs() {
 	return { TIME_FRAME_INSTANT, TIME_FRAME_STANDARD };
 }
 
-export const getWorkStartHour = async () => {
-	const config = await configRepository.findOneBy({ type: 'workStartHour' });
+export const getWorkStartTime = async (): Promise<moment.Moment> => {
+	const config = await configRepository.findBy({
+		type: In(['workStartHour', 'workStartMinute'])
+	});
 	if (!config) {
 		throw new Error('Missing configuration for work start hour');
 	}
-	return config.value;
+
+	const hour = config.filter((c) => c.type === 'workStartHour')[0].value;
+	const minute = config.filter((c) => c.type === 'workStartMinute')[0].value;
+	const result = moment().set({ hour, minute, second: 0, millisecond: 0 });
+
+	return result;
 };
 
-export const getWorkEndHour = async () => {
-	const config = await configRepository.findOneBy({ type: 'workEndHour' });
+export const getWorkEndTime = async (): Promise<moment.Moment> => {
+	const config = await configRepository.findBy({
+		type: In(['workEndHour', 'workEndMinute'])
+	});
 	if (!config) {
 		throw new Error('Missing configuration for work end hour');
 	}
-	return config.value;
+
+	const hour = config.filter((c) => c.type === 'workEndHour')[0].value;
+	const minute = config.filter((c) => c.type === 'workEndMinute')[0].value;
+
+	const result = moment().set({ hour, minute, second: 0, millisecond: 0 });
+
+	return result;
 };
 
 export const getCancelOrderDuration = async () => {
