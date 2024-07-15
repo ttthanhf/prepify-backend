@@ -40,10 +40,12 @@ class OrderService {
 			},
 			relations: ['user']
 		});
+		console.log('🚀 ~ OrderService ~ currentBatch:', currentBatch);
 
 		if (!currentBatch) {
-			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'No batch found';
+			response.data = {
+				orders: []
+			};
 			return response.send();
 		}
 
@@ -60,14 +62,12 @@ class OrderService {
 		let statusList: string[] = [];
 		if (query.status && query.status.split(',').length > 0) {
 			statusList = query.status.split(',');
-			console.log('🚀 ~ OrderService ~ statusList:', statusList);
 			queryBuilder.andWhere('orderBatch.status IN (:...statusList)', {
 				statusList
 			});
 		}
 
 		const orderBatches = await queryBuilder.getMany();
-		console.log('🚀 ~ OrderService ~  orderBatches :', orderBatches);
 
 		response.data = {
 			orders: await Promise.all(
@@ -101,7 +101,8 @@ class OrderService {
 			where: {
 				user: {
 					id: shipper!.id
-				}
+				},
+				status: Not(BatchStatus.CREATED)
 			},
 			order: {
 				datetime: 'DESC'
@@ -224,8 +225,9 @@ class OrderService {
 		const batch = await batchQuery.getOne();
 
 		if (!batch) {
-			response.statusCode = HTTP_STATUS_CODE.NOT_FOUND;
-			response.message = 'No batch found';
+			response.data = {
+				orderCounts: []
+			};
 			return response.send();
 		}
 

@@ -4,10 +4,6 @@ import { ConsumeMessage } from 'amqplib';
 import moment from 'moment';
 import { OrderStatus } from '~constants/orderstatus.constant';
 import { RABBITMQ_CONSTANT } from '~constants/rabbitmq.constant';
-// import {
-// 	TIME_FRAME_INSTANT,
-// 	TIME_FRAME_STANDARD
-// } from '~constants/timeframe.constant';
 import { Area } from '~models/entities/area.entity';
 import { Batch } from '~models/entities/batch.entity';
 import { OrderBatch } from '~models/entities/order-batch.entity';
@@ -29,6 +25,7 @@ import userRepository from '~repositories/user.repository';
 import { Role } from '~constants/role.constant';
 import {
 	generateTimeFrameConfigs,
+	getMaximumOrdersInBatch,
 	getWorkEndTime,
 	getWorkStartTime
 } from '~constants/timeframe.constant';
@@ -197,6 +194,7 @@ class OrderProcessWorker {
 			availableShipper = await this.findAvailableShipper(order.area);
 			if (availableShipper) {
 				batch.user = availableShipper;
+				await this.sendNotificationToShipper(availableShipper.id);
 			}
 			batch = await batchRepository.create(batch);
 		}
@@ -209,11 +207,6 @@ class OrderProcessWorker {
 		orderBatch.datetime = datetime.toDate();
 
 		await orderBatchRepository.create(orderBatch);
-
-		// notify the shipper to deliver the order (send to the shipper queue)
-		if (availableShipper) {
-			await this.sendNotificationToShipper(availableShipper.id);
-		}
 	}
 
 	private async findCurrentAvailableBatch(
@@ -228,8 +221,13 @@ class OrderProcessWorker {
 			relations: ['orderBatches']
 		});
 
+		const maximumOrdersInBatch = await getMaximumOrdersInBatch();
+
 		// If no batch found or batch is full, return null
-		if (!batch || (batch && batch.orderBatches.length >= 10)) {
+		if (
+			!batch ||
+			(batch && batch.orderBatches.length >= maximumOrdersInBatch)
+		) {
 			return null;
 		}
 
@@ -243,7 +241,7 @@ class OrderProcessWorker {
 		const notificationPromises = pushTokens.map((pushToken) => {
 			const notification: Notification = {
 				pushToken: pushToken.pushToken,
-				title: 'Đã có đơn hàng mới',
+				title: 'Đã có lô hàng mới',
 				body: 'Nhận ngay ->'
 			};
 
@@ -276,6 +274,19 @@ class OrderProcessWorker {
 			.setParameter('statuses', [OrderStatus.DELIVERING, OrderStatus.PICKED_UP])
 			.limit(1)
 			.getOne();
+
+		// check if shipper is currently assigned to other batches
+		if (shipper) {
+			const isShipperAvailable = shipper.batches.every(
+				(batch) =>
+					batch.status === BatchStatus.DELIVERED ||
+					batch.status === BatchStatus.CREATED
+			);
+
+			if (!isShipperAvailable) {
+				return null;
+			}
+		}
 
 		return shipper;
 	}
