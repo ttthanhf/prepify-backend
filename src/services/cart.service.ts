@@ -72,7 +72,12 @@ class CartService {
 			);
 
 			if (cart.mealKit.extraSpice && cart.has_extra_spice) {
-				mealKitCart.extraSpice.image = DEFAULT_IMAGE;
+				const image = await imageRepository.findOneBy({
+					type: ImageType.EXTRASPICE,
+					entityId: cart.mealKit.extraSpice.id
+				});
+
+				mealKitCart.extraSpice.image = image ? image.url : DEFAULT_IMAGE;
 			}
 
 			const mealKitItemList: Array<MealKitCartResponse> = [];
@@ -100,11 +105,24 @@ class CartService {
 						mealKit,
 						MealKitCartResponse
 					);
+					if (mealKit.extraSpice) {
+						const image = await imageRepository.findOneBy({
+							type: ImageType.EXTRASPICE,
+							entityId: mealKit.extraSpice.id
+						});
+						mealKitCartResponse.extraSpice.image = image
+							? image.url
+							: DEFAULT_IMAGE;
+					}
 					mealKitItemList.push(mealKitCartResponse);
 				}
 				for (const mealKitItem of mealKitItemList) {
 					if (mealKitItem.extraSpice) {
-						mealKitItem.extraSpice.image = DEFAULT_IMAGE;
+						const image = await imageRepository.findOneBy({
+							type: ImageType.EXTRASPICE,
+							entityId: mealKitItem.extraSpice.id
+						});
+						mealKitItem.extraSpice.image = image ? image.url : DEFAULT_IMAGE;
 					}
 				}
 				mealKitItemExisted[cart.mealKit.recipe.id] = mealKitItemList;

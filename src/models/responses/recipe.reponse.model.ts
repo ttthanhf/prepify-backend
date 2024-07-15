@@ -64,6 +64,7 @@ export class NutritionRecipeDetailShopResponse {
 	id!: string;
 	name!: string;
 	units!: UnitRecipeDetailShopResponse;
+	amount!: number;
 }
 
 export class IngredientsRecipeDetailShopResponse {
@@ -74,6 +75,7 @@ export class IngredientsRecipeDetailShopResponse {
 	description!: string;
 	unit!: UnitRecipeDetailShopResponse;
 	imageURL!: string;
+	amount!: number;
 }
 
 export class RecipeDetailShopResponse {

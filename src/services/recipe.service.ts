@@ -146,7 +146,9 @@ class RecipeService {
 			recipeShopResponseModel.slug = recipe.slug;
 			recipeShopResponseModel.foodStyle = recipe?.foodStyles?.[0]?.name;
 			recipeShopResponseModel.mainImage = recipe.images[0] || DEFAULT_IMAGE;
-			recipeShopResponseModel.subImage = recipe.images[1] || DEFAULT_IMAGE;
+			recipeShopResponseModel.subImage = recipe.images[1]
+				? recipe.images[1]
+				: recipeShopResponseModel.mainImage;
 			recipeShopResponseModel.level = recipe.level;
 			recipeShopResponseModel.time = recipe.time;
 
@@ -154,7 +156,7 @@ class RecipeService {
 				let lowestPriceMealKit = recipe.mealKits[0];
 				totalSold += lowestPriceMealKit.sold;
 				for (let i = 1; i < recipe.mealKits.length; i++) {
-					if (recipe.mealKits[i].price < lowestPriceMealKit.price) {
+					if (recipe.mealKits[i].price > lowestPriceMealKit.price) {
 						lowestPriceMealKit = recipe.mealKits[i];
 					}
 					totalSold += recipe.mealKits[i].sold;
@@ -185,6 +187,11 @@ class RecipeService {
 		const recipe = await recipeRepository.findOne({
 			where: {
 				slug
+			},
+			order: {
+				mealKits: {
+					serving: 'ASC'
+				}
 			},
 			relations: [
 				'mealKits',
@@ -235,6 +242,17 @@ class RecipeService {
 			itemRecipeDetailShopResponse.images = [DEFAULT_IMAGE];
 		}
 
+		if (itemRecipeDetailShopResponse.mealKits.extraSpice) {
+			const image = await imageRepository.findOneBy({
+				type: ImageType.EXTRASPICE,
+				entityId: itemRecipeDetailShopResponse.mealKits.extraSpice.id
+			});
+
+			itemRecipeDetailShopResponse.mealKits.extraSpice.image = image
+				? image.url
+				: DEFAULT_IMAGE;
+		}
+
 		itemRecipeDetailShopResponse.sold = totalSold;
 		itemRecipeDetailShopResponse.totalFeedback = recipe.totalFeedback;
 		itemRecipeDetailShopResponse.star = recipe.rating;
@@ -272,6 +290,7 @@ class RecipeService {
 				item.ingredient,
 				IngredientsRecipeDetailShopResponse
 			);
+			ingredientsRecipeDetailShopResponse.amount = item.amount;
 			const unit = mapperUtil.mapEntityToClass(
 				item.unit,
 				UnitRecipeDetailShopResponse
@@ -301,6 +320,7 @@ class RecipeService {
 				item.nutrition,
 				NutritionRecipeDetailShopResponse
 			);
+			nutritionRecipeDetailShopResponse.amount = item.amount;
 			const unit = mapperUtil.mapEntityToClass(
 				item.unit,
 				UnitRecipeDetailShopResponse

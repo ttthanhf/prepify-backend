@@ -1,5 +1,6 @@
 import { DEFAULT_IMAGE } from '~constants/default.constant';
 import { HTTP_STATUS_CODE } from '~constants/httpstatuscode.constant';
+import { ImageType } from '~constants/image.constant';
 import { OrderBy, SortBy } from '~constants/sort.constant';
 import { ExtraSpice } from '~models/entities/extra-spice.entity';
 import { MealKit } from '~models/entities/meal-kit.entity';
@@ -10,6 +11,7 @@ import {
 	MealKitModeratorCreateRequest,
 	MealKitModeratorGetRequest
 } from '~models/schemas/moderator/mealkit.schemas.model';
+import imageRepository from '~repositories/image.repository';
 import mealKitRepository from '~repositories/mealKit.repository';
 import { FastifyRequest, FastifyResponse } from '~types/fastify.type';
 import mapperUtil from '~utils/mapper.util';
@@ -114,19 +116,33 @@ class MealKitModeratorService {
 
 		const getAllMealKitModeratorResponseList: Array<GetMealKitModeratorResponse> =
 			[];
-		mealKits.forEach((item) => {
+		for (const item of mealKits) {
 			const getAllMealKitModeratorResponse = mapperUtil.mapEntityToClass(
 				item,
 				GetMealKitModeratorResponse
 			);
 			getAllMealKitModeratorResponse.recipeName = item.recipe.name;
 			getAllMealKitModeratorResponse.recipeId = item.recipe.id;
-			getAllMealKitModeratorResponse.image = DEFAULT_IMAGE;
-			if (getAllMealKitModeratorResponse.extraSpice) {
-				getAllMealKitModeratorResponse.extraSpice.image = DEFAULT_IMAGE;
+
+			const image = await imageRepository.findOneBy({
+				type: ImageType.RECIPE,
+				entityId: item.recipe.id
+			});
+
+			getAllMealKitModeratorResponse.image = image ? image.url : DEFAULT_IMAGE;
+
+			if (getAllMealKitModeratorResponse.extraSpice && item.extraSpice) {
+				const images = await imageRepository.findBy({
+					type: ImageType.EXTRASPICE,
+					entityId: item.extraSpice.id
+				});
+
+				getAllMealKitModeratorResponse.extraSpice.image = images[0]
+					? images[0].url
+					: DEFAULT_IMAGE;
 			}
 			getAllMealKitModeratorResponseList.push(getAllMealKitModeratorResponse);
-		});
+		}
 
 		const response = new ResponseModel(res);
 		response.data = {
