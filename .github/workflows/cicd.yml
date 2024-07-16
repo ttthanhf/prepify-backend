@@ -1,0 +1,34 @@
+on:
+  push:
+    branches: ['dev']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: DELOYMENT
+
+    strategy:
+      matrix:
+        node-version: ['20.x']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install package
+        run: npm install
+
+      - name: Add .env
+        run: echo "${{ secrets.DELOYMENT_ENV }}" >> ./deloyment.env
+
+      - name: Build
+        run: npm run build:deloy
+
+      - name: Deloy
+        run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp -r -o StrictHostKeyChecking=no ${{ secrets.LOCAL_PATH }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ secrets.SERVER_PATH }}

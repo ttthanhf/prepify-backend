@@ -1,6 +1,6 @@
 {
 	"swc": true,
-	"include": ["src"],
+	"include": ["src/**/*.ts", "src"],
 	"compilerOptions": {
 		"module": "CommonJS",
 		"outDir": "build",
@@ -8,18 +8,19 @@
 		"declaration": false, //remove type ts when build
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
-		"target": "ES2022",
+		"target": "ESNext",
 		"emitDeclarationOnly": false,
 		"noEmit": false,
 		"sourceMap": false,
 		"noEmitOnError": true,
 		"skipLibCheck": true,
+		"allowJs": true,
 
 		// Linting
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"alwaysStrict": true,
-		"exactOptionalPropertyTypes": false, //must be false or mikro-orm will break down
+		"exactOptionalPropertyTypes": false, //note
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
@@ -32,12 +33,36 @@
 		"strictBindCallApply": true,
 		"strictFunctionTypes": true,
 		"strictNullChecks": true,
-		"strictPropertyInitialization": true
+		"strictPropertyInitialization": true,
+
+		// alias
+		"baseUrl": "src",
+		"paths": {
+			"~configs/*": ["./configs/*"],
+			"~constants/*": ["./constants/*"],
+			"~controllers/*": ["./controllers/*"],
+			"~exceptions/*": ["./exceptions/*"],
+			"~middlewares/*": ["./middlewares/*"],
+			"~models/*": ["./models/*"],
+			"~entities/*": ["./models/entities/*"],
+			"~plugins/*": ["./plugins/*"],
+			"~repositories/*": ["./repositories/*"],
+			"~routes/*": ["./routes/*"],
+			"~services/*": ["./services/*"],
+			"~types/*": ["./types/*"],
+			"~utils/*": ["./utils/*"],
+			"~workers/*": ["./workers/*"]
+		}
 	},
 	"ts-node": {
 		"compilerOptions": {
 			"module": "CommonJS"
 		},
-		"swc": true
+		"swc": true,
+		"require": ["tsconfig-paths/register"]
+	},
+	"tsc-alias": {
+		"verbose": false,
+		"resolveFullPaths": true
 	}
 }

@@ -1,13 +1,24 @@
-import { Fastify } from '../types/fastify.type';
+import { Fastify } from '~types/fastify.type';
 import cors from '@fastify/cors';
-import helmet from '@fastify/helmet';
+import fp from 'fastify-plugin';
+import multipart from '@fastify/multipart';
 
-export default async function plugins(
-	app: Fastify,
-	options: unknown,
-	next: CallableFunction
-) {
-	app.register(cors);
-	app.register(helmet);
+function fastifyPlugin(app: Fastify, opts: Object, next: CallableFunction) {
+	app.register(cors, {
+		origin: ['http://localhost:3000', 'https://prepify.thanhf.dev'],
+		credentials: true
+	});
+	app.register(multipart, {
+		limits: {
+			fieldNameSize: 100,
+			fieldSize: 100 * 1024 * 1024,
+			fields: 10,
+			fileSize: 100 * 1024 * 1024,
+			files: 10,
+			headerPairs: 2000
+		}
+	});
 	next();
 }
+
+module.exports = fp(fastifyPlugin);

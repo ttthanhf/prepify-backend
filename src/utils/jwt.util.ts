@@ -1,18 +1,29 @@
 import { createSigner, createDecoder, createVerifier } from 'fast-jwt';
-import JWT_CONFIG from '../configs/jwt.config';
+import envConfig from '~configs/env.config';
+import JWT_CONFIG from '~configs/jwt.config';
 
-async function sign(payload: object) {
-	const signSync = createSigner(JWT_CONFIG);
+function sign(
+	payload: object,
+	expiresIn: number | string = envConfig.JWT_EXPIRE
+) {
+	const signSync = createSigner({
+		...JWT_CONFIG,
+		expiresIn: expiresIn
+	});
 	return signSync(payload);
 }
 
-async function decode(token: string) {
+function decode(token: string | number) {
 	return createDecoder({ complete: true });
 }
 
-async function verify(token: string) {
+function verify(token: string | number) {
 	const verifySync = createVerifier(JWT_CONFIG);
-	return verifySync(token);
+	try {
+		return verifySync(String(token));
+	} catch (e) {
+		return null;
+	}
 }
 
 export default {
