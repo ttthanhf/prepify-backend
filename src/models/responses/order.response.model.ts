@@ -28,6 +28,9 @@ export class OrderResponse {
 
 export class OrderDetailResponse {
 	id!: string;
+	address!: string;
+	phone!: string;
+	fullname!: string;
 	orderItems!: OrderItemResponse[];
 	status!: OrderStatus;
 	orderDate!: Date;
