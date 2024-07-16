@@ -241,6 +241,7 @@ class OrderService {
 			},
 			relations: [
 				'customer',
+				'customer.user',
 				'orderDetails',
 				'payment',
 				'area',
@@ -262,6 +263,7 @@ class OrderService {
 			OrderDetailResponse
 		);
 
+		orderDetailResponse.fullname = order.customer.user.fullname;
 		orderDetailResponse.orderDate = order.datetime;
 		orderDetailResponse.deliveryPrice = order.isPriority
 			? order.area.instantPrice
